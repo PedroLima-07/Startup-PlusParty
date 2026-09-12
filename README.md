@@ -1,142 +1,167 @@
-# Resenhou
+<div align="center">
 
-> Sua noite, sem complicação.
+# +party
 
-Resenhou é um sistema de vida noturna que conecta quem sai para o rolê com os bares da cidade.
-De um lado, um app para o cliente descobrir bares, abrir comanda digital e pedir sem enfrentar
-fila; do outro, um painel para o dono do estabelecimento gerenciar mesas, comandas e o
-movimento da noite. As duas pontas se comunicam por trás através de um backend compartilhado.
+**Sua noite, sem complicação.**
 
-Projeto acadêmico desenvolvido na disciplina **Startup Project One** do curso de Análise e
+Sistema de vida noturna que conecta quem sai para o rolê com os bares da cidade.
+
+</div>
+
+---
+
+## Sobre
+
+O +party resolve os atritos de uma noite fora dos dois lados do balcão. Do lado do cliente:
+descobrir onde a noite está acontecendo, abrir uma comanda digital e pedir sem enfrentar fila.
+Do lado do estabelecimento: acompanhar o movimento, organizar os pedidos entre bar e cozinha e
+divulgar novidades direto para quem está por perto.
+
+O sistema é dividido em **três acessos independentes** que compartilham a mesma base de dados —
+cada um desenhado para um papel específico dentro da experiência.
+
+Projeto acadêmico desenvolvido na disciplina **Startup Project One**, do curso de Análise e
 Desenvolvimento de Sistemas.
 
 ---
 
-## Índice
+## Os três acessos
 
-- [Sobre o projeto](#sobre-o-projeto)
-- [O problema](#o-problema)
-- [A solução](#a-solução)
-- [As duas frentes](#as-duas-frentes)
-- [Principais funcionalidades](#principais-funcionalidades)
-- [Tecnologias](#tecnologias)
-- [Estrutura do repositório](#estrutura-do-repositório)
-- [Como rodar](#como-rodar)
-- [Status do projeto](#status-do-projeto)
-- [Equipe](#equipe)
+| Acesso | Quem usa | Plataforma | O que faz |
+|---|---|---|---|
+| 🍹 **Cliente** | Rolezeiro | Mobile | Descobre bares, abre comanda, pede e acompanha o feed |
+| 📊 **Gerente** | Dono do bar | Responsivo | Acompanha o movimento, publica novidades e gerencia o perfil do bar |
+| 👨‍🍳 **Bar/Cozinha** | Equipe operacional | Mobile | Recebe pedidos, libera comandas, atende chamados e confirma pagamentos |
+
+Os três se comunicam através de uma API compartilhada. Nenhum deles conhece o funcionamento
+interno do outro — todos operam sobre o mesmo conjunto de dados (comandas, pedidos,
+estabelecimentos, postagens).
 
 ---
 
-## Sobre o projeto
+## Funcionalidades
 
-Resenhou nasceu da observação de que a saída noturna tem atritos evitáveis dos dois lados do
-balcão: o cliente enfrenta filas e falta de informação, e o dono do bar perde controle da
-operação na correria da noite. O sistema ataca os dois problemas com uma única base de dados
-compartilhada, entregando uma experiência sob medida para cada perfil.
+<details>
+<summary><b>🍹 Cliente</b></summary>
 
-## O problema
+- Cadastro e autenticação
+- **Discovery** — lista de bares com busca, filtro por cidade e indicador de lotação em tempo
+  real
+- **Feed** — postagens dos estabelecimentos, com curtidas, compartilhamento e visualização
+  expandida
+- **Comanda digital** — abertura com informação de mesa ou balcão, aguardando liberação de um
+  atendente que confirma a presença no local
+- **Cardápio e pedidos** — carrinho com controle de quantidade e acompanhamento do status de
+  cada pedido (enviado, em andamento, pronto)
+- **Chamar garçom** — disponível apenas para quem abriu comanda em uma mesa
+- **Fechamento de conta** — conferência dos itens recebidos e orientação para pagamento no
+  caixa
+- Avaliação do estabelecimento ao final da experiência
+- Histórico de rolês anteriores
 
-- Filas para pagar a conta no fim da noite.
-- Dificuldade de chamar atendimento ou fazer novos pedidos em locais lotados.
-- Chegar a um estabelecimento e encontrá-lo vazio ou cheio demais, sem saber antes.
-- Do lado do dono: controle de comandas manual, sem visão em tempo real da ocupação do salão.
+</details>
 
-## A solução
+<details>
+<summary><b>📊 Gerente</b></summary>
 
-Um sistema em duas frentes que se conversam:
+- **Movimento** — indicador de lotação da noite, comandas abertas, total do dia e valor
+  consumido
+- **Comandas do dia** — lista completa com cliente, mesa, valor e status, com filtro por
+  situação
+- **Postagens** — publicação de novidades que aparecem no feed dos clientes
+- **Perfil do bar** — dados do estabelecimento que alimentam o que o cliente vê no app
 
-- O cliente descobre bares com indicador de lotação em tempo real, abre uma comanda digital
-  (com ou sem mesa), faz pedidos pelo próprio celular e fecha a conta sem fila.
-- O dono acompanha as comandas abertas, o status de cada mesa e o movimento da noite em um
-  painel, além de poder divulgar novidades diretamente para os clientes do app.
+</details>
 
-## As duas frentes
+<details>
+<summary><b>👨‍🍳 Bar/Cozinha</b></summary>
 
-| Frente | Público | Plataforma | Cor de identidade |
-|---|---|---|---|
-| App do cliente | Cliente / rolezeiro | Mobile (web) | Azul-marinho |
-| Painel do estabelecimento | Dono do bar | Desktop (web) | Verde |
-| Landing page | Ambos (entrada) | Web | Azul (marca) |
+- Login vinculado ao estabelecimento (`@nomedobar`)
+- **Pedidos** — fila por ordem de chegada, separada em abas Bar e Cozinha, com avanço de status
+  em dois toques
+- **Alertas** — chamados de garçom enviados pelos clientes, com número da mesa
+- **Comandas** — liberação de novas comandas (confirmando presença do cliente), lançamento de
+  pedidos feitos no balcão e confirmação de pagamento no caixa
 
-> Observação: nesta fase do projeto, ambas as frentes são entregues como aplicação **web**.
-> Funcionalidades que dependem de recursos exclusivos de dispositivos móveis (como
-> geolocalização contínua em segundo plano) ficam previstas para uma futura versão em app
-> nativo.
+</details>
 
-## Principais funcionalidades
+---
 
-**App do cliente**
-- Cadastro e login
-- Descoberta de bares com indicador de lotação
-- Comanda digital com aprovação do estabelecimento
-- Cardápio, carrinho e pedidos
-- Fechamento de conta com pagamento simulado
-- Avaliação do estabelecimento
-- Grupo de amigos ("esquadrão")
+## Regras de negócio principais
 
-**Painel do estabelecimento**
-- Dashboard com indicador de lotação da noite
-- Gestão de mesas e cardápio
-- Comandas em tempo real, organizadas por ID e vinculadas ao cliente
-- Avaliações recebidas
-- Divulgação de novidades para os clientes
+- Uma **comanda pertence ao cliente**, não à mesa — o número da mesa é uma informação da
+  comanda, o que permite várias comandas independentes na mesma mesa.
+- Nenhum pedido é liberado antes de um atendente **confirmar a presença física** do cliente no
+  estabelecimento.
+- O **indicador de lotação** é calculado a partir do número de comandas abertas, com uma faixa
+  de histerese para evitar oscilação do selo entre "Normal" e "Quente".
+- O **pagamento acontece fora do sistema** (caixa do estabelecimento). O app registra o
+  fechamento e a confirmação, mas não processa transações.
+
+---
 
 ## Tecnologias
 
-- **Front-end:** [Angular / especificar versão]
-- **Back-end:** [especificar — ex: Node.js, .NET, etc.]
-- **Banco de dados:** [especificar]
-- **Prototipação:** Figma
-- **Gestão de projeto:** Trello
+**Front-end** · `[especificar — ex: Angular]`
+**Back-end** · `[especificar]`
+**Banco de dados** · `[especificar]`
+**Prototipação** · Figma
+**Gestão** · Trello
 
-> Preencher conforme as decisões finais da equipe.
+---
 
 ## Estrutura do repositório
 
 ```
-resenhou/
-├── cliente/           # App do cliente (mobile web)
-├── estabelecimento/   # Painel do dono (desktop web)
-├── landing/           # Landing page
-└── docs/              # Documentação do projeto
+party/
+├── cliente/            # App do cliente (mobile)
+├── gerente/            # Acesso do gerente (responsivo)
+├── bar-cozinha/        # Acesso da equipe operacional (mobile)
+├── api/                # Back-end compartilhado
+└── docs/               # Documentação do projeto
 ```
 
-> Ajustar conforme a organização real adotada pela equipe (monorepo ou repositórios
-> separados).
+> A landing page fica em repositório separado: `[link]`
+
+---
 
 ## Como rodar
 
 ```bash
 # Clonar o repositório
-git clone [URL-do-repositório]
-cd resenhou
+git clone [URL]
+cd party
 
 # Instalar dependências
-[comando de instalação — ex: npm install]
+[comando]
 
-# Rodar o projeto
-[comando de execução — ex: ng serve]
+# Rodar
+[comando]
 ```
 
-> Preencher com os comandos reais assim que o ambiente estiver definido.
+---
 
-## Status do projeto
+## Status
 
-🚧 **Em desenvolvimento** — MVP acadêmico.
+🚧 **Em desenvolvimento** — MVP acadêmico, com apresentação prevista para **15/11/2026**.
 
-Fase atual: prototipação validada com professores e personas, iniciando o desenvolvimento das
-frentes web.
+Protótipo validado com professores e personas reais (incluindo um dono de bar em atividade).
+Desenvolvimento das três frentes em andamento.
+
+---
 
 ## Equipe
 
 | Nome | Função |
 |---|---|
-| [Nome 1] | [Função] |
-| [Nome 2] | [Função] |
-| [Nome 3] | [Função] |
-| [Nome 4] | [Função] |
-| [Nome 5] | [Função] |
+| `[Nome]` | `[Função]` |
+| `[Nome]` | `[Função]` |
+| `[Nome]` | `[Função]` |
+| `[Nome]` | `[Função]` |
+| `[Nome]` | `[Função]` |
 
 ---
 
-Projeto acadêmico — Análise e Desenvolvimento de Sistemas.
+<div align="center">
+<sub>Projeto acadêmico · Análise e Desenvolvimento de Sistemas</sub>
+</div>
