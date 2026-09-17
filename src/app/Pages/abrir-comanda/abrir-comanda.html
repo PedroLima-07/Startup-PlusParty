@@ -1,0 +1,100 @@
+<header class="app-header">
+  <div class="header-content">
+    <button
+      type="button"
+      class="back-button"
+      aria-label="Voltar"
+      (click)="voltar()"
+    >
+      <span aria-hidden="true">‹</span>
+    </button>
+
+    <h1>Selecionar estabelecimento</h1>
+  </div>
+</header>
+
+<main class="page-content container-fluid">
+  <section class="intro-section">
+    <h2>Onde você está?</h2>
+  </section>
+
+  <section class="section-block" aria-labelledby="favoritos-titulo">
+    <div class="section-heading">
+      <h3 id="favoritos-titulo">Favoritos</h3>
+    </div>
+
+    <div class="bars-list">
+      @for (estabelecimento of favoritos; track estabelecimento.id) {
+        <button
+          type="button"
+          class="bar-card"
+          (click)="selecionarEstabelecimento(estabelecimento)"
+        >
+          <span class="bar-avatar" aria-hidden="true">
+            {{ iniciais(estabelecimento.nome) }}
+          </span>
+
+          <span class="bar-info">
+            <span class="bar-name">{{ estabelecimento.nome }}</span>
+            <span class="bar-description">{{ estabelecimento.descricao }}</span>
+            <span class="bar-rating" aria-label="Avaliação {{ estabelecimento.avaliacao }} de 5">
+              <span class="star" aria-hidden="true">★</span>
+              <span>{{ estabelecimento.avaliacao.toFixed(1) }}</span>
+            </span>
+          </span>
+
+          <span class="card-chevron" aria-hidden="true">›</span>
+        </button>
+      }
+    </div>
+  </section>
+
+  <section class="section-block" aria-labelledby="pesquisa-titulo">
+    <div class="section-heading">
+      <h3 id="pesquisa-titulo">Pesquisar bares</h3>
+    </div>
+
+    <label class="search-box" for="busca-bar">
+      <span class="search-icon" aria-hidden="true">⌕</span>
+      <input
+        id="busca-bar"
+        type="search"
+        [(ngModel)]="busca"
+        placeholder="Buscar bar pelo nome"
+        autocomplete="off"
+        enterkeyhint="search"
+      />
+    </label>
+
+    <div class="bars-list all-bars-list">
+      @for (estabelecimento of estabelecimentosFiltrados; track estabelecimento.id) {
+        <button
+          type="button"
+          class="bar-card"
+          (click)="selecionarEstabelecimento(estabelecimento)"
+        >
+          <span class="bar-avatar" aria-hidden="true">
+            {{ iniciais(estabelecimento.nome) }}
+          </span>
+
+          <span class="bar-info">
+            <span class="bar-name">{{ estabelecimento.nome }}</span>
+            <span class="bar-description">{{ estabelecimento.descricao }}</span>
+            <span class="bar-rating" aria-label="Avaliação {{ estabelecimento.avaliacao }} de 5">
+              <span class="star" aria-hidden="true">★</span>
+              <span>{{ estabelecimento.avaliacao.toFixed(1) }}</span>
+            </span>
+          </span>
+
+          <span class="card-chevron" aria-hidden="true">›</span>
+        </button>
+      } @empty {
+        <div class="empty-state">
+          <span class="empty-icon" aria-hidden="true">⌕</span>
+          <p>Nenhum bar encontrado.</p>
+          <small>Tente buscar por outro nome.</small>
+        </div>
+      }
+    </div>
+  </section>
+</main>
