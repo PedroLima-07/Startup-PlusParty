@@ -18,30 +18,19 @@ export class AuthService {
   }
 
   /**
-   * signUp() sozinho não basta: sem a linha em `perfis`, as funções que o RLS
-   * usa (meu_tipo(), meu_estabelecimento_id()) voltam vazias e todas as
-   * políticas bloqueiam o acesso, mesmo autenticado.
+   * O perfil é criado pelo trigger `ao_criar_usuario` (supabase/trigger_criar_perfil.sql),
+   * que lê `nome`/`tipo` de raw_user_meta_data — por isso vão em `options.data` aqui.
+   * Não inserir manualmente em `perfis`: o trigger já roda como SECURITY DEFINER,
+   * e um insert duplicado colidiria com a chave primária (id).
    */
   async cadastrar(nome: string, email: string, senha: string): Promise<void> {
-    const { data, error: erroCadastro } = await this.supabase.client.auth.signUp({
+    const { error } = await this.supabase.client.auth.signUp({
       email,
       password: senha,
+      options: { data: { nome, tipo: 'cliente' } },
     });
 
-    if (erroCadastro) throw erroCadastro;
-
-    const perfil: Omit<Perfil, 'criado_em'> = {
-      id: data.user!.id,
-      nome,
-      email,
-      telefone: null,
-      tipo: 'cliente',
-      estabelecimento_id: null,
-    };
-
-    const { error: erroPerfil } = await this.supabase.client.from('perfis').insert(perfil);
-
-    if (erroPerfil) throw erroPerfil;
+    if (error) throw error;
   }
 
   async buscarNomeAtual(): Promise<string> {
