@@ -1,5 +1,6 @@
 import { Component, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { Router } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 
 type Modo = 'login' | 'cadastro';
@@ -13,11 +14,11 @@ type Modo = 'login' | 'cadastro';
 export class LoginPage {
   private fb = inject(FormBuilder);
   private authService = inject(AuthService);
+  private router = inject(Router);
 
   protected readonly modo = signal<Modo>('login');
   protected readonly carregando = signal(false);
   protected readonly erro = signal<string | null>(null);
-  protected readonly usuarioLogado = signal<string | null>(null);
 
   protected readonly form = this.fb.nonNullable.group({
     nome: [''],
@@ -51,11 +52,10 @@ export class LoginPage {
     try {
       if (this.modo() === 'login') {
         await this.authService.login(email, senha);
-        this.usuarioLogado.set(await this.authService.buscarNomeAtual());
       } else {
         await this.authService.cadastrar(nome, email, senha);
-        this.usuarioLogado.set(nome);
       }
+      await this.router.navigateByUrl('/home');
     } catch (erro) {
       this.erro.set(this.traduzirErro(erro));
     } finally {

@@ -1,17 +1,10 @@
 <div class="tela">
-  @if (usuarioLogado(); as nome) {
-    <div class="card-login card-sucesso">
-      <div class="icone-sucesso">✓</div>
-      <h1>E aí, {{ nome }}! 🎉</h1>
-      <p class="tagline">Login realizado com sucesso.</p>
+  <div class="card-login">
+    <div class="logo">
+      <span class="logo-icone">+</span>
+      <span>party</span>
     </div>
-  } @else {
-    <div class="card-login">
-      <div class="logo">
-        <span class="logo-icone">+</span>
-        <span>party</span>
-      </div>
-      <p class="tagline">Seu rolê começa aqui</p>
+    <p class="tagline">Seu rolê começa aqui</p>
 
       <form [formGroup]="form" (ngSubmit)="enviar()">
         @if (modo() === 'cadastro') {
@@ -74,8 +67,7 @@
           <button class="link" type="button" (click)="alternarModo()">Entrar</button>
         </p>
       }
-    </div>
-  }
+  </div>
 
   <p class="rodape">+party 2026 · São Paulo</p>
 </div>
