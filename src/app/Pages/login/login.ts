@@ -75,6 +75,9 @@ export class LoginPage {
     if (mensagem.includes('Password should be at least')) {
       return 'A senha precisa ter pelo menos 6 caracteres.';
     }
+    if (mensagem.includes('Email not confirmed')) {
+      return 'Confirme seu e-mail antes de entrar — verifique sua caixa de entrada.';
+    }
 
     return 'Não foi possível concluir. Tente novamente.';
   }
