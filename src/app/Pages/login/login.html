@@ -1,0 +1,81 @@
+<div class="tela">
+  @if (usuarioLogado(); as nome) {
+    <div class="card-login card-sucesso">
+      <div class="icone-sucesso">✓</div>
+      <h1>E aí, {{ nome }}! 🎉</h1>
+      <p class="tagline">Login realizado com sucesso.</p>
+    </div>
+  } @else {
+    <div class="card-login">
+      <div class="logo">
+        <span class="logo-icone">+</span>
+        <span>party</span>
+      </div>
+      <p class="tagline">Seu rolê começa aqui</p>
+
+      <form [formGroup]="form" (ngSubmit)="enviar()">
+        @if (modo() === 'cadastro') {
+          <label class="campo">
+            Nome
+            <input type="text" formControlName="nome" autocomplete="name" />
+            @if (form.controls.nome.invalid && form.controls.nome.touched) {
+              <span class="erro-campo">Informe seu nome.</span>
+            }
+          </label>
+        }
+
+        <label class="campo">
+          Login
+          <input
+            type="email"
+            formControlName="email"
+            placeholder="seuemail@party.app"
+            autocomplete="email"
+          />
+          @if (form.controls.email.invalid && form.controls.email.touched) {
+            <span class="erro-campo">Informe um e-mail válido.</span>
+          }
+        </label>
+
+        <label class="campo">
+          Senha
+          <input
+            type="password"
+            formControlName="senha"
+            autocomplete="current-password"
+          />
+          @if (form.controls.senha.invalid && form.controls.senha.touched) {
+            <span class="erro-campo">Mínimo de 6 caracteres.</span>
+          }
+        </label>
+
+        @if (erro(); as mensagem) {
+          <p class="erro-geral">{{ mensagem }}</p>
+        }
+
+        <button class="botao-primario" type="submit" [disabled]="carregando()">
+          @if (carregando()) {
+            {{ modo() === 'login' ? 'Entrando...' : 'Cadastrando...' }}
+          } @else {
+            {{ modo() === 'login' ? 'LOGIN' : 'CADASTRAR' }}
+          }
+        </button>
+      </form>
+
+      @if (modo() === 'login') {
+        <button class="link" type="button">Esqueceu a senha? Clique aqui</button>
+        <p class="rodape-link">
+          Não tem conta?
+          <button class="link" type="button" (click)="alternarModo()">Cadastre-se</button>
+        </p>
+      } @else {
+        <p class="rodape-link">
+          Já tem conta?
+          <button class="link" type="button" (click)="alternarModo()">Entrar</button>
+        </p>
+      }
+    </div>
+  }
+
+  <p class="rodape">+party 2026 · São Paulo</p>
+</div>
