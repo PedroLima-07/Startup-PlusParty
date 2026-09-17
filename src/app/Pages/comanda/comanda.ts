@@ -33,6 +33,10 @@ export class ComandaPage implements OnInit {
     return status === 'aguardando_pagamento' || status === 'paga';
   });
 
+  protected readonly aguardandoLiberacao = computed(
+    () => this.comanda()?.status === 'aguardando_liberacao'
+  );
+
   async ngOnInit(): Promise<void> {
     await this.carregarDados();
   }
@@ -47,6 +51,10 @@ export class ComandaPage implements OnInit {
 
   protected async atualizarStatus(): Promise<void> {
     this.itens.set(await this.comandaService.buscarItensPedidos(this.id()));
+  }
+
+  protected async verificarLiberacao(): Promise<void> {
+    await this.carregarDados();
   }
 
   protected abrirConfirmacaoRecebimento(): void {

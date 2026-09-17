@@ -15,6 +15,24 @@
         <button class="botao-primario" type="button" routerLink="/">Voltar ao início</button>
       </div>
     </div>
+  } @else if (aguardandoLiberacao()) {
+    <div class="tela tela-fechamento">
+      <header class="cabecalho">
+        <button class="voltar" type="button" routerLink="/" aria-label="Voltar">←</button>
+        <h1>Sua comanda</h1>
+      </header>
+
+      <div class="conteudo-fechamento">
+        <div class="icone-sucesso">⏳</div>
+        <p class="rotulo">Comanda em<br /><strong>{{ c.estabelecimento.nome }}</strong></p>
+        <p class="instrucao">
+          Aguardando liberação. Chame um atendente para confirmar sua presença.
+        </p>
+        <button class="botao-primario" type="button" (click)="verificarLiberacao()">
+          Já fui liberado, atualizar
+        </button>
+      </div>
+    </div>
   } @else {
     <div class="tela">
       <header class="cabecalho">
