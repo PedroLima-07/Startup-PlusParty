@@ -15,8 +15,6 @@
         <button class="botao-primario" type="button" routerLink="/">Voltar ao início</button>
       </div>
     </div>
-    // erro pois ainda precisa ser criado a parte de aguarde a simulação do atendente liberar a comanda, para que o usuário possa fechar a conta.
-    lembre-se faça simulado.
   } @else if (aguardandoLiberacao()) {
     <div class="tela tela-fechamento">
       <header class="cabecalho">
@@ -32,6 +30,9 @@
         </p>
         <button class="botao-primario" type="button" (click)="verificarLiberacao()">
           Já fui liberado, atualizar
+        </button>
+        <button class="botao-teste" type="button" (click)="simularLiberacao()">
+          [Teste] Simular liberação do atendente
         </button>
       </div>
     </div>

@@ -39,7 +39,7 @@
             <span class="bar-description">{{ estabelecimento.descricao }}</span>
             <span class="bar-rating" aria-label="Avaliação {{ estabelecimento.avaliacao }} de 5">
               <span class="star" aria-hidden="true">★</span>
-              <span>{{ estabelecimento.avaliacao.toFixed(1) }}</span>
+              <span>{{ (estabelecimento.avaliacao ?? 0).toFixed(1) }}</span>
             </span>
           </span>
 
@@ -82,7 +82,7 @@
             <span class="bar-description">{{ estabelecimento.descricao }}</span>
             <span class="bar-rating" aria-label="Avaliação {{ estabelecimento.avaliacao }} de 5">
               <span class="star" aria-hidden="true">★</span>
-              <span>{{ estabelecimento.avaliacao.toFixed(1) }}</span>
+              <span>{{ (estabelecimento.avaliacao ?? 0).toFixed(1) }}</span>
             </span>
           </span>
 
