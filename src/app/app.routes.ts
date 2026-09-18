@@ -1,6 +1,10 @@
 import { Routes } from '@angular/router';
-import { authGuard } from './guards/auth.guard';
 
+// TODO: reativar authGuard em home/abrir-comanda/abrir-comanda/local/comanda
+// assim que o login real estiver liberado pra todo mundo (Supabase com
+// "Confirm email" ligado trava sessão pra quem não tem acesso ao painel).
+// Guard removido a pedido do Nathan pra destravar testes e demonstrações
+// sem precisar logar. Ver card "Usar Contextualização" no Trello.
 export const routes: Routes = [
   {
     path: 'login',
@@ -9,24 +13,20 @@ export const routes: Routes = [
   {
     path: 'home',
     loadComponent: () => import('./Pages/home/home').then((m) => m.HomePage),
-    canActivate: [authGuard],
   },
   {
     path: 'abrir-comanda',
     loadComponent: () =>
       import('./Pages/abrir-comanda/abrir-comanda').then((m) => m.AbrirComandaComponent),
-    canActivate: [authGuard],
   },
   {
     path: 'abrir-comanda/local',
     loadComponent: () =>
       import('./Pages/abrir-comanda/local/local').then((m) => m.AbrirComandaLocalComponent),
-    canActivate: [authGuard],
   },
   {
     path: 'comanda/:id',
     loadComponent: () => import('./Pages/comanda/comanda').then((m) => m.ComandaPage),
-    canActivate: [authGuard],
   },
   {
     path: '',
