@@ -1,55 +1,51 @@
-import { Injectable, inject } from '@angular/core';
-import { ComandaDetalhada, Pedido, PedidoItemDetalhado } from '../models';
-import { SupabaseService } from './supabase.service';
+import { Injectable, computed, signal } from '@angular/core';
+import { ComandaState, ItemPedido, TipoLocal } from '../models';
 
+/**
+ * Mantém o estado da comanda em memória (mock).
+ * A integração com o Supabase entra nos métodos marcados com TODO.
+ */
 @Injectable({
   providedIn: 'root',
 })
 export class ComandaService {
-  private supabase = inject(SupabaseService);
+  // TODO: integrar Supabase — nome real do estabelecimento vem da tabela
+  private readonly BAR_NOME_MOCK = "Bar D'Zé";
 
-  async buscarComanda(comandaId: string): Promise<ComandaDetalhada> {
-    const { data, error } = await this.supabase.client
-      .from('comandas')
-      .select('*, estabelecimento:estabelecimentos(nome)')
-      .eq('id', comandaId)
-      .single();
+  private readonly estado = signal<ComandaState | null>(null);
 
-    if (error) throw error;
-    return data as unknown as ComandaDetalhada;
+  readonly comanda = this.estado.asReadonly();
+
+  readonly total = computed(() => {
+    const comanda = this.estado();
+    if (!comanda) return 0;
+    return comanda.itens.reduce(
+      (soma, item) => soma + item.quantidade * item.precoUnitario,
+      0,
+    );
+  });
+
+  // TODO: integrar Supabase — inserir a comanda no banco e aguardar liberação
+  abrirComanda(tipoLocal: TipoLocal, numeroMesa?: string): void {
+    this.estado.set({
+      barNome: this.BAR_NOME_MOCK,
+      tipoLocal,
+      numeroMesa: tipoLocal === 'mesa' ? numeroMesa : undefined,
+      itens: [],
+    });
   }
 
-  async buscarItensPedidos(comandaId: string): Promise<PedidoItemDetalhado[]> {
-    const { data, error } = await this.supabase.client
-      .from('pedido_itens')
-      .select('*, item:itens(nome, setor), pedido:pedidos!inner(comanda_id)')
-      .eq('pedido.comanda_id', comandaId);
+  adicionarItem(item: ItemPedido): void {
+    const comanda = this.estado();
+    if (!comanda) return;
 
-    if (error) throw error;
-    return (data ?? []) as unknown as PedidoItemDetalhado[];
+    this.estado.update((atual) =>
+      atual ? { ...atual, itens: [...atual.itens, item] } : atual,
+    );
   }
 
-  calcularTotal(itens: PedidoItemDetalhado[]): number {
-    return itens.reduce((total, item) => total + item.quantidade * item.preco_unitario, 0);
-  }
-
-  async criarPedido(comandaId: string): Promise<Pedido> {
-    const { data, error } = await this.supabase.client
-      .from('pedidos')
-      .insert({ comanda_id: comandaId })
-      .select()
-      .single();
-
-    if (error) throw error;
-    return data as Pedido;
-  }
-
-  async fecharConta(comandaId: string): Promise<void> {
-    const { error } = await this.supabase.client
-      .from('comandas')
-      .update({ status: 'aguardando_pagamento', fechada_em: new Date().toISOString() })
-      .eq('id', comandaId);
-
-    if (error) throw error;
+  // TODO: integrar Supabase — registrar fechamento e aguardar confirmação do caixa
+  fecharConta(): void {
+    this.estado.set(null);
   }
 }
