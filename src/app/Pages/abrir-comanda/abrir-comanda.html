@@ -24,7 +24,7 @@
     </div>
 
     <div class="bars-list">
-      @for (estabelecimento of favoritos; track estabelecimento.id) {
+      @for (estabelecimento of favoritos(); track estabelecimento.id) {
         <button
           type="button"
           class="bar-card"

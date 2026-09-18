@@ -69,7 +69,7 @@
           [disabled]="!podeAbrirComanda()"
           (click)="abrirComanda()"
         >
-          Abrir comanda
+          {{ salvando() ? 'Abrindo...' : 'Abrir comanda' }}
         </button>
       </div>
       <span id="mesa-ajuda" class="sr-only">
@@ -86,8 +86,12 @@
         [disabled]="!podeAbrirComanda()"
         (click)="abrirComanda()"
       >
-        Abrir comanda
+        {{ salvando() ? 'Abrindo...' : 'Abrir comanda' }}
       </button>
     </section>
+  }
+
+  @if (mensagem()) {
+    <p class="mensagem-erro" role="alert">{{ mensagem() }}</p>
   }
 </main>

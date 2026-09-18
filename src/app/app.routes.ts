@@ -18,6 +18,12 @@ export const routes: Routes = [
     canActivate: [authGuard],
   },
   {
+    path: 'abrir-comanda/local',
+    loadComponent: () =>
+      import('./Pages/abrir-comanda/local/local').then((m) => m.AbrirComandaLocalComponent),
+    canActivate: [authGuard],
+  },
+  {
     path: 'comanda/:id',
     loadComponent: () => import('./Pages/comanda/comanda').then((m) => m.ComandaPage),
     canActivate: [authGuard],

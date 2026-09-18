@@ -1,5 +1,5 @@
 import { Injectable, inject } from '@angular/core';
-import { ComandaDetalhada, PedidoItemDetalhado } from '../models';
+import { Comanda, ComandaDetalhada, PedidoItemDetalhado } from '../models';
 import { SupabaseService } from './supabase.service';
 
 @Injectable({
@@ -7,6 +7,29 @@ import { SupabaseService } from './supabase.service';
 })
 export class ComandaService {
   private supabase = inject(SupabaseService);
+
+  async abrirComanda(estabelecimentoId: string, mesa: string | null): Promise<Comanda> {
+    const {
+      data: { user },
+      error: erroUsuario,
+    } = await this.supabase.client.auth.getUser();
+    if (erroUsuario) throw erroUsuario;
+    if (!user) throw new Error('Usuário não autenticado.');
+
+    const { data, error } = await this.supabase.client
+      .from('comandas')
+      .insert({
+        usuario_id: user.id,
+        estabelecimento_id: estabelecimentoId,
+        mesa,
+        status: 'aguardando_liberacao',
+      })
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data as Comanda;
+  }
 
   async buscarComanda(comandaId: string): Promise<ComandaDetalhada> {
     const { data, error } = await this.supabase.client
