@@ -1,0 +1,268 @@
+:host {
+  display: block;
+  min-height: 100dvh;
+  background: #f7f8fb;
+  color: #0f1f4b;
+}
+
+.app-header {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  background: #0f1f4b;
+  color: #fff;
+  box-shadow: 0 2px 10px rgba(15, 31, 75, 0.12);
+}
+
+.header-content {
+  min-height: 58px;
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 0 16px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.header-content h1 {
+  min-width: 0;
+  margin: 0;
+  overflow: hidden;
+  color: #fff;
+  font-size: 17px;
+  font-weight: 700;
+  line-height: 1.2;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.back-button {
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: #fff;
+  display: grid;
+  place-items: center;
+  flex: 0 0 34px;
+  cursor: pointer;
+}
+
+.back-button:hover,
+.back-button:focus-visible {
+  background: rgba(255, 255, 255, 0.12);
+  outline: none;
+}
+
+.back-button span {
+  display: block;
+  margin-top: -4px;
+  font-size: 33px;
+  font-weight: 300;
+  line-height: 1;
+}
+
+.page-content {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 34px 16px 42px;
+}
+
+.intro-section {
+  margin-bottom: 28px;
+  text-align: center;
+}
+
+.intro-section h2 {
+  margin: 0;
+  color: #0f1f4b;
+  font-size: 30px;
+  font-weight: 800;
+  line-height: 1.15;
+}
+
+.local-options {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.local-card {
+  min-height: 220px;
+  padding: 24px 18px;
+  border: 2px solid #e1e5ee;
+  border-radius: 14px;
+  background: #fff;
+  color: #0f1f4b;
+  box-shadow: 0 4px 14px rgba(15, 31, 75, 0.06);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  cursor: pointer;
+  transition: border-color 120ms ease, box-shadow 120ms ease, transform 120ms ease;
+}
+
+.local-card:hover {
+  border-color: #b9c8f2;
+  box-shadow: 0 7px 20px rgba(15, 31, 75, 0.09);
+  transform: translateY(-1px);
+}
+
+.local-card.selected {
+  border-color: #2f6bff;
+  box-shadow: 0 0 0 3px rgba(47, 107, 255, 0.1);
+}
+
+.local-card:focus-visible {
+  outline: 3px solid rgba(47, 107, 255, 0.2);
+  outline-offset: 2px;
+}
+
+.local-icon {
+  width: 64px;
+  height: 64px;
+  margin-bottom: 16px;
+  border-radius: 50%;
+  background: #eaf0ff;
+  display: grid;
+  place-items: center;
+  font-size: 28px;
+}
+
+.local-card-title {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 17px;
+  font-weight: 800;
+}
+
+.local-card-description {
+  max-width: 250px;
+  color: #6e7482;
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.mesa-form,
+.balcao-action {
+  margin-top: 22px;
+}
+
+.mesa-form > label {
+  display: block;
+  margin-bottom: 8px;
+  color: #0f1f4b;
+  font-size: 14px;
+  font-weight: 800;
+}
+
+.mesa-action-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 12px;
+  align-items: stretch;
+}
+
+.mesa-action-row input {
+  width: 100%;
+  min-height: 48px;
+  padding: 0 14px;
+  border: 1px solid #dfe3eb;
+  border-radius: 12px;
+  background: #fff;
+  color: #0f1f4b;
+  font-size: 14px;
+  outline: none;
+  box-shadow: 0 3px 10px rgba(15, 31, 75, 0.04);
+}
+
+.mesa-action-row input:focus {
+  border-color: #2f6bff;
+  box-shadow: 0 0 0 3px rgba(47, 107, 255, 0.12);
+}
+
+.mesa-action-row input::placeholder {
+  color: #9298a5;
+}
+
+.primary-button {
+  min-height: 48px;
+  padding: 0 22px;
+  border: 0;
+  border-radius: 12px;
+  background: #2f6bff;
+  color: #fff;
+  font-size: 14px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: opacity 120ms ease, transform 120ms ease;
+  white-space: nowrap;
+}
+
+.balcao-action .primary-button {
+  width: 100%;
+}
+
+.primary-button:hover:not(:disabled) {
+  transform: translateY(-1px);
+}
+
+.primary-button:focus-visible {
+  outline: 3px solid rgba(47, 107, 255, 0.22);
+  outline-offset: 2px;
+}
+
+.primary-button:disabled {
+  background: #c9ced8;
+  color: #f7f8fb;
+  cursor: not-allowed;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+@media (max-width: 560px) {
+  .page-content {
+    padding-top: 28px;
+  }
+
+  .intro-section h2 {
+    font-size: 27px;
+  }
+
+  .local-card {
+    min-height: 205px;
+    padding: 20px 12px;
+  }
+
+  .local-icon {
+    width: 56px;
+    height: 56px;
+    font-size: 25px;
+  }
+
+  .local-card-description {
+    font-size: 12px;
+  }
+
+  .mesa-action-row {
+    grid-template-columns: 1fr;
+  }
+
+  .primary-button {
+    width: 100%;
+  }
+}
