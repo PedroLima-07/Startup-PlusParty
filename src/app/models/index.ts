@@ -94,3 +94,23 @@ export interface Postagem {
   imagem_url: string | null;
   criada_em: string;
 }
+
+/** Tipo de local escolhido ao abrir uma comanda (fluxo mock em memória). */
+export type TipoLocal = 'mesa' | 'balcao';
+
+export interface ItemPedido {
+  nome: string;
+  quantidade: number;
+  precoUnitario: number;
+}
+
+/**
+ * Estado da comanda em memória (mock). Chamado de State porque a interface
+ * `Comanda` já existe representando a tabela do Supabase.
+ */
+export interface ComandaState {
+  barNome: string;
+  tipoLocal: TipoLocal;
+  numeroMesa?: string;
+  itens: ItemPedido[];
+}
