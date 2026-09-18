@@ -29,6 +29,10 @@ export const routes: Routes = [
     loadComponent: () => import('./Pages/comanda/comanda').then((m) => m.ComandaPage),
   },
   {
+    path: 'cardapio/:id',
+    loadComponent: () => import('./Pages/cardapio/cardapio').then((m) => m.CardapioPage),
+  },
+  {
     path: '',
     redirectTo: 'home',
     pathMatch: 'full',

@@ -1,0 +1,71 @@
+@if (carregando()) {
+  <p class="carregando">Carregando cardápio...</p>
+} @else if (comanda(); as c) {
+  <div class="tela">
+    <header class="cabecalho">
+      <button class="voltar" type="button" (click)="voltar()" aria-label="Voltar">←</button>
+      <h1>{{ c.estabelecimento.nome }}</h1>
+    </header>
+
+    <div class="conteudo">
+      @for (grupo of categorias(); track grupo[0]) {
+        <section class="categoria">
+          <h2>{{ grupo[0] }}</h2>
+          <ul class="lista-itens">
+            @for (item of grupo[1]; track item.id) {
+              <li class="item">
+                <div class="detalhe">
+                  <span class="nome">{{ item.nome }}</span>
+                  <span class="preco">{{ item.preco | currency: 'BRL' }}</span>
+                </div>
+
+                <div class="stepper">
+                  @if (quantidadeDe(item.id) > 0) {
+                    <button
+                      type="button"
+                      class="botao-stepper"
+                      (click)="remover(item.id)"
+                      aria-label="Remover uma unidade"
+                    >
+                      −
+                    </button>
+                    <span class="quantidade">{{ quantidadeDe(item.id) }}</span>
+                  }
+                  <button
+                    type="button"
+                    class="botao-stepper"
+                    (click)="adicionar(item.id)"
+                    aria-label="Adicionar uma unidade"
+                  >
+                    +
+                  </button>
+                </div>
+              </li>
+            }
+          </ul>
+        </section>
+      }
+    </div>
+
+    @if (erro(); as mensagem) {
+      <p class="erro-geral">{{ mensagem }}</p>
+    }
+
+    <footer class="rodape">
+      <button
+        class="botao-primario"
+        type="button"
+        [disabled]="totalItensCarrinho() === 0 || enviando()"
+        (click)="confirmarPedido()"
+      >
+        @if (enviando()) {
+          Enviando...
+        } @else {
+          Confirmar pedido{{ totalItensCarrinho() > 0 ? ' · ' : '' }}{{
+            totalItensCarrinho() > 0 ? (totalCarrinho() | currency: 'BRL') : ''
+          }}
+        }
+      </button>
+    </footer>
+  </div>
+}
