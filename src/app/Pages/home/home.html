@@ -1,0 +1,70 @@
+@if (carregando()) {
+  <p class="carregando">Carregando...</p>
+} @else {
+  <div class="tela">
+    <header class="cabecalho">
+      <h1>Pronto para o rolê, {{ nome() }}? 🎉</h1>
+      <p class="subtitulo">O rolê de hoje começa agora.</p>
+    </header>
+
+    <a class="card-comanda" [routerLink]="linkComanda()">
+      <span class="icone-comanda">{{ iconeComanda() }}</span>
+      <span class="texto-comanda">
+        <strong>{{ rotuloComanda() }}</strong>
+        <span>Peça e faça seus pedidos direto pelo app</span>
+      </span>
+    </a>
+
+    @if (favoritos().length > 0) {
+      <section class="secao">
+        <h2>Favoritos</h2>
+        <div class="lista-horizontal">
+          @for (estabelecimento of favoritos(); track estabelecimento.id) {
+            <div class="card-estabelecimento">
+              <span class="avatar">{{ inicial(estabelecimento.nome) }}</span>
+              <span class="nome">{{ estabelecimento.nome }}</span>
+              <span class="avaliacao">⭐ {{ estabelecimento.avaliacao ?? '—' }}</span>
+            </div>
+          }
+        </div>
+      </section>
+    }
+
+    <section class="secao">
+      <h2>Tá rolando 🔥</h2>
+      <ul class="lista-vertical">
+        @for (estabelecimento of estabelecimentos(); track estabelecimento.id) {
+          <li class="item-estabelecimento">
+            <span class="avatar">{{ inicial(estabelecimento.nome) }}</span>
+            <div class="detalhe">
+              <span class="nome">{{ estabelecimento.nome }}</span>
+              <span class="descricao">{{ estabelecimento.descricao }}</span>
+            </div>
+            <span class="badge" [class.quente]="estabelecimento.lotacao === 'quente'">
+              {{ estabelecimento.lotacao === 'quente' ? 'Quente' : 'Normal' }}
+            </span>
+          </li>
+        }
+      </ul>
+    </section>
+
+    <nav class="nav-inferior">
+      <button class="item-nav ativo" type="button">
+        <span class="icone">🏠</span>
+        <span>Início</span>
+      </button>
+      <button class="item-nav" type="button">
+        <span class="icone">🧭</span>
+        <span>Discovery</span>
+      </button>
+      <button class="item-nav" type="button">
+        <span class="icone">📰</span>
+        <span>Feed</span>
+      </button>
+      <button class="item-nav" type="button">
+        <span class="icone">🔔</span>
+        <span>Notificações</span>
+      </button>
+    </nav>
+  </div>
+}

@@ -79,6 +79,15 @@ export interface ComandaDetalhada extends Comanda {
   estabelecimento: Pick<Estabelecimento, 'nome'>;
 }
 
+/** item + quantidade escolhida, como o carrinho da tela de cardápio guarda. */
+export interface ItemCarrinho {
+  item: Item;
+  quantidade: number;
+}
+
+/** itens do cardápio agrupados por categoria (Cervejas, Drinks, Pra petiscar...). */
+export type CardapioAgrupado = Record<string, Item[]>;
+
 export interface Alerta {
   id: string;
   comanda_id: string;

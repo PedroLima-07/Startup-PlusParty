@@ -1,5 +1,5 @@
 import { Injectable, inject } from '@angular/core';
-import { ComandaDetalhada, Pedido, PedidoItemDetalhado } from '../models';
+import { ComandaDetalhada, PedidoItemDetalhado } from '../models';
 import { SupabaseService } from './supabase.service';
 
 @Injectable({
@@ -33,21 +33,24 @@ export class ComandaService {
     return itens.reduce((total, item) => total + item.quantidade * item.preco_unitario, 0);
   }
 
-  async criarPedido(comandaId: string): Promise<Pedido> {
-    const { data, error } = await this.supabase.client
-      .from('pedidos')
-      .insert({ comanda_id: comandaId })
-      .select()
-      .single();
-
-    if (error) throw error;
-    return data as Pedido;
-  }
-
   async fecharConta(comandaId: string): Promise<void> {
     const { error } = await this.supabase.client
       .from('comandas')
       .update({ status: 'aguardando_pagamento', fechada_em: new Date().toISOString() })
+      .eq('id', comandaId);
+
+    if (error) throw error;
+  }
+
+  /**
+   * Simula a liberação de um atendente (aguardando_liberacao -> aberta).
+   * Provisório: existe só para testar o fluxo ponta a ponta antes da
+   * tela do atendente existir. Remover quando ela for implementada.
+   */
+  async simularLiberacao(comandaId: string): Promise<void> {
+    const { error } = await this.supabase.client
+      .from('comandas')
+      .update({ status: 'aberta' })
       .eq('id', comandaId);
 
     if (error) throw error;

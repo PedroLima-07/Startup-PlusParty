@@ -155,27 +155,3 @@ form {
   font-size: 0.75rem;
   margin: 0;
 }
-
-.card-sucesso {
-  align-items: center;
-  text-align: center;
-  gap: 8px;
-
-  h1 {
-    font-size: 1.25rem;
-    margin: 0;
-  }
-
-  .icone-sucesso {
-    width: 56px;
-    height: 56px;
-    border-radius: 50%;
-    background: #eef2ff;
-    color: var(--azul-acao);
-    font-size: 1.5rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-bottom: 8px;
-  }
-}

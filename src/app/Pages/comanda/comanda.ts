@@ -57,6 +57,12 @@ export class ComandaPage implements OnInit {
     await this.carregarDados();
   }
 
+  /** Provisório: simula o atendente liberando a comanda, até essa tela existir. */
+  protected async simularLiberacao(): Promise<void> {
+    await this.comandaService.simularLiberacao(this.id());
+    await this.carregarDados();
+  }
+
   protected abrirConfirmacaoRecebimento(): void {
     this.confirmandoRecebimento.set(true);
   }
