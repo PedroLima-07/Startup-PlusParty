@@ -1,100 +1,57 @@
 <header class="app-header">
   <div class="header-content">
-    <button
-      type="button"
-      class="back-button"
-      aria-label="Voltar"
-      (click)="voltar()"
-    >
-      <span aria-hidden="true">‹</span>
-    </button>
-
-    <h1>Selecionar estabelecimento</h1>
+    <h1>Abrir comanda</h1>
   </div>
 </header>
 
-<main class="page-content container-fluid">
+<main class="page-content">
   <section class="intro-section">
     <h2>Onde você está?</h2>
+    <p class="subtitulo">Escolha o local para abrir sua comanda na casa.</p>
   </section>
 
-  <section class="section-block" aria-labelledby="favoritos-titulo">
-    <div class="section-heading">
-      <h3 id="favoritos-titulo">Favoritos</h3>
-    </div>
+  <section class="opcoes-local" aria-label="Tipo de local">
+    <button
+      type="button"
+      class="opcao-local"
+      [class.selecionada]="tipoLocal() === 'mesa'"
+      (click)="selecionarTipo('mesa')"
+    >
+      <span class="icone-local" aria-hidden="true">M</span>
+      <span class="rotulo-local">Mesa</span>
+      <span class="descricao-local">Sentado na mesa</span>
+    </button>
 
-    <div class="bars-list">
-      @for (estabelecimento of favoritos; track estabelecimento.id) {
-        <button
-          type="button"
-          class="bar-card"
-          (click)="selecionarEstabelecimento(estabelecimento)"
-        >
-          <span class="bar-avatar" aria-hidden="true">
-            {{ iniciais(estabelecimento.nome) }}
-          </span>
-
-          <span class="bar-info">
-            <span class="bar-name">{{ estabelecimento.nome }}</span>
-            <span class="bar-description">{{ estabelecimento.descricao }}</span>
-            <span class="bar-rating" aria-label="Avaliação {{ estabelecimento.avaliacao }} de 5">
-              <span class="star" aria-hidden="true">★</span>
-              <span>{{ estabelecimento.avaliacao.toFixed(1) }}</span>
-            </span>
-          </span>
-
-          <span class="card-chevron" aria-hidden="true">›</span>
-        </button>
-      }
-    </div>
+    <button
+      type="button"
+      class="opcao-local"
+      [class.selecionada]="tipoLocal() === 'balcao'"
+      (click)="selecionarTipo('balcao')"
+    >
+      <span class="icone-local" aria-hidden="true">B</span>
+      <span class="rotulo-local">Balcão</span>
+      <span class="descricao-local">No balcão do bar</span>
+    </button>
   </section>
 
-  <section class="section-block" aria-labelledby="pesquisa-titulo">
-    <div class="section-heading">
-      <h3 id="pesquisa-titulo">Pesquisar bares</h3>
-    </div>
-
-    <label class="search-box" for="busca-bar">
-      <span class="search-icon" aria-hidden="true">⌕</span>
+  @if (tipoLocal() === 'mesa') {
+    <label class="campo-mesa" for="numero-mesa">
+      <span>Número da mesa</span>
       <input
-        id="busca-bar"
-        type="search"
-        [(ngModel)]="busca"
-        placeholder="Buscar bar pelo nome"
+        id="numero-mesa"
+        type="text"
+        inputmode="numeric"
+        [value]="numeroMesa()"
+        placeholder="Ex: 12"
         autocomplete="off"
-        enterkeyhint="search"
+        (input)="numeroMesa.set($any($event.target).value)"
       />
     </label>
+  }
 
-    <div class="bars-list all-bars-list">
-      @for (estabelecimento of estabelecimentosFiltrados; track estabelecimento.id) {
-        <button
-          type="button"
-          class="bar-card"
-          (click)="selecionarEstabelecimento(estabelecimento)"
-        >
-          <span class="bar-avatar" aria-hidden="true">
-            {{ iniciais(estabelecimento.nome) }}
-          </span>
-
-          <span class="bar-info">
-            <span class="bar-name">{{ estabelecimento.nome }}</span>
-            <span class="bar-description">{{ estabelecimento.descricao }}</span>
-            <span class="bar-rating" aria-label="Avaliação {{ estabelecimento.avaliacao }} de 5">
-              <span class="star" aria-hidden="true">★</span>
-              <span>{{ estabelecimento.avaliacao.toFixed(1) }}</span>
-            </span>
-          </span>
-
-          <span class="card-chevron" aria-hidden="true">›</span>
-        </button>
-      } @empty {
-        <div class="empty-state">
-          <span class="empty-icon" aria-hidden="true">⌕</span>
-          <p>Nenhum bar encontrado.</p>
-          <small>Tente buscar por outro nome.</small>
-        </div>
-      }
-    </div>
-  </section>
+  <footer class="rodape">
+    <button class="botao-abrir" type="button" [disabled]="!podeAbrir" (click)="abrir()">
+      Abrir comanda
+    </button>
+  </footer>
 </main>
