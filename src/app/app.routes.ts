@@ -6,7 +6,11 @@ export const routes: Routes = [
     loadComponent: () => import('./Pages/login/login').then((m) => m.LoginPage),
   },
   {
-    path: 'comanda/:id',
+    path: 'abrir-comanda',
+    loadComponent: () => import('./Pages/abrir-comanda/abrir-comanda').then((m) => m.AbrirComanda),
+  },
+  {
+    path: 'comanda',
     loadComponent: () => import('./Pages/comanda/comanda').then((m) => m.ComandaPage),
   },
   {
