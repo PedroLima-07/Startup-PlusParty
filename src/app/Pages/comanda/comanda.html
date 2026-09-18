@@ -1,117 +1,60 @@
-@if (carregando()) {
-  <p class="carregando">Carregando comanda...</p>
-} @else if (comanda(); as c) {
-  @if (comandaEncerrada()) {
-    <div class="tela tela-fechamento">
-      <header class="cabecalho">
-        <h1>Comanda encerrada</h1>
-      </header>
+@if (comanda(); as c) {
+  <div class="tela">
+    <header class="cabecalho">
+      <button class="voltar" type="button" routerLink="/abrir-comanda" aria-label="Voltar">←</button>
+      <h1>Sua comanda</h1>
+    </header>
 
-      <div class="conteudo-fechamento">
-        <div class="icone-sucesso">✓</div>
-        <p class="rotulo">Total da comanda</p>
-        <p class="valor">{{ total() | currency: 'BRL' }}</p>
-        <p class="instrucao">Passe no caixa para concluir o pagamento</p>
-        <button class="botao-primario" type="button" routerLink="/">Voltar ao início</button>
-      </div>
+    <div class="info-comanda">
+      <span class="aberta-em">Comanda aberta em<br /><strong>{{ c.barNome }}</strong></span>
+      <span class="badge-local">{{ rotuloLocal(c) }}</span>
     </div>
-    // erro pois ainda precisa ser criado a parte de aguarde a simulação do atendente liberar a comanda, para que o usuário possa fechar a conta.
-    lembre-se faça simulado.
-  } @else if (aguardandoLiberacao()) {
-    <div class="tela tela-fechamento">
-      <header class="cabecalho">
-        <button class="voltar" type="button" routerLink="/" aria-label="Voltar">←</button>
-        <h1>Sua comanda</h1>
-      </header>
 
-      <div class="conteudo-fechamento">
-        <div class="icone-sucesso">⏳</div>
-        <p class="rotulo">Comanda em<br /><strong>{{ c.estabelecimento.nome }}</strong></p>
-        <p class="instrucao">
-          Aguardando liberação. Chame um atendente para confirmar sua presença.
-        </p>
-        <button class="botao-primario" type="button" (click)="verificarLiberacao()">
-          Já fui liberado, atualizar
-        </button>
-      </div>
+    <section class="card-total">
+      <span>Total geral</span>
+      <strong>{{ total() | currency: 'BRL' }}</strong>
+    </section>
+
+    <button class="botao-primario" type="button" (click)="fazerPedido()">
+      + Fazer pedido
+    </button>
+
+    <div class="cabecalho-itens">
+      <span>Itens pedidos</span>
     </div>
-  } @else {
-    <div class="tela">
-      <header class="cabecalho">
-        <button class="voltar" type="button" routerLink="/" aria-label="Voltar">←</button>
-        <h1>Sua comanda</h1>
-      </header>
 
-      <div class="info-comanda">
-        <span class="aberta-em">Comanda aberta em<br /><strong>{{ c.estabelecimento.nome }}</strong></span>
-        <span class="badge-local">{{ rotuloLocal(c) }}</span>
+    @if (c.itens.length === 0) {
+      <div class="vazio">
+        <p>Nenhum item ainda. Toque em "Fazer pedido".</p>
       </div>
-
-      <section class="card-total">
-        <span>Total geral</span>
-        <strong>{{ total() | currency: 'BRL' }}</strong>
-      </section>
-
-      <button class="botao-primario" type="button" [routerLink]="['/cardapio', c.id]">
-        + Fazer pedido
-      </button>
-
-      <div class="cabecalho-itens">
-        <span>Itens pedidos</span>
-        @if (itens().length > 0) {
-          <button class="link" type="button" (click)="atualizarStatus()">Atualizar status</button>
-        }
-      </div>
-
-      @if (itens().length === 0) {
-        <div class="vazio">
-          <span class="icone-vazio">🎫</span>
-          <p>Nenhum item ainda. Toque em "Fazer pedido".</p>
-        </div>
-      } @else {
-        <ul class="lista-itens">
-          @for (pedidoItem of itens(); track pedidoItem.id) {
-            <li class="item">
-              <span class="quantidade">{{ pedidoItem.quantidade }}</span>
-              <div class="detalhe">
-                <span class="nome">{{ pedidoItem.item.nome }}</span>
-                <span class="status">{{ rotuloStatusItem(pedidoItem.status) }}</span>
-              </div>
-              <span class="preco">{{
-                pedidoItem.quantidade * pedidoItem.preco_unitario | currency: 'BRL'
-              }}</span>
-            </li>
-          }
-        </ul>
-      }
-
-      <footer class="rodape">
-        <button
-          class="botao-fechar"
-          type="button"
-          [disabled]="itens().length === 0"
-          (click)="abrirConfirmacaoRecebimento()"
-        >
-          Fechar conta · {{ total() | currency: 'BRL' }}
-        </button>
-      </footer>
-
-      @if (confirmandoRecebimento()) {
-        <div class="overlay">
-          <div class="modal">
-            <span class="icone-modal">📋</span>
-            <p class="pergunta">Você recebeu tudo o que você pediu?</p>
-            <div class="acoes-modal">
-              <button class="botao-secundario" type="button" (click)="cancelarFechamento()">
-                Não
-              </button>
-              <button class="botao-primario" type="button" (click)="confirmarFechamento()">
-                Sim
-              </button>
+    } @else {
+      <ul class="lista-itens">
+        @for (item of c.itens; track $index) {
+          <li class="item">
+            <span class="quantidade">{{ item.quantidade }}</span>
+            <div class="detalhe">
+              <span class="nome">{{ item.nome }}</span>
+              <span class="preco-unitario">{{ item.precoUnitario | currency: 'BRL' }}</span>
             </div>
-          </div>
-        </div>
-      }
+            <span class="preco">{{ item.quantidade * item.precoUnitario | currency: 'BRL' }}</span>
+          </li>
+        }
+      </ul>
+    }
+
+    <footer class="rodape">
+      <button class="botao-fechar" type="button" (click)="fecharConta()">
+        Fechar conta · {{ total() | currency: 'BRL' }}
+      </button>
+    </footer>
+  </div>
+} @else {
+  <div class="tela">
+    <div class="vazio">
+      <p>Nenhuma comanda aberta.</p>
+      <button class="botao-primario" type="button" routerLink="/abrir-comanda">
+        Abrir comanda
+      </button>
     </div>
-  }
+  </div>
 }
