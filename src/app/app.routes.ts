@@ -12,12 +12,18 @@ export const routes: Routes = [
     canActivate: [authGuard],
   },
   {
+    path: 'abrir-comanda',
+    loadComponent: () =>
+      import('./Pages/abrir-comanda/abrir-comanda').then((m) => m.AbrirComandaComponent),
+    canActivate: [authGuard],
+  },
+  {
     path: 'comanda/:id',
     loadComponent: () => import('./Pages/comanda/comanda').then((m) => m.ComandaPage),
   },
   {
     path: '',
-    redirectTo: 'login',
+    redirectTo: 'home',
     pathMatch: 'full',
   },
 ];

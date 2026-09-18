@@ -52,4 +52,18 @@ export class ComandaService {
 
     if (error) throw error;
   }
+
+  /**
+   * Simula a liberação de um atendente (aguardando_liberacao -> aberta).
+   * Provisório: existe só para testar o fluxo ponta a ponta antes da
+   * tela do atendente existir. Remover quando ela for implementada.
+   */
+  async simularLiberacao(comandaId: string): Promise<void> {
+    const { error } = await this.supabase.client
+      .from('comandas')
+      .update({ status: 'aberta' })
+      .eq('id', comandaId);
+
+    if (error) throw error;
+  }
 }
