@@ -51,9 +51,9 @@ export class HomePage implements OnInit {
     }
   });
 
-  protected readonly linkComanda = computed<string[] | null>(() => {
+  protected readonly linkComanda = computed<string[]>(() => {
     const comanda = this.comandaAtiva();
-    return comanda ? ['/comanda', comanda.id] : null;
+    return comanda ? ['/comanda', comanda.id] : ['/abrir-comanda'];
   });
 
   async ngOnInit(): Promise<void> {
@@ -61,8 +61,9 @@ export class HomePage implements OnInit {
       data: { user },
     } = await this.supabase.client.auth.getUser();
 
+    // TODO: exigir sessão de verdade assim que o authGuard voltar (ver app.routes.ts).
     const [nome, comandaAtiva, estabelecimentos] = await Promise.all([
-      this.authService.buscarNomeAtual(),
+      user ? this.authService.buscarNomeAtual() : Promise.resolve('Visitante'),
       user ? this.homeService.buscarComandaAtiva(user.id) : Promise.resolve(null),
       this.carregarEstabelecimentosComLotacao(),
     ]);

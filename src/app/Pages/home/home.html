@@ -7,23 +7,13 @@
       <p class="subtitulo">O rolê de hoje começa agora.</p>
     </header>
 
-    @if (linkComanda(); as link) {
-      <a class="card-comanda" [routerLink]="link">
-        <span class="icone-comanda">{{ iconeComanda() }}</span>
-        <span class="texto-comanda">
-          <strong>{{ rotuloComanda() }}</strong>
-          <span>Peça e faça seus pedidos direto pelo app</span>
-        </span>
-      </a>
-    } @else {
-      <div class="card-comanda inerte">
-        <span class="icone-comanda">{{ iconeComanda() }}</span>
-        <span class="texto-comanda">
-          <strong>{{ rotuloComanda() }}</strong>
-          <span>Peça e faça seus pedidos direto pelo app</span>
-        </span>
-      </div>
-    }
+    <a class="card-comanda" [routerLink]="linkComanda()">
+      <span class="icone-comanda">{{ iconeComanda() }}</span>
+      <span class="texto-comanda">
+        <strong>{{ rotuloComanda() }}</strong>
+        <span>Peça e faça seus pedidos direto pelo app</span>
+      </span>
+    </a>
 
     @if (favoritos().length > 0) {
       <section class="secao">
