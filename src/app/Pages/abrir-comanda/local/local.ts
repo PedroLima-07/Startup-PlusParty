@@ -13,6 +13,7 @@ import { ComandaService } from '../../../services/comanda.service';
   templateUrl: './local.html',
   styleUrl: './local.scss',
 })
+
 export class AbrirComandaLocalComponent {
   private readonly router = inject(Router);
   private readonly location = inject(Location);
