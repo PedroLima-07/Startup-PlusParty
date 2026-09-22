@@ -1,0 +1,212 @@
+$cor-primaria: #0F1F4B;
+$cor-secundaria: #2F6BFF;
+$cor-fundo: #F8F9FA;
+$cor-borda: #E0E0E0;
+
+// Cores dos status baseadas na especificação
+$cor-novo: #D0E2FF;
+$cor-novo-texto: #0F1F4B;
+$cor-andamento: #0F1F4B;
+$cor-andamento-texto: #FFFFFF;
+
+:host {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background-color: $cor-fundo;
+  font-family: sans-serif;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: $cor-primaria;
+  color: white;
+  padding: 16px 20px;
+
+  .brand h1 {
+    margin: 0;
+    font-size: 1.5rem;
+  }
+
+  .btn-refresh {
+    background: transparent;
+    border: none;
+    color: white;
+    cursor: pointer;
+    min-width: 44px; // Área de toque grande para mobile
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+}
+
+.tabs {
+  display: flex;
+  background: white;
+  border-bottom: 1px solid $cor-borda;
+
+  .tab-btn {
+    flex: 1;
+    padding: 16px;
+    background: transparent;
+    border: none;
+    border-bottom: 3px solid transparent;
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #666;
+    cursor: pointer;
+    min-height: 56px; // Área de toque acessível
+
+    &.active {
+      color: $cor-primaria;
+      border-bottom-color: $cor-primaria;
+    }
+  }
+}
+
+.pedidos-lista {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  flex: 1;
+  overflow-y: auto;
+}
+
+.card-pedido {
+  background: white;
+  border: 1px solid $cor-borda;
+  border-radius: 12px;
+  padding: 16px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.03);
+  cursor: pointer;
+  touch-action: manipulation; // Previne delays de clique em touchscreens
+
+  .card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+
+    .mesa {
+      font-size: 1.4rem;
+      font-weight: 900;
+      color: $cor-primaria;
+    }
+    .tempo {
+      color: #666;
+      font-size: 0.95rem;
+    }
+  }
+
+  .cliente {
+    font-size: 1.05rem;
+    color: #444;
+    margin-bottom: 16px;
+  }
+
+  .itens-lista {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 16px 0;
+
+    li {
+      font-size: 1.15rem;
+      padding: 6px 0;
+      border-bottom: 1px solid #f4f4f4;
+
+      &:last-child {
+        border-bottom: none;
+      }
+    }
+  }
+
+  .card-footer {
+    display: flex;
+    justify-content: flex-end;
+  }
+}
+
+.badge {
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 0.95rem;
+  font-weight: bold;
+
+  &.novo {
+    background-color: $cor-novo;
+    color: $cor-novo-texto;
+  }
+  &.em_andamento {
+    background-color: $cor-andamento;
+    color: $cor-andamento-texto;
+  }
+}
+
+.empty-state {
+  text-align: center;
+  color: #666;
+  padding: 40px 16px;
+  font-size: 1.1rem;
+}
+
+/* Modal Pop-up no formato Bottom Sheet (melhor para usar em pé/mobile) */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0,0,0,0.6);
+  display: flex;
+  align-items: flex-end;
+  z-index: 1000;
+
+  .modal-content {
+    background: white;
+    width: 100%;
+    padding: 24px 20px 32px 20px;
+    border-radius: 24px 24px 0 0;
+    box-shadow: 0 -4px 12px rgba(0,0,0,0.1);
+
+    h3 {
+      margin: 0 0 8px 0;
+      color: $cor-primaria;
+      font-size: 1.3rem;
+    }
+
+    .modal-mesa {
+      color: #666;
+      margin-bottom: 24px;
+      font-size: 1.1rem;
+    }
+
+    .modal-actions {
+      display: flex;
+      gap: 12px;
+
+      button {
+        flex: 1;
+        border-radius: 12px;
+        font-size: 1.1rem;
+        font-weight: bold;
+        border: none;
+        cursor: pointer;
+        min-height: 60px; // Alvo de toque bem grande para a correria
+        
+        &.btn-cancelar {
+          background: #E0E0E0;
+          color: #333;
+        }
+
+        &.btn-confirmar {
+          background: $cor-secundaria;
+          color: white;
+        }
+      }
+    }
+  }
+}
