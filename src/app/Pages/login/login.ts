@@ -55,7 +55,7 @@ export class LoginPage {
       } else {
         await this.authService.cadastrar(nome, email, senha);
       }
-      await this.router.navigateByUrl('/home');
+      await this.router.navigateByUrl('/cliente/home');
     } catch (erro) {
       this.erro.set(this.traduzirErro(erro));
     } finally {
