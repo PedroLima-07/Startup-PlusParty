@@ -1,0 +1,156 @@
+:host {
+  display: block;
+  min-height: 100dvh;
+  background: #f7f8fb;
+  color: #0f1f4b;
+  font-family: system-ui, sans-serif;
+}
+
+.carregando {
+  padding: 40px;
+  text-align: center;
+  color: #6b7280;
+}
+
+.app-header {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  background: #fff;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.header-content {
+  min-height: 58px;
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 0 16px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.header-content h1 {
+  margin: 0;
+  color: #0f1f4b;
+  font-size: 18px;
+  font-weight: 800;
+  line-height: 1.2;
+}
+
+.back-button {
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: #0f1f4b;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.back-button:hover,
+.back-button:focus-visible {
+  background: #eef2ff;
+  outline: none;
+}
+
+.back-button span {
+  display: block;
+  margin-top: -3px;
+  font-size: 30px;
+  font-weight: 300;
+  line-height: 1;
+}
+
+.page-content {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 20px 16px 42px;
+}
+
+.descricao {
+  margin: 0 0 8px;
+  color: #4d5565;
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+.avaliacao {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin-bottom: 20px;
+  font-size: 14px;
+  font-weight: 700;
+  color: #4d5565;
+
+  .star {
+    color: #f0a51a;
+  }
+}
+
+.acoes {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 28px;
+}
+
+.botao-primario,
+.botao-secundario {
+  flex: 1;
+  padding: 13px;
+  border-radius: 999px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.botao-primario {
+  border: none;
+  background: #0f1f4b;
+  color: #fff;
+}
+
+.botao-secundario {
+  border: 1.5px solid #0f1f4b;
+  background: transparent;
+  color: #0f1f4b;
+}
+
+.secao-endereco {
+  h2 {
+    margin: 0 0 10px;
+    font-size: 15px;
+    font-weight: 800;
+    color: #0f1f4b;
+  }
+}
+
+.linha-endereco {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px;
+  background: #fff;
+  border: 1px solid #e1e5ee;
+  border-radius: 12px;
+  font-size: 14px;
+  color: #4d5565;
+}
+
+.botao-copiar {
+  flex-shrink: 0;
+  padding: 6px 12px;
+  border: 1px solid #dfe3eb;
+  border-radius: 999px;
+  background: #f7f8fb;
+  color: #2f6bff;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+}

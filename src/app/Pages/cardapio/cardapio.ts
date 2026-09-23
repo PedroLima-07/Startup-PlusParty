@@ -1,9 +1,12 @@
-import { CurrencyPipe } from '@angular/common';
+import { CurrencyPipe, Location } from '@angular/common';
 import { Component, OnInit, computed, inject, input, signal } from '@angular/core';
-import { Router } from '@angular/router';
-import { ComandaDetalhada, Item, ItemCarrinho } from '../../models';
+import { ActivatedRoute, Router } from '@angular/router';
+import { Item, ItemCarrinho } from '../../models';
 import { CardapioService } from '../../services/cardapio.service';
 import { ComandaService } from '../../services/comanda.service';
+import { EstabelecimentosService } from '../../services/estabelecimentos.service';
+
+type ModoCardapio = 'pedir' | 'visualizar';
 
 @Component({
   selector: 'app-cardapio',
@@ -12,21 +15,30 @@ import { ComandaService } from '../../services/comanda.service';
   styleUrl: './cardapio.scss',
 })
 export class CardapioPage implements OnInit {
+  private location = inject(Location);
+  private route = inject(ActivatedRoute);
   private router = inject(Router);
   private comandaService = inject(ComandaService);
   private cardapioService = inject(CardapioService);
+  private estabelecimentosService = inject(EstabelecimentosService);
 
-  /** id da comanda (a rota reaproveita o mesmo :id da tela de Comanda). */
+  /**
+   * No modo 'pedir', é o id da comanda. No modo 'visualizar', é o id do
+   * estabelecimento direto (não existe comanda nesse fluxo ainda).
+   */
   id = input.required<string>();
+
+  protected readonly modo: ModoCardapio = this.route.snapshot.data['modo'] ?? 'pedir';
 
   protected readonly carregando = signal(true);
   protected readonly enviando = signal(false);
   protected readonly erro = signal<string | null>(null);
-  protected readonly comanda = signal<ComandaDetalhada | null>(null);
+  protected readonly nomeEstabelecimento = signal('');
   protected readonly categorias = signal<[string, Item[]][]>([]);
   protected readonly carrinho = signal<Map<string, number>>(new Map());
 
   private itensPorId = new Map<string, Item>();
+  private comandaId: string | null = null;
 
   protected readonly totalItensCarrinho = computed(() =>
     Array.from(this.carrinho().values()).reduce((total, quantidade) => total + quantidade, 0),
@@ -42,10 +54,20 @@ export class CardapioPage implements OnInit {
   });
 
   async ngOnInit(): Promise<void> {
-    const comanda = await this.comandaService.buscarComanda(this.id());
-    this.comanda.set(comanda);
+    let estabelecimentoId: string;
 
-    const itens = await this.cardapioService.buscarCardapio(comanda.estabelecimento_id);
+    if (this.modo === 'visualizar') {
+      estabelecimentoId = this.id();
+      const estabelecimento = await this.estabelecimentosService.buscarPorId(estabelecimentoId);
+      this.nomeEstabelecimento.set(estabelecimento?.nome ?? '');
+    } else {
+      this.comandaId = this.id();
+      const comanda = await this.comandaService.buscarComanda(this.comandaId);
+      estabelecimentoId = comanda.estabelecimento_id;
+      this.nomeEstabelecimento.set(comanda.estabelecimento.nome);
+    }
+
+    const itens = await this.cardapioService.buscarCardapio(estabelecimentoId);
     this.itensPorId = new Map(itens.map((item) => [item.id, item]));
     this.categorias.set(Object.entries(this.cardapioService.agruparPorCategoria(itens)));
 
@@ -76,7 +98,7 @@ export class CardapioPage implements OnInit {
   }
 
   protected async confirmarPedido(): Promise<void> {
-    if (this.totalItensCarrinho() === 0 || this.enviando()) return;
+    if (this.totalItensCarrinho() === 0 || this.enviando() || !this.comandaId) return;
 
     this.enviando.set(true);
     this.erro.set(null);
@@ -89,8 +111,8 @@ export class CardapioPage implements OnInit {
       .filter((itemCarrinho): itemCarrinho is ItemCarrinho => itemCarrinho !== null);
 
     try {
-      await this.cardapioService.confirmarPedido(this.id(), itensCarrinho);
-      void this.router.navigate(['/comanda', this.id()]);
+      await this.cardapioService.confirmarPedido(this.comandaId, itensCarrinho);
+      void this.router.navigate(['/cliente/comanda', this.comandaId]);
     } catch {
       this.erro.set('Não foi possível confirmar o pedido agora. Tente novamente.');
       this.enviando.set(false);
@@ -98,6 +120,6 @@ export class CardapioPage implements OnInit {
   }
 
   protected voltar(): void {
-    void this.router.navigate(['/comanda', this.id()]);
+    this.location.back();
   }
 }
