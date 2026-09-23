@@ -1,0 +1,48 @@
+<header class="app-header">
+  <div class="header-content">
+    <h1>Descobrir</h1>
+  </div>
+</header>
+
+<main class="page-content">
+  <label class="search-box" for="busca-bar">
+    <span class="search-icon" aria-hidden="true">⌕</span>
+    <input
+      id="busca-bar"
+      type="search"
+      [(ngModel)]="busca"
+      placeholder="Buscar bar pelo nome"
+      autocomplete="off"
+      enterkeyhint="search"
+    />
+  </label>
+
+  @if (carregando()) {
+    <p class="carregando">Carregando bares...</p>
+  } @else {
+    <div class="bars-list">
+      @for (estabelecimento of estabelecimentosFiltrados; track estabelecimento.id) {
+        <button type="button" class="bar-card" (click)="abrirPerfil(estabelecimento)">
+          <span class="bar-avatar" aria-hidden="true">{{ iniciais(estabelecimento.nome) }}</span>
+
+          <span class="bar-info">
+            <span class="bar-name">{{ estabelecimento.nome }}</span>
+            <span class="bar-description">{{ estabelecimento.descricao }}</span>
+            <span class="bar-rating" aria-label="Avaliação {{ estabelecimento.avaliacao }} de 5">
+              <span class="star" aria-hidden="true">★</span>
+              <span>{{ (estabelecimento.avaliacao ?? 0).toFixed(1) }}</span>
+            </span>
+          </span>
+
+          <span class="card-chevron" aria-hidden="true">›</span>
+        </button>
+      } @empty {
+        <div class="empty-state">
+          <span class="empty-icon" aria-hidden="true">⌕</span>
+          <p>Nenhum bar encontrado.</p>
+          <small>Tente buscar por outro nome.</small>
+        </div>
+      }
+    </div>
+  }
+</main>

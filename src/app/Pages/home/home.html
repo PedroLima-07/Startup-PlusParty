@@ -20,11 +20,11 @@
         <h2>Favoritos</h2>
         <div class="lista-horizontal">
           @for (estabelecimento of favoritos(); track estabelecimento.id) {
-            <div class="card-estabelecimento">
+            <a class="card-estabelecimento" [routerLink]="['/cliente/estabelecimento', estabelecimento.id]">
               <span class="avatar">{{ inicial(estabelecimento.nome) }}</span>
               <span class="nome">{{ estabelecimento.nome }}</span>
               <span class="avaliacao">⭐ {{ estabelecimento.avaliacao ?? '—' }}</span>
-            </div>
+            </a>
           }
         </div>
       </section>
@@ -34,29 +34,31 @@
       <h2>Tá rolando 🔥</h2>
       <ul class="lista-vertical">
         @for (estabelecimento of estabelecimentos(); track estabelecimento.id) {
-          <li class="item-estabelecimento">
-            <span class="avatar">{{ inicial(estabelecimento.nome) }}</span>
-            <div class="detalhe">
-              <span class="nome">{{ estabelecimento.nome }}</span>
-              <span class="descricao">{{ estabelecimento.descricao }}</span>
-            </div>
-            <span class="badge" [class.quente]="estabelecimento.lotacao === 'quente'">
-              {{ estabelecimento.lotacao === 'quente' ? 'Quente' : 'Normal' }}
-            </span>
+          <li>
+            <a class="item-estabelecimento" [routerLink]="['/cliente/estabelecimento', estabelecimento.id]">
+              <span class="avatar">{{ inicial(estabelecimento.nome) }}</span>
+              <div class="detalhe">
+                <span class="nome">{{ estabelecimento.nome }}</span>
+                <span class="descricao">{{ estabelecimento.descricao }}</span>
+              </div>
+              <span class="badge" [class.quente]="estabelecimento.lotacao === 'quente'">
+                {{ estabelecimento.lotacao === 'quente' ? 'Quente' : 'Normal' }}
+              </span>
+            </a>
           </li>
         }
       </ul>
     </section>
 
     <nav class="nav-inferior">
-      <button class="item-nav ativo" type="button">
+      <a class="item-nav ativo" routerLink="/cliente/home">
         <span class="icone">🏠</span>
         <span>Início</span>
-      </button>
-      <button class="item-nav" type="button">
+      </a>
+      <a class="item-nav" routerLink="/cliente/discovery">
         <span class="icone">🧭</span>
         <span>Discovery</span>
-      </button>
+      </a>
       <button class="item-nav" type="button">
         <span class="icone">📰</span>
         <span>Feed</span>

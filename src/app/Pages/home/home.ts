@@ -53,7 +53,7 @@ export class HomePage implements OnInit {
 
   protected readonly linkComanda = computed<string[]>(() => {
     const comanda = this.comandaAtiva();
-    return comanda ? ['/comanda', comanda.id] : ['/abrir-comanda'];
+    return comanda ? ['/cliente/comanda', comanda.id] : ['/cliente/discovery'];
   });
 
   async ngOnInit(): Promise<void> {

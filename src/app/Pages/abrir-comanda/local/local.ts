@@ -1,10 +1,11 @@
 import { Location } from '@angular/common';
-import { Component, inject, signal } from '@angular/core';
+import { Component, OnInit, inject, input, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 
 import { Estabelecimento } from '../../../models';
 import { ComandaService } from '../../../services/comanda.service';
+import { EstabelecimentosService } from '../../../services/estabelecimentos.service';
 
 @Component({
   selector: 'app-abrir-comanda-local',
@@ -13,37 +14,26 @@ import { ComandaService } from '../../../services/comanda.service';
   templateUrl: './local.html',
   styleUrl: './local.scss',
 })
-
-export class AbrirComandaLocalComponent {
+export class AbrirComandaLocalComponent implements OnInit {
   private readonly router = inject(Router);
   private readonly location = inject(Location);
   private readonly comandaService = inject(ComandaService);
+  private readonly estabelecimentosService = inject(EstabelecimentosService);
 
-  estabelecimento: Estabelecimento = {
-    id: '',
-    nome: '',
-    descricao: null,
-    endereco: null,
-    capacidade: null,
-    avaliacao: null,
-    criado_em: '',
-  };
+  /** id do estabelecimento (vem da rota, ex: a partir do Perfil do bar). */
+  id = input.required<string>();
+
+  protected readonly carregando = signal(true);
+  protected readonly estabelecimento = signal<Estabelecimento | null>(null);
 
   localSelecionado: 'mesa' | 'balcao' | null = null;
   numeroMesa = '';
   protected readonly mensagem = signal('');
   protected readonly salvando = signal(false);
 
-  constructor() {
-    const estabelecimentoState = history.state?.['estabelecimento'] as Estabelecimento | undefined;
-
-    if (estabelecimentoState) {
-      this.estabelecimento = estabelecimentoState;
-    } else {
-      // Sem o estado da navegação (ex.: página recarregada), não há dado
-      // confiável do estabelecimento — volta pro início da escolha.
-      void this.router.navigate(['/abrir-comanda']);
-    }
+  async ngOnInit(): Promise<void> {
+    this.estabelecimento.set(await this.estabelecimentosService.buscarPorId(this.id()));
+    this.carregando.set(false);
   }
 
   selecionarLocal(local: 'mesa' | 'balcao'): void {
@@ -74,8 +64,8 @@ export class AbrirComandaLocalComponent {
 
     try {
       const mesa = this.localSelecionado === 'mesa' ? this.numeroMesa.trim() : null;
-      const comanda = await this.comandaService.abrirComanda(this.estabelecimento.id, mesa);
-      void this.router.navigate(['/comanda', comanda.id]);
+      const comanda = await this.comandaService.abrirComanda(this.id(), mesa);
+      void this.router.navigate(['/cliente/comanda', comanda.id]);
     } catch {
       this.mensagem.set('Não foi possível abrir a comanda agora. Tente novamente.');
       this.salvando.set(false);

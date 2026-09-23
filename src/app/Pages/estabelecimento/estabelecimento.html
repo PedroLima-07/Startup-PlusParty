@@ -1,0 +1,38 @@
+@if (carregando()) {
+  <p class="carregando">Carregando...</p>
+} @else if (estabelecimento(); as e) {
+  <header class="app-header">
+    <div class="header-content">
+      <button type="button" class="back-button" (click)="voltar()" aria-label="Voltar">
+        <span aria-hidden="true">‹</span>
+      </button>
+      <h1>{{ e.nome }}</h1>
+    </div>
+  </header>
+
+  <main class="page-content">
+    <p class="descricao">{{ e.descricao }}</p>
+
+    <div class="avaliacao">
+      <span class="star" aria-hidden="true">★</span>
+      <span>{{ (e.avaliacao ?? 0).toFixed(1) }}</span>
+    </div>
+
+    <div class="acoes">
+      <button type="button" class="botao-primario" (click)="abrirComanda()">Abrir comanda</button>
+      <button type="button" class="botao-secundario" (click)="verCardapio()">Ver cardápio</button>
+    </div>
+
+    @if (e.endereco) {
+      <section class="secao-endereco">
+        <h2>Endereço</h2>
+        <div class="linha-endereco">
+          <span>{{ e.endereco }}</span>
+          <button type="button" class="botao-copiar" (click)="copiarEndereco(e.endereco)">
+            {{ enderecoCopiado() ? 'Copiado!' : 'Copiar' }}
+          </button>
+        </div>
+      </section>
+    }
+  </main>
+}

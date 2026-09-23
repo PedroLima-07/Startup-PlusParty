@@ -219,3 +219,13 @@
     color: var(--azul-acao);
   }
 }
+
+.card-estabelecimento,
+.item-estabelecimento {
+  text-decoration: none;
+  color: inherit;
+}
+
+a.item-nav {
+  text-decoration: none;
+}

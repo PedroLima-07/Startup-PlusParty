@@ -1,13 +1,17 @@
 @if (carregando()) {
   <p class="carregando">Carregando cardápio...</p>
-} @else if (comanda(); as c) {
+} @else {
   <div class="tela">
     <header class="cabecalho">
       <button class="voltar" type="button" (click)="voltar()" aria-label="Voltar">←</button>
-      <h1>{{ c.estabelecimento.nome }}</h1>
+      <h1>{{ nomeEstabelecimento() }}</h1>
     </header>
 
     <div class="conteudo">
+      @if (categorias().length === 0) {
+        <p class="vazio">Este bar ainda não cadastrou o cardápio.</p>
+      }
+
       @for (grupo of categorias(); track grupo[0]) {
         <section class="categoria">
           <h2>{{ grupo[0] }}</h2>
@@ -19,27 +23,29 @@
                   <span class="preco">{{ item.preco | currency: 'BRL' }}</span>
                 </div>
 
-                <div class="stepper">
-                  @if (quantidadeDe(item.id) > 0) {
+                @if (modo === 'pedir') {
+                  <div class="stepper">
+                    @if (quantidadeDe(item.id) > 0) {
+                      <button
+                        type="button"
+                        class="botao-stepper"
+                        (click)="remover(item.id)"
+                        aria-label="Remover uma unidade"
+                      >
+                        −
+                      </button>
+                      <span class="quantidade">{{ quantidadeDe(item.id) }}</span>
+                    }
                     <button
                       type="button"
                       class="botao-stepper"
-                      (click)="remover(item.id)"
-                      aria-label="Remover uma unidade"
+                      (click)="adicionar(item.id)"
+                      aria-label="Adicionar uma unidade"
                     >
-                      −
+                      +
                     </button>
-                    <span class="quantidade">{{ quantidadeDe(item.id) }}</span>
-                  }
-                  <button
-                    type="button"
-                    class="botao-stepper"
-                    (click)="adicionar(item.id)"
-                    aria-label="Adicionar uma unidade"
-                  >
-                    +
-                  </button>
-                </div>
+                  </div>
+                }
               </li>
             }
           </ul>
@@ -47,25 +53,27 @@
       }
     </div>
 
-    @if (erro(); as mensagem) {
-      <p class="erro-geral">{{ mensagem }}</p>
-    }
+    @if (modo === 'pedir') {
+      @if (erro(); as mensagem) {
+        <p class="erro-geral">{{ mensagem }}</p>
+      }
 
-    <footer class="rodape">
-      <button
-        class="botao-primario"
-        type="button"
-        [disabled]="totalItensCarrinho() === 0 || enviando()"
-        (click)="confirmarPedido()"
-      >
-        @if (enviando()) {
-          Enviando...
-        } @else {
-          Confirmar pedido{{ totalItensCarrinho() > 0 ? ' · ' : '' }}{{
-            totalItensCarrinho() > 0 ? (totalCarrinho() | currency: 'BRL') : ''
-          }}
-        }
-      </button>
-    </footer>
+      <footer class="rodape">
+        <button
+          class="botao-primario"
+          type="button"
+          [disabled]="totalItensCarrinho() === 0 || enviando()"
+          (click)="confirmarPedido()"
+        >
+          @if (enviando()) {
+            Enviando...
+          } @else {
+            Confirmar pedido{{ totalItensCarrinho() > 0 ? ' · ' : '' }}{{
+              totalItensCarrinho() > 0 ? (totalCarrinho() | currency: 'BRL') : ''
+            }}
+          }
+        </button>
+      </footer>
+    }
   </div>
 }

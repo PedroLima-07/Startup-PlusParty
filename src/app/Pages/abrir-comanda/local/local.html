@@ -1,68 +1,88 @@
-<header class="app-header">
-  <div class="header-content">
-    <button
-      type="button"
-      class="back-button"
-      aria-label="Voltar para seleção de estabelecimento"
-      (click)="voltar()"
-    >
-      <span aria-hidden="true">‹</span>
-    </button>
+@if (carregando()) {
+  <p class="carregando">Carregando...</p>
+} @else if (estabelecimento(); as e) {
+  <header class="app-header">
+    <div class="header-content">
+      <button
+        type="button"
+        class="back-button"
+        aria-label="Voltar para seleção de estabelecimento"
+        (click)="voltar()"
+      >
+        <span aria-hidden="true">‹</span>
+      </button>
 
-    <h1>{{ estabelecimento.nome }}</h1>
-  </div>
-</header>
+      <h1>{{ e.nome }}</h1>
+    </div>
+  </header>
 
-<main class="page-content container-fluid">
-  <section class="intro-section" aria-labelledby="titulo-local">
-    <h2 id="titulo-local">Onde você está?</h2>
-  </section>
+  <main class="page-content container-fluid">
+    <section class="intro-section" aria-labelledby="titulo-local">
+      <h2 id="titulo-local">Onde você está?</h2>
+    </section>
 
-  <section class="local-options" aria-label="Escolha onde você está no estabelecimento">
-    <button
-      type="button"
-      class="local-card"
-      [class.selected]="localSelecionado === 'mesa'"
-      [attr.aria-pressed]="localSelecionado === 'mesa'"
-      (click)="selecionarLocal('mesa')"
-    >
-      <span class="local-icon" aria-hidden="true">🍴</span>
-      <span class="local-card-title">Na mesa</span>
-      <span class="local-card-description">
-        Informe o número da sua mesa e o garçom leva seu pedido até você
-      </span>
-    </button>
+    <section class="local-options" aria-label="Escolha onde você está no estabelecimento">
+      <button
+        type="button"
+        class="local-card"
+        [class.selected]="localSelecionado === 'mesa'"
+        [attr.aria-pressed]="localSelecionado === 'mesa'"
+        (click)="selecionarLocal('mesa')"
+      >
+        <span class="local-icon" aria-hidden="true">🍴</span>
+        <span class="local-card-title">Na mesa</span>
+        <span class="local-card-description">
+          Informe o número da sua mesa e o garçom leva seu pedido até você
+        </span>
+      </button>
 
-    <button
-      type="button"
-      class="local-card"
-      [class.selected]="localSelecionado === 'balcao'"
-      [attr.aria-pressed]="localSelecionado === 'balcao'"
-      (click)="selecionarLocal('balcao')"
-    >
-      <span class="local-icon" aria-hidden="true">🔔</span>
-      <span class="local-card-title">No balcão</span>
-      <span class="local-card-description">
-        Você retira seu pedido direto no balcão do bar
-      </span>
-    </button>
-  </section>
+      <button
+        type="button"
+        class="local-card"
+        [class.selected]="localSelecionado === 'balcao'"
+        [attr.aria-pressed]="localSelecionado === 'balcao'"
+        (click)="selecionarLocal('balcao')"
+      >
+        <span class="local-icon" aria-hidden="true">🔔</span>
+        <span class="local-card-title">No balcão</span>
+        <span class="local-card-description">
+          Você retira seu pedido direto no balcão do bar
+        </span>
+      </button>
+    </section>
 
-  @if (localSelecionado === 'mesa') {
-    <section class="mesa-form" aria-labelledby="mesa-titulo">
-      <label id="mesa-titulo" for="numero-mesa">Número da mesa</label>
-      <div class="mesa-action-row">
-        <input
-          id="numero-mesa"
-          type="text"
-          inputmode="numeric"
-          autocomplete="off"
-          maxlength="4"
-          [(ngModel)]="numeroMesa"
-          placeholder="Ex: 12"
-          aria-describedby="mesa-ajuda"
-        />
+    @if (localSelecionado === 'mesa') {
+      <section class="mesa-form" aria-labelledby="mesa-titulo">
+        <label id="mesa-titulo" for="numero-mesa">Número da mesa</label>
+        <div class="mesa-action-row">
+          <input
+            id="numero-mesa"
+            type="text"
+            inputmode="numeric"
+            autocomplete="off"
+            maxlength="4"
+            [(ngModel)]="numeroMesa"
+            placeholder="Ex: 12"
+            aria-describedby="mesa-ajuda"
+          />
 
+          <button
+            type="button"
+            class="primary-button"
+            [disabled]="!podeAbrirComanda()"
+            (click)="abrirComanda()"
+          >
+            {{ salvando() ? 'Abrindo...' : 'Abrir comanda' }}
+          </button>
+        </div>
+        <span id="mesa-ajuda" class="sr-only">
+          Informe o número da mesa para abrir sua comanda.
+        </span>
+      </section>
+    }
+
+    @if (localSelecionado === 'balcao') {
+      <section class="balcao-action" aria-label="Abrir comanda no balcão">
         <button
           type="button"
           class="primary-button"
@@ -71,27 +91,11 @@
         >
           {{ salvando() ? 'Abrindo...' : 'Abrir comanda' }}
         </button>
-      </div>
-      <span id="mesa-ajuda" class="sr-only">
-        Informe o número da mesa para abrir sua comanda.
-      </span>
-    </section>
-  }
+      </section>
+    }
 
-  @if (localSelecionado === 'balcao') {
-    <section class="balcao-action" aria-label="Abrir comanda no balcão">
-      <button
-        type="button"
-        class="primary-button"
-        [disabled]="!podeAbrirComanda()"
-        (click)="abrirComanda()"
-      >
-        {{ salvando() ? 'Abrindo...' : 'Abrir comanda' }}
-      </button>
-    </section>
-  }
-
-  @if (mensagem()) {
-    <p class="mensagem-erro" role="alert">{{ mensagem() }}</p>
-  }
-</main>
+    @if (mensagem()) {
+      <p class="mensagem-erro" role="alert">{{ mensagem() }}</p>
+    }
+  </main>
+}
