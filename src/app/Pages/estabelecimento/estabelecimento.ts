@@ -1,4 +1,3 @@
-import { Location } from '@angular/common';
 import { Component, OnInit, inject, input, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { Estabelecimento } from '../../models';
@@ -13,7 +12,6 @@ import { EstabelecimentosService } from '../../services/estabelecimentos.service
 })
 export class EstabelecimentoPage implements OnInit {
   private readonly router = inject(Router);
-  private readonly location = inject(Location);
   private readonly estabelecimentosService = inject(EstabelecimentosService);
 
   id = input.required<string>();
@@ -28,7 +26,7 @@ export class EstabelecimentoPage implements OnInit {
   }
 
   protected voltar(): void {
-    this.location.back();
+    void this.router.navigate(['/cliente/discovery']);
   }
 
   protected abrirComanda(): void {

@@ -12,10 +12,15 @@ export interface TabelaEscutada {
   providedIn: 'root',
 })
 export class SupabaseService {
-  readonly client: SupabaseClient = createClient(
-    environment.supabaseUrl,
-    environment.supabaseKey
-  );
+  /**
+   * A sessão fica no sessionStorage: cada aba tem o seu login. Com o padrão
+   * (localStorage) todas as abas compartilham um login, e entrar como cliente
+   * numa aba fazia a tela do atendente, aberta em outra, agir como cliente.
+   * Custo: fechar a aba encerra a sessão.
+   */
+  readonly client: SupabaseClient = createClient(environment.supabaseUrl, environment.supabaseKey, {
+    auth: { storage: sessionStorage },
+  });
 
   /**
    * Chama `aoMudar` quando alguma linha visível dessas tabelas for criada ou

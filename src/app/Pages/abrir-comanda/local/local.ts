@@ -1,4 +1,3 @@
-import { Location } from '@angular/common';
 import { Component, OnInit, inject, input, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -16,7 +15,6 @@ import { EstabelecimentosService } from '../../../services/estabelecimentos.serv
 })
 export class AbrirComandaLocalComponent implements OnInit {
   private readonly router = inject(Router);
-  private readonly location = inject(Location);
   private readonly comandaService = inject(ComandaService);
   private readonly estabelecimentosService = inject(EstabelecimentosService);
 
@@ -77,6 +75,6 @@ export class AbrirComandaLocalComponent implements OnInit {
   }
 
   voltar(): void {
-    this.location.back();
+    void this.router.navigate(['/cliente/estabelecimento', this.id()]);
   }
 }

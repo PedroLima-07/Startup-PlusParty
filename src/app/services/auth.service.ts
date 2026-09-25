@@ -51,6 +51,11 @@ export class AuthService {
     return (data as Pick<Perfil, 'nome'>).nome;
   }
 
+  /** Tela onde cada tipo de usuário começa depois de entrar. */
+  telaInicial(tipo: TipoPerfil | null): string {
+    return tipo === 'funcionario' || tipo === 'gerente' ? '/atendente/pedidos' : '/cliente/home';
+  }
+
   /** Tipo do usuário logado, ou null se não houver sessão. */
   async buscarTipoAtual(): Promise<TipoPerfil | null> {
     const {

@@ -1,5 +1,6 @@
 import { Routes } from '@angular/router';
 import { authGuard } from './guards/auth.guard';
+import { semSessaoGuard } from './guards/sem-sessao.guard';
 import { staffGuard } from './guards/staff.guard';
 
 // Navegar pelos bares (discovery, perfil, cardápio em modo visualizar, home)
@@ -8,6 +9,7 @@ export const routes: Routes = [
   {
     path: 'login',
     loadComponent: () => import('./Pages/login/login').then((m) => m.LoginPage),
+    canActivate: [semSessaoGuard],
   },
   {
     path: 'cliente/discovery',

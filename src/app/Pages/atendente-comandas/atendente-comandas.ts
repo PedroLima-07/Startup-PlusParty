@@ -98,10 +98,19 @@ export class AtendenteComandas implements OnInit {
     try {
       await acao();
       this.comandas.update((lista) => lista.filter((c) => c.id !== comanda.id));
-    } catch {
-      this.erro.set('Não foi possível atualizar a comanda. Tente novamente.');
+    } catch (erro) {
+      this.erro.set(
+        recusadoPeloBanco(erro)
+          ? 'Sem permissão para esta ação. Saia e entre de novo com a conta de atendente.'
+          : 'Não foi possível atualizar a comanda. Tente novamente.',
+      );
     } finally {
       this.processando.set(null);
     }
   }
+}
+
+/** Erro levantado pelas regras do banco (supabase/protecoes.sql), não por rede. */
+function recusadoPeloBanco(erro: unknown): boolean {
+  return (erro as { code?: string } | null)?.code === 'P0001';
 }
