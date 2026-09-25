@@ -76,7 +76,20 @@ $cor-andamento-texto: #FFFFFF;
   overflow-y: auto;
 }
 
+.mensagem-erro {
+  margin: 12px 16px 0;
+  padding: 10px 14px;
+  border-radius: 10px;
+  background: #fef2f2;
+  color: #dc2626;
+}
+
 .card-pedido {
+  display: block;
+  width: 100%;
+  text-align: left;
+  font: inherit;
+  color: inherit;
   background: white;
   border: 1px solid $cor-borda;
   border-radius: 12px;

@@ -55,7 +55,10 @@ export class LoginPage {
       } else {
         await this.authService.cadastrar(nome, email, senha);
       }
-      await this.router.navigateByUrl('/cliente/home');
+
+      const tipo = await this.authService.buscarTipoAtual();
+      const staff = tipo === 'funcionario' || tipo === 'gerente';
+      await this.router.navigateByUrl(staff ? '/atendente/pedidos' : '/cliente/home');
     } catch (erro) {
       this.erro.set(this.traduzirErro(erro));
     } finally {

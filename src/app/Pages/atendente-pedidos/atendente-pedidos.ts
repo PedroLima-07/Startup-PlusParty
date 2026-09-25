@@ -1,126 +1,87 @@
-import { Component, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { DatePipe, NgClass } from '@angular/common';
+import { Component, OnInit, computed, inject, signal } from '@angular/core';
+import { PedidoSetor, SetorItem } from '../../models';
+import { PedidosAtendenteService } from '../../services/pedidos-atendente.service';
 
-export type StatusPedidoItem = 'novo' | 'em_andamento' | 'pronto';
-export type Setor = 'bar' | 'cozinha';
-
-export interface PedidoAgrupado {
-  id: string; // Chave virtual gerada (pedido_id + setor)
-  pedido_id: string;
-  mesa: string;
-  cliente: string;
-  criado_em: Date;
-  status: StatusPedidoItem;
-  setor: Setor;
-  itens_ids: string[]; // Guardado para o update em lote no Supabase futuramente
-  itens: { nome: string; quantidade: number }[];
-}
+type AcaoModal = 'comecar' | 'pronto';
 
 @Component({
   selector: 'app-atendente-pedidos',
-  standalone: true,
-  imports: [CommonModule],
+  imports: [DatePipe, NgClass],
   templateUrl: './atendente-pedidos.html',
-  styleUrls: ['./atendente-pedidos.scss']
+  styleUrls: ['./atendente-pedidos.scss'],
 })
-
 export class AtendentePedidos implements OnInit {
-  abaAtiva: Setor = 'bar';
-  pedidos: PedidoAgrupado[] = [];
+  private pedidosService = inject(PedidosAtendenteService);
 
-  // Controle de Pop-up (Modal)
-  pedidoSelecionado: PedidoAgrupado | null = null;
-  acaoModal: 'comecar' | 'pronto' | null = null;
+  protected readonly abaAtiva = signal<SetorItem>('bar');
+  protected readonly pedidos = signal<PedidoSetor[]>([]);
+  protected readonly carregando = signal(true);
+  protected readonly salvando = signal(false);
+  protected readonly erro = signal<string | null>(null);
 
-  ngOnInit() {
-    this.carregarPedidosMock();
+  protected readonly pedidoSelecionado = signal<PedidoSetor | null>(null);
+  protected readonly acaoModal = computed<AcaoModal | null>(() => {
+    const pedido = this.pedidoSelecionado();
+    if (!pedido) return null;
+    return pedido.status === 'novo' ? 'comecar' : 'pronto';
+  });
+
+  protected readonly pedidosFiltrados = computed(() =>
+    this.pedidos().filter((pedido) => pedido.setor === this.abaAtiva()),
+  );
+
+  async ngOnInit(): Promise<void> {
+    await this.atualizarLista();
   }
 
-  // Estratégia recomendada: Dados fixos simulando o retorno do Supabase
-  carregarPedidosMock() {
-    const rawDados = [
-      { id: 'i1', quantidade: 2, status: 'novo', pedido_id: 'p1', itens: { nome: 'Chope Pilsen', setor: 'bar' }, pedidos: { criado_em: '2026-09-22T22:00:00Z', comandas: { mesa: '12', perfis: { nome: 'Carlos' } } } },
-      { id: 'i2', quantidade: 1, status: 'novo', pedido_id: 'p1', itens: { nome: 'Batata Frita', setor: 'cozinha' }, pedidos: { criado_em: '2026-09-22T22:00:00Z', comandas: { mesa: '12', perfis: { nome: 'Carlos' } } } },
-      { id: 'i3', quantidade: 1, status: 'em_andamento', pedido_id: 'p2', itens: { nome: 'Caipirinha', setor: 'bar' }, pedidos: { criado_em: '2026-09-22T21:45:00Z', comandas: { mesa: null, perfis: { nome: 'Mariana' } } } },
-      { id: 'i4', quantidade: 3, status: 'novo', pedido_id: 'p3', itens: { nome: 'Hambúrguer Clássico', setor: 'cozinha' }, pedidos: { criado_em: '2026-09-22T22:05:00Z', comandas: { mesa: '04', perfis: { nome: 'Roberto' } } } }
-    ];
+  protected async atualizarLista(): Promise<void> {
+    this.carregando.set(true);
+    this.erro.set(null);
 
-    this.pedidos = this.agruparPedidos(rawDados as any);
-  }
-
-  atualizarLista() {
-    // Ação do botão de recarregar do cabeçalho
-    this.carregarPedidosMock();
-  }
-
-  // Agrupa por pedido_id e setor, e ordena por ordem de chegada
-  agruparPedidos(raw: any[]): PedidoAgrupado[] {
-    const mapa = new Map<string, PedidoAgrupado>();
-
-    raw.forEach(item => {
-      if (item.status === 'pronto') return; // Pedidos prontos saem da lista
-
-      const setor = item.itens.setor;
-      const pedido_id = item.pedido_id;
-      const chave = `${pedido_id}-${setor}`;
-
-      if (!mapa.has(chave)) {
-        mapa.set(chave, {
-          id: chave,
-          pedido_id: pedido_id,
-          mesa: item.pedidos.comandas.mesa || 'Balcão',
-          cliente: item.pedidos.comandas.perfis.nome,
-          criado_em: new Date(item.pedidos.criado_em),
-          status: item.status,
-          setor: setor,
-          itens_ids: [],
-          itens: []
-        });
-      }
-
-      const grupo = mapa.get(chave)!;
-      grupo.itens_ids.push(item.id);
-      grupo.itens.push({ nome: item.itens.nome, quantidade: item.quantidade });
-    });
-
-    // Ordem de chegada: o mais antigo no topo
-    return Array.from(mapa.values()).sort((a, b) => a.criado_em.getTime() - b.criado_em.getTime());
-  }
-
-  get pedidosFiltrados() {
-    return this.pedidos.filter(p => p.setor === this.abaAtiva);
-  }
-
-  // Lógica de abertura do pop-up
-  abrirAcao(pedido: PedidoAgrupado) {
-    if (pedido.status === 'novo') {
-      this.pedidoSelecionado = pedido;
-      this.acaoModal = 'comecar';
-    } else if (pedido.status === 'em_andamento') {
-      this.pedidoSelecionado = pedido;
-      this.acaoModal = 'pronto';
+    try {
+      this.pedidos.set(await this.pedidosService.listarPendentes());
+    } catch {
+      this.erro.set('Não foi possível carregar os pedidos. Toque em atualizar para tentar de novo.');
+    } finally {
+      this.carregando.set(false);
     }
   }
 
-  fecharModal() {
-    this.pedidoSelecionado = null;
-    this.acaoModal = null;
+  protected rotuloLocal(pedido: PedidoSetor): string {
+    return pedido.mesa ? `Mesa ${pedido.mesa}` : 'Balcão';
   }
 
-  confirmarAcao() {
-    if (!this.pedidoSelecionado) return;
+  protected abrirAcao(pedido: PedidoSetor): void {
+    this.pedidoSelecionado.set(pedido);
+  }
 
-    if (this.acaoModal === 'comecar') {
-      this.pedidoSelecionado.status = 'em_andamento';
-      // Futuro: this.pedidosService.atualizarStatus(this.pedidoSelecionado.itens_ids, 'em_andamento')
-    } else if (this.acaoModal === 'pronto') {
-      this.pedidoSelecionado.status = 'pronto';
-      // Futuro: this.pedidosService.atualizarStatus(this.pedidoSelecionado.itens_ids, 'pronto')
-      
-      // Sai da lista
-      this.pedidos = this.pedidos.filter(p => p.id !== this.pedidoSelecionado!.id);
+  protected fecharModal(): void {
+    if (this.salvando()) return;
+    this.pedidoSelecionado.set(null);
+  }
+
+  protected async confirmarAcao(): Promise<void> {
+    const pedido = this.pedidoSelecionado();
+    if (!pedido || this.salvando()) return;
+
+    const novoStatus = pedido.status === 'novo' ? 'em_andamento' : 'pronto';
+    this.salvando.set(true);
+    this.erro.set(null);
+
+    try {
+      await this.pedidosService.atualizarStatus(pedido.itens_ids, novoStatus);
+
+      this.pedidos.update((lista) =>
+        novoStatus === 'pronto'
+          ? lista.filter((p) => p.id !== pedido.id)
+          : lista.map((p) => (p.id === pedido.id ? { ...p, status: novoStatus } : p)),
+      );
+    } catch {
+      this.erro.set('Não foi possível atualizar o pedido. Tente novamente.');
+    } finally {
+      this.salvando.set(false);
+      this.pedidoSelecionado.set(null);
     }
-
-    this.fecharModal();
   }
 }

@@ -50,8 +50,4 @@ export class DiscoveryPage implements OnInit {
 
     return `${palavras[0].charAt(0)}${palavras[palavras.length - 1].charAt(0)}`.toUpperCase();
   }
-
-  protected trackById(_: number, estabelecimento: Estabelecimento): string {
-    return estabelecimento.id;
-  }
 }

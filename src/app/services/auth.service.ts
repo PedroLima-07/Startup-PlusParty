@@ -1,5 +1,5 @@
 import { Injectable, inject } from '@angular/core';
-import { Perfil } from '../models';
+import { Perfil, TipoPerfil } from '../models';
 import { SupabaseService } from './supabase.service';
 
 @Injectable({
@@ -45,5 +45,22 @@ export class AuthService {
 
     if (error) throw error;
     return (data as Pick<Perfil, 'nome'>).nome;
+  }
+
+  /** Tipo do usuário logado, ou null se não houver sessão. */
+  async buscarTipoAtual(): Promise<TipoPerfil | null> {
+    const {
+      data: { user },
+    } = await this.supabase.client.auth.getUser();
+    if (!user) return null;
+
+    const { data, error } = await this.supabase.client
+      .from('perfis')
+      .select('tipo')
+      .eq('id', user.id)
+      .single();
+
+    if (error) throw error;
+    return (data as Pick<Perfil, 'tipo'>).tipo;
   }
 }
