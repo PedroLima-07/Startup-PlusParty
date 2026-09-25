@@ -4,7 +4,7 @@ import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 
 import { Estabelecimento } from '../../../models';
-import { ComandaService } from '../../../services/comanda.service';
+import { ComandaEmOutroLugarError, ComandaService } from '../../../services/comanda.service';
 import { EstabelecimentosService } from '../../../services/estabelecimentos.service';
 
 @Component({
@@ -66,8 +66,12 @@ export class AbrirComandaLocalComponent implements OnInit {
       const mesa = this.localSelecionado === 'mesa' ? this.numeroMesa.trim() : null;
       const comanda = await this.comandaService.abrirComanda(this.id(), mesa);
       void this.router.navigate(['/cliente/comanda', comanda.id]);
-    } catch {
-      this.mensagem.set('Não foi possível abrir a comanda agora. Tente novamente.');
+    } catch (erro) {
+      this.mensagem.set(
+        erro instanceof ComandaEmOutroLugarError
+          ? `Você já tem uma comanda aberta no ${erro.nomeEstabelecimento}. Pague ela antes de abrir outra.`
+          : 'Não foi possível abrir a comanda agora. Tente novamente.',
+      );
       this.salvando.set(false);
     }
   }

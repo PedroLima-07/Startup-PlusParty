@@ -5,6 +5,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Router, provideRouter } from '@angular/router';
 import { ComandaPendente } from '../../models';
 import { AuthService } from '../../services/auth.service';
+import { SupabaseService } from '../../services/supabase.service';
 import { ComandasAtendenteService } from '../../services/comandas-atendente.service';
 import { AtendenteComandas } from './atendente-comandas';
 
@@ -41,7 +42,16 @@ describe('AtendenteComandas', () => {
     )!;
   }
 
+  let supabase: { escutarMudancas: ReturnType<typeof vi.fn> };
+  let avisarMudanca: () => void;
+
   beforeEach(async () => {
+    supabase = {
+      escutarMudancas: vi.fn((_tabelas: unknown, aoMudar: () => void) => {
+        avisarMudanca = aoMudar;
+        return () => {};
+      }),
+    };
     service = {
       listarPendentes: vi.fn().mockResolvedValue([
         comanda({ id: 'c1', mesa: '12', cliente: 'Carlos' }),
@@ -59,6 +69,7 @@ describe('AtendenteComandas', () => {
         { provide: LOCALE_ID, useValue: 'pt-BR' },
         { provide: ComandasAtendenteService, useValue: service },
         { provide: AuthService, useValue: authService },
+        { provide: SupabaseService, useValue: supabase },
       ],
     }).compileComponents();
 
@@ -126,5 +137,21 @@ describe('AtendenteComandas', () => {
 
     expect(authService.sair).toHaveBeenCalled();
     expect(router.navigateByUrl).toHaveBeenCalledWith('/login');
+  });
+
+  it('recarrega sozinha, sem piscar "Carregando", quando o banco avisa uma mudança', async () => {
+    service.listarPendentes.mockResolvedValueOnce([
+      comanda({ id: 'c3', mesa: '7', cliente: 'Josias' }),
+    ]);
+
+    avisarMudanca();
+    expect(tela().textContent).not.toContain('Carregando');
+    await fixture.whenStable();
+
+    expect(supabase.escutarMudancas).toHaveBeenCalledWith(
+      [{ tabela: 'comandas' }, { tabela: 'pedido_itens' }],
+      expect.any(Function),
+    );
+    expect(tela().textContent).toContain('Josias');
   });
 });

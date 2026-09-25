@@ -2,6 +2,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 import { PedidoSetor } from '../../models';
 import { AuthService } from '../../services/auth.service';
+import { SupabaseService } from '../../services/supabase.service';
 import { PedidosAtendenteService } from '../../services/pedidos-atendente.service';
 import { AtendentePedidos } from './atendente-pedidos';
 
@@ -44,7 +45,16 @@ describe('AtendentePedidos', () => {
     await fixture.whenStable();
   }
 
+  let supabase: { escutarMudancas: ReturnType<typeof vi.fn> };
+  let avisarMudanca: () => void;
+
   beforeEach(async () => {
+    supabase = {
+      escutarMudancas: vi.fn((_tabelas: unknown, aoMudar: () => void) => {
+        avisarMudanca = aoMudar;
+        return () => {};
+      }),
+    };
     service = {
       listarPendentes: vi.fn().mockResolvedValue([
         pedido({ id: 'p1', setor: 'bar', status: 'novo', mesa: '12' }),
@@ -60,6 +70,7 @@ describe('AtendentePedidos', () => {
         provideRouter([]),
         { provide: PedidosAtendenteService, useValue: service },
         { provide: AuthService, useValue: { sair: vi.fn() } },
+        { provide: SupabaseService, useValue: supabase },
       ],
     }).compileComponents();
 
@@ -120,5 +131,17 @@ describe('AtendentePedidos', () => {
     await fixture.whenStable();
 
     expect(textoDaTela()).toContain('Não foi possível carregar os pedidos');
+  });
+
+  it('mostra pedido novo sozinho quando o banco avisa uma mudança', async () => {
+    service.listarPendentes.mockResolvedValueOnce([
+      pedido({ id: 'p9', setor: 'bar', cliente: 'Josias' }),
+    ]);
+
+    avisarMudanca();
+    await fixture.whenStable();
+
+    expect(supabase.escutarMudancas).toHaveBeenCalledWith([{ tabela: 'pedido_itens' }], expect.any(Function));
+    expect(textoDaTela()).toContain('Josias');
   });
 });

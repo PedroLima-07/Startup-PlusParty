@@ -1,11 +1,9 @@
 import { Routes } from '@angular/router';
+import { authGuard } from './guards/auth.guard';
 import { staffGuard } from './guards/staff.guard';
 
-// TODO: reativar authGuard nas rotas /cliente/* assim que o login real
-// estiver liberado pra todo mundo (Supabase com "Confirm email" ligado
-// trava sessão pra quem não tem acesso ao painel). Guard removido a
-// pedido do Nathan pra destravar testes e demonstrações sem precisar
-// logar. Ver card "Usar Contextualização" no Trello.
+// Navegar pelos bares (discovery, perfil, cardápio em modo visualizar, home)
+// não exige login, para demonstrar sem conta. Abrir e usar uma comanda exige.
 export const routes: Routes = [
   {
     path: 'login',
@@ -33,15 +31,18 @@ export const routes: Routes = [
     path: 'cliente/abrir-comanda/:id',
     loadComponent: () =>
       import('./Pages/abrir-comanda/local/local').then((m) => m.AbrirComandaLocalComponent),
+    canActivate: [authGuard],
   },
   {
     path: 'cliente/comanda/:id',
     loadComponent: () => import('./Pages/comanda/comanda').then((m) => m.ComandaPage),
+    canActivate: [authGuard],
   },
   {
     path: 'cliente/cardapio/:id',
     loadComponent: () => import('./Pages/cardapio/cardapio').then((m) => m.CardapioPage),
     data: { modo: 'pedir' },
+    canActivate: [authGuard],
   },
   {
     path: 'atendente/pedidos',

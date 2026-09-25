@@ -1,8 +1,9 @@
 import { DatePipe, NgClass } from '@angular/common';
-import { Component, OnInit, computed, inject, signal } from '@angular/core';
+import { Component, DestroyRef, OnInit, computed, inject, signal } from '@angular/core';
 import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { PedidoSetor, SetorItem } from '../../models';
 import { AuthService } from '../../services/auth.service';
+import { SupabaseService } from '../../services/supabase.service';
 import { PedidosAtendenteService } from '../../services/pedidos-atendente.service';
 
 type AcaoModal = 'comecar' | 'pronto';
@@ -15,6 +16,8 @@ type AcaoModal = 'comecar' | 'pronto';
 })
 export class AtendentePedidos implements OnInit {
   private pedidosService = inject(PedidosAtendenteService);
+  private supabase = inject(SupabaseService);
+  private destroyRef = inject(DestroyRef);
   private authService = inject(AuthService);
   private router = inject(Router);
 
@@ -36,6 +39,13 @@ export class AtendentePedidos implements OnInit {
   );
 
   async ngOnInit(): Promise<void> {
+    // Pedido novo do cliente aparece sozinho, sem tocar em atualizar.
+    const pararDeEscutar = this.supabase.escutarMudancas(
+      [{ tabela: 'pedido_itens' }],
+      () => void this.atualizarLista(true),
+    );
+    this.destroyRef.onDestroy(pararDeEscutar);
+
     await this.atualizarLista();
   }
 
@@ -44,8 +54,9 @@ export class AtendentePedidos implements OnInit {
     await this.router.navigateByUrl('/login');
   }
 
-  protected async atualizarLista(): Promise<void> {
-    this.carregando.set(true);
+  /** `silencioso` recarrega sem trocar a lista por "Carregando...". */
+  protected async atualizarLista(silencioso = false): Promise<void> {
+    if (!silencioso) this.carregando.set(true);
     this.erro.set(null);
 
     try {
