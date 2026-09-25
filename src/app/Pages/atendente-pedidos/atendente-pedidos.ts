@@ -1,7 +1,8 @@
 import { DatePipe, NgClass } from '@angular/common';
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
-import { RouterLink, RouterLinkActive } from '@angular/router';
+import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { PedidoSetor, SetorItem } from '../../models';
+import { AuthService } from '../../services/auth.service';
 import { PedidosAtendenteService } from '../../services/pedidos-atendente.service';
 
 type AcaoModal = 'comecar' | 'pronto';
@@ -14,6 +15,8 @@ type AcaoModal = 'comecar' | 'pronto';
 })
 export class AtendentePedidos implements OnInit {
   private pedidosService = inject(PedidosAtendenteService);
+  private authService = inject(AuthService);
+  private router = inject(Router);
 
   protected readonly abaAtiva = signal<SetorItem>('bar');
   protected readonly pedidos = signal<PedidoSetor[]>([]);
@@ -34,6 +37,11 @@ export class AtendentePedidos implements OnInit {
 
   async ngOnInit(): Promise<void> {
     await this.atualizarLista();
+  }
+
+  protected async sair(): Promise<void> {
+    await this.authService.sair();
+    await this.router.navigateByUrl('/login');
   }
 
   protected async atualizarLista(): Promise<void> {

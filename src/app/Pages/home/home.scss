@@ -27,6 +27,11 @@
 }
 
 .cabecalho {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+
   h1 {
     margin: 0 0 4px;
     font-size: 1.3rem;
@@ -36,6 +41,20 @@
     margin: 0;
     color: var(--cinza-texto);
     font-size: 0.9rem;
+  }
+
+  .botao-conta {
+    flex-shrink: 0;
+    padding: 6px 14px;
+    border: 1px solid var(--cinza-borda);
+    border-radius: 999px;
+    background: #fff;
+    color: var(--azul-marinho);
+    font: inherit;
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-decoration: none;
+    cursor: pointer;
   }
 }
 
