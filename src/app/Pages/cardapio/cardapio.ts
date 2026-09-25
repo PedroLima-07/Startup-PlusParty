@@ -1,4 +1,4 @@
-import { CurrencyPipe, Location } from '@angular/common';
+import { CurrencyPipe } from '@angular/common';
 import { Component, OnInit, computed, inject, input, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Item, ItemCarrinho } from '../../models';
@@ -15,7 +15,6 @@ type ModoCardapio = 'pedir' | 'visualizar';
   styleUrl: './cardapio.scss',
 })
 export class CardapioPage implements OnInit {
-  private location = inject(Location);
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private comandaService = inject(ComandaService);
@@ -120,6 +119,7 @@ export class CardapioPage implements OnInit {
   }
 
   protected voltar(): void {
-    this.location.back();
+    const destino = this.modo === 'visualizar' ? '/cliente/estabelecimento' : '/cliente/comanda';
+    void this.router.navigate([destino, this.id()]);
   }
 }

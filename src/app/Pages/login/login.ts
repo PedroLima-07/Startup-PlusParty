@@ -1,6 +1,7 @@
 import { Component, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
+import { TipoPerfil } from '../../models';
 import { AuthService } from '../../services/auth.service';
 
 type Modo = 'login' | 'cadastro';
@@ -57,9 +58,9 @@ export class LoginPage {
         await this.authService.cadastrar(nome, email, senha);
       }
 
+      // replaceUrl tira o login do histórico: o "voltar" não cai de novo aqui.
       const tipo = await this.authService.buscarTipoAtual();
-      const staff = tipo === 'funcionario' || tipo === 'gerente';
-      await this.router.navigateByUrl(staff ? '/atendente/pedidos' : this.destinoCliente());
+      await this.router.navigateByUrl(this.destino(tipo), { replaceUrl: true });
     } catch (erro) {
       this.erro.set(this.traduzirErro(erro));
     } finally {
@@ -68,9 +69,10 @@ export class LoginPage {
   }
 
   /** Volta para a página que pediu login, se for uma página do cliente deste app. */
-  private destinoCliente(): string {
+  private destino(tipo: TipoPerfil | null): string {
     const voltar = this.route.snapshot.queryParamMap.get('voltar');
-    return voltar?.startsWith('/cliente/') ? voltar : '/cliente/home';
+    if (tipo === 'cliente' && voltar?.startsWith('/cliente/')) return voltar;
+    return this.authService.telaInicial(tipo);
   }
 
   private traduzirErro(erro: unknown): string {

@@ -154,4 +154,14 @@ describe('AtendenteComandas', () => {
     );
     expect(tela().textContent).toContain('Josias');
   });
+
+  it('explica quando o banco recusa por falta de permissão', async () => {
+    service.liberar.mockRejectedValueOnce({ code: 'P0001', message: 'Mudança de status não permitida' });
+
+    botao('Liberar entrada').click();
+    await fixture.whenStable();
+
+    expect(tela().textContent).toContain('Sem permissão para esta ação');
+    expect(tela().textContent).toContain('Carlos');
+  });
 });

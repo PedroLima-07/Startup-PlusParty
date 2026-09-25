@@ -117,4 +117,9 @@ describe('AbrirComandaLocalComponent', () => {
       'Você já tem uma comanda aberta no Neon Club. Pague ela antes de abrir outra.',
     );
   });
+
+  it('a seta de voltar leva ao perfil do estabelecimento', () => {
+    component.voltar();
+    expect(router.navigate).toHaveBeenCalledWith(['/cliente/estabelecimento', 'bar-1']);
+  });
 });

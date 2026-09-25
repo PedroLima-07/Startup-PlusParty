@@ -12,13 +12,13 @@
         <p class="rotulo">Total da comanda</p>
         <p class="valor">{{ total() | currency: 'BRL' }}</p>
         <p class="instrucao">Passe no caixa para concluir o pagamento</p>
-        <button class="botao-primario" type="button" routerLink="/">Voltar ao início</button>
+        <button class="botao-primario" type="button" routerLink="/cliente/home">Voltar ao início</button>
       </div>
     </div>
   } @else if (aguardandoLiberacao()) {
     <div class="tela tela-fechamento">
       <header class="cabecalho">
-        <button class="voltar" type="button" routerLink="/" aria-label="Voltar">←</button>
+        <button class="voltar" type="button" routerLink="/cliente/home" aria-label="Voltar">←</button>
         <h1>Sua comanda</h1>
       </header>
 
@@ -36,7 +36,7 @@
   } @else {
     <div class="tela">
       <header class="cabecalho">
-        <button class="voltar" type="button" routerLink="/" aria-label="Voltar">←</button>
+        <button class="voltar" type="button" routerLink="/cliente/home" aria-label="Voltar">←</button>
         <h1>Sua comanda</h1>
       </header>
 
