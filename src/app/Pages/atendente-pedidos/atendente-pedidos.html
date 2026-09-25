@@ -2,61 +2,77 @@
   <div class="brand">
     <h1>+party</h1>
   </div>
-  <button class="btn-refresh" (click)="atualizarLista()" aria-label="Atualizar pedidos">
-    <!-- Ícone de recarregar simples em SVG -->
+  <button
+    class="btn-refresh"
+    type="button"
+    (click)="atualizarLista()"
+    [disabled]="carregando()"
+    aria-label="Atualizar pedidos"
+  >
     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 2v6h-6"></path><path d="M3 12a9 9 0 1 0 2.1-5.7L2 9"></path></svg>
   </button>
 </header>
 
 <div class="tabs">
-  <button class="tab-btn" [class.active]="abaAtiva === 'bar'" (click)="abaAtiva = 'bar'">Bar</button>
-  <button class="tab-btn" [class.active]="abaAtiva === 'cozinha'" (click)="abaAtiva = 'cozinha'">Cozinha</button>
+  <button class="tab-btn" type="button" [class.active]="abaAtiva() === 'bar'" (click)="abaAtiva.set('bar')">Bar</button>
+  <button class="tab-btn" type="button" [class.active]="abaAtiva() === 'cozinha'" (click)="abaAtiva.set('cozinha')">Cozinha</button>
 </div>
 
+@if (erro(); as mensagem) {
+  <p class="mensagem-erro" role="alert">{{ mensagem }}</p>
+}
+
 <main class="pedidos-lista">
-  @for (pedido of pedidosFiltrados; track pedido.id) {
-    <!-- O card inteiro é clicável -->
-    <div class="card-pedido" (click)="abrirAcao(pedido)">
-      <div class="card-header">
-        <span class="mesa">{{ pedido.mesa === 'Balcão' ? 'Balcão' : 'Mesa ' + pedido.mesa }}</span>
-        <span class="tempo">{{ pedido.criado_em | date:'HH:mm' }}</span>
-      </div>
-
-      <div class="cliente">{{ pedido.cliente }}</div>
-
-      <ul class="itens-lista">
-        @for (item of pedido.itens; track item.nome) {
-          <li><strong>{{ item.quantidade }}x</strong> {{ item.nome }}</li>
-        }
-      </ul>
-
-      <div class="card-footer">
-        <span class="badge" [ngClass]="pedido.status">
-          @if (pedido.status === 'novo') { Novo }
-          @else if (pedido.status === 'em_andamento') { Em andamento }
-        </span>
-      </div>
-    </div>
-  } @empty {
+  @if (carregando()) {
     <div class="empty-state">
-      <p>Nenhum pedido pendente no momento.</p>
+      <p>Carregando pedidos...</p>
     </div>
+  } @else {
+    @for (pedido of pedidosFiltrados(); track pedido.id) {
+      <button type="button" class="card-pedido" (click)="abrirAcao(pedido)">
+        <div class="card-header">
+          <span class="mesa">{{ rotuloLocal(pedido) }}</span>
+          <span class="tempo">{{ pedido.criado_em | date: 'HH:mm' }}</span>
+        </div>
+
+        <div class="cliente">{{ pedido.cliente }}</div>
+
+        <ul class="itens-lista">
+          @for (item of pedido.itens; track $index) {
+            <li><strong>{{ item.quantidade }}x</strong> {{ item.nome }}</li>
+          }
+        </ul>
+
+        <div class="card-footer">
+          <span class="badge" [ngClass]="pedido.status">
+            {{ pedido.status === 'novo' ? 'Novo' : 'Em andamento' }}
+          </span>
+        </div>
+      </button>
+    } @empty {
+      <div class="empty-state">
+        <p>Nenhum pedido pendente no momento.</p>
+      </div>
+    }
   }
 </main>
 
-<!-- Pop-up Dinâmico -->
-@if (pedidoSelecionado) {
+@if (pedidoSelecionado(); as pedido) {
   <div class="modal-overlay" (click)="fecharModal()">
     <div class="modal-content" (click)="$event.stopPropagation()">
-      <h3>{{ acaoModal === 'comecar' ? 'Começar a preparar este pedido?' : 'Marcar como pronto?' }}</h3>
-      <p class="modal-mesa">
-        {{ pedidoSelecionado.mesa === 'Balcão' ? 'Balcão' : 'Mesa ' + pedidoSelecionado.mesa }} - {{ pedidoSelecionado.cliente }}
-      </p>
+      <h3>{{ acaoModal() === 'comecar' ? 'Começar a preparar este pedido?' : 'Marcar como pronto?' }}</h3>
+      <p class="modal-mesa">{{ rotuloLocal(pedido) }} - {{ pedido.cliente }}</p>
 
       <div class="modal-actions">
-        <button class="btn-cancelar" (click)="fecharModal()">Cancelar</button>
-        <button class="btn-confirmar" (click)="confirmarAcao()">
-          {{ acaoModal === 'comecar' ? 'Começar' : 'Pronto' }}
+        <button class="btn-cancelar" type="button" (click)="fecharModal()" [disabled]="salvando()">
+          Cancelar
+        </button>
+        <button class="btn-confirmar" type="button" (click)="confirmarAcao()" [disabled]="salvando()">
+          @if (salvando()) {
+            Salvando...
+          } @else {
+            {{ acaoModal() === 'comecar' ? 'Começar' : 'Pronto' }}
+          }
         </button>
       </div>
     </div>

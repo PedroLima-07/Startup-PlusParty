@@ -88,6 +88,22 @@ export interface ItemCarrinho {
 /** itens do cardápio agrupados por categoria (Cervejas, Drinks, Pra petiscar...). */
 export type CardapioAgrupado = Record<string, Item[]>;
 
+/**
+ * O que o bar/cozinha vê: os itens de um mesmo pedido, só do seu setor.
+ * Um pedido com chope e batata vira dois cards, um em cada aba.
+ */
+export interface PedidoSetor {
+  id: string;
+  pedido_id: string;
+  setor: SetorItem;
+  status: StatusPedidoItem;
+  mesa: string | null;
+  cliente: string;
+  criado_em: string;
+  itens_ids: string[];
+  itens: { nome: string; quantidade: number }[];
+}
+
 export interface Alerta {
   id: string;
   comanda_id: string;

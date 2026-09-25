@@ -269,3 +269,22 @@ create policy "postagens: gerente publica"
   on postagens for all
   using (public.meu_tipo() = 'gerente' and estabelecimento_id = public.meu_estabelecimento_id())
   with check (public.meu_tipo() = 'gerente' and estabelecimento_id = public.meu_estabelecimento_id());
+
+-- ---------------------------------------------------------------------
+-- 11. perfis — staff vê o perfil de quem tem comanda no seu local
+-- ---------------------------------------------------------------------
+-- A tela do bar/cozinha mostra o nome do cliente em cada pedido (essencial
+-- no balcão, onde não há mesa). Sem esta política o atendente só lê o
+-- próprio perfil e o nome chega vazio.
+drop policy if exists "perfis: staff vê clientes do seu local" on perfis;
+
+create policy "perfis: staff vê clientes do seu local"
+  on perfis for select
+  using (
+    public.sou_staff()
+    and exists (
+      select 1 from comandas c
+      where c.usuario_id = perfis.id
+        and c.estabelecimento_id = public.meu_estabelecimento_id()
+    )
+  );

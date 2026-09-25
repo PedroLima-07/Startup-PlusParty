@@ -1,4 +1,5 @@
 import { Routes } from '@angular/router';
+import { staffGuard } from './guards/staff.guard';
 
 // TODO: reativar authGuard nas rotas /cliente/* assim que o login real
 // estiver liberado pra todo mundo (Supabase com "Confirm email" ligado
@@ -41,6 +42,12 @@ export const routes: Routes = [
     path: 'cliente/cardapio/:id',
     loadComponent: () => import('./Pages/cardapio/cardapio').then((m) => m.CardapioPage),
     data: { modo: 'pedir' },
+  },
+  {
+    path: 'atendente/pedidos',
+    loadComponent: () =>
+      import('./Pages/atendente-pedidos/atendente-pedidos').then((m) => m.AtendentePedidos),
+    canActivate: [staffGuard],
   },
   {
     path: 'cliente',
