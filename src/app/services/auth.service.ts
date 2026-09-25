@@ -19,15 +19,14 @@ export class AuthService {
 
   /**
    * O perfil é criado pelo trigger `ao_criar_usuario` (supabase/trigger_criar_perfil.sql),
-   * que lê `nome`/`tipo` de raw_user_meta_data — por isso vão em `options.data` aqui.
-   * Não inserir manualmente em `perfis`: o trigger já roda como SECURITY DEFINER,
-   * e um insert duplicado colidiria com a chave primária (id).
+   * que lê o `nome` de `options.data` e sempre cria como cliente.
+   * Não inserir manualmente em `perfis`: um insert duplicado colidiria com a chave primária.
    */
   async cadastrar(nome: string, email: string, senha: string): Promise<void> {
     const { error } = await this.supabase.client.auth.signUp({
       email,
       password: senha,
-      options: { data: { nome, tipo: 'cliente' } },
+      options: { data: { nome } },
     });
 
     if (error) throw error;

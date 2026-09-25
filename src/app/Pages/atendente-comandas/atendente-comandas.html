@@ -1,0 +1,96 @@
+<header class="header">
+  <div class="brand">
+    <h1>+party</h1>
+  </div>
+  <button
+    class="btn-refresh"
+    type="button"
+    (click)="atualizarLista()"
+    [disabled]="carregando()"
+    aria-label="Atualizar comandas"
+  >
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 2v6h-6"></path><path d="M3 12a9 9 0 1 0 2.1-5.7L2 9"></path></svg>
+  </button>
+</header>
+
+<nav class="nav-staff" aria-label="Telas do atendente">
+  <a routerLink="/atendente/pedidos" routerLinkActive="ativo">Pedidos</a>
+  <a routerLink="/atendente/comandas" routerLinkActive="ativo">Comandas</a>
+</nav>
+
+@if (erro(); as mensagem) {
+  <p class="mensagem-erro" role="alert">{{ mensagem }}</p>
+}
+
+<main class="conteudo">
+  @if (carregando()) {
+    <p class="vazio">Carregando comandas...</p>
+  } @else {
+    <section aria-labelledby="titulo-liberacao">
+      <h2 id="titulo-liberacao">Aguardando liberação <span class="contador">{{ aguardandoLiberacao().length }}</span></h2>
+
+      @for (comanda of aguardandoLiberacao(); track comanda.id) {
+        <article class="card">
+          <div class="card-topo">
+            <span class="local">{{ rotuloLocal(comanda) }}</span>
+            <span class="hora">{{ comanda.criada_em | date: 'HH:mm' }}</span>
+          </div>
+          <p class="cliente">{{ comanda.cliente }}</p>
+          <button
+            class="btn-acao"
+            type="button"
+            (click)="liberar(comanda)"
+            [disabled]="processando() !== null"
+          >
+            {{ processando() === comanda.id ? 'Liberando...' : 'Liberar entrada' }}
+          </button>
+        </article>
+      } @empty {
+        <p class="vazio">Ninguém esperando liberação.</p>
+      }
+    </section>
+
+    <section aria-labelledby="titulo-pagamento">
+      <h2 id="titulo-pagamento">Aguardando pagamento <span class="contador">{{ aguardandoPagamento().length }}</span></h2>
+
+      @for (comanda of aguardandoPagamento(); track comanda.id) {
+        <article class="card">
+          <div class="card-topo">
+            <span class="local">{{ rotuloLocal(comanda) }}</span>
+            <span class="total">{{ comanda.total | currency: 'BRL' }}</span>
+          </div>
+          <p class="cliente">{{ comanda.cliente }}</p>
+          <button
+            class="btn-acao btn-pagamento"
+            type="button"
+            (click)="pedirConfirmacaoPagamento(comanda)"
+            [disabled]="processando() !== null"
+          >
+            Confirmar pagamento
+          </button>
+        </article>
+      } @empty {
+        <p class="vazio">Nenhuma conta esperando pagamento.</p>
+      }
+    </section>
+  }
+</main>
+
+@if (pagamentoEmConfirmacao(); as comanda) {
+  <div class="modal-overlay" (click)="cancelarPagamento()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <h3>Confirmar pagamento de {{ comanda.total | currency: 'BRL' }}?</h3>
+      <p class="modal-detalhe">{{ rotuloLocal(comanda) }} - {{ comanda.cliente }}</p>
+      <p class="modal-aviso">A comanda será encerrada e não poderá ser reaberta.</p>
+
+      <div class="modal-actions">
+        <button class="btn-cancelar" type="button" (click)="cancelarPagamento()" [disabled]="processando() !== null">
+          Cancelar
+        </button>
+        <button class="btn-confirmar" type="button" (click)="confirmarPagamento()" [disabled]="processando() !== null">
+          {{ processando() ? 'Confirmando...' : 'Confirmar' }}
+        </button>
+      </div>
+    </div>
+  </div>
+}

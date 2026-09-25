@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideRouter } from '@angular/router';
 import { PedidoSetor } from '../../models';
 import { PedidosAtendenteService } from '../../services/pedidos-atendente.service';
 import { AtendentePedidos } from './atendente-pedidos';
@@ -54,7 +55,7 @@ describe('AtendentePedidos', () => {
 
     await TestBed.configureTestingModule({
       imports: [AtendentePedidos],
-      providers: [{ provide: PedidosAtendenteService, useValue: service }],
+      providers: [provideRouter([]), { provide: PedidosAtendenteService, useValue: service }],
     }).compileComponents();
 
     fixture = TestBed.createComponent(AtendentePedidos);

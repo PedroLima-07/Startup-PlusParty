@@ -1,5 +1,6 @@
 import { DatePipe, NgClass } from '@angular/common';
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
+import { RouterLink, RouterLinkActive } from '@angular/router';
 import { PedidoSetor, SetorItem } from '../../models';
 import { PedidosAtendenteService } from '../../services/pedidos-atendente.service';
 
@@ -7,7 +8,7 @@ type AcaoModal = 'comecar' | 'pronto';
 
 @Component({
   selector: 'app-atendente-pedidos',
-  imports: [DatePipe, NgClass],
+  imports: [DatePipe, NgClass, RouterLink, RouterLinkActive],
   templateUrl: './atendente-pedidos.html',
   styleUrls: ['./atendente-pedidos.scss'],
 })
