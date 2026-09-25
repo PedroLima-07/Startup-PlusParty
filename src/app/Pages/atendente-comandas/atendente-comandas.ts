@@ -1,7 +1,8 @@
 import { CurrencyPipe, DatePipe } from '@angular/common';
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
-import { RouterLink, RouterLinkActive } from '@angular/router';
+import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { ComandaPendente } from '../../models';
+import { AuthService } from '../../services/auth.service';
 import { ComandasAtendenteService } from '../../services/comandas-atendente.service';
 
 @Component({
@@ -12,6 +13,8 @@ import { ComandasAtendenteService } from '../../services/comandas-atendente.serv
 })
 export class AtendenteComandas implements OnInit {
   private comandasService = inject(ComandasAtendenteService);
+  private authService = inject(AuthService);
+  private router = inject(Router);
 
   protected readonly comandas = signal<ComandaPendente[]>([]);
   protected readonly carregando = signal(true);
@@ -29,6 +32,11 @@ export class AtendenteComandas implements OnInit {
 
   async ngOnInit(): Promise<void> {
     await this.atualizarLista();
+  }
+
+  protected async sair(): Promise<void> {
+    await this.authService.sair();
+    await this.router.navigateByUrl('/login');
   }
 
   protected async atualizarLista(): Promise<void> {

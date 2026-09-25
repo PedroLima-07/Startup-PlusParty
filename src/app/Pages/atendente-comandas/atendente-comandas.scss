@@ -24,6 +24,24 @@ $cor-borda: #E0E0E0;
     font-size: 1.5rem;
   }
 
+  .acoes-header {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .btn-sair {
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    border-radius: 999px;
+    color: white;
+    font: inherit;
+    font-size: 0.9rem;
+    font-weight: 600;
+    padding: 6px 14px;
+    cursor: pointer;
+  }
+
   .btn-refresh {
     background: transparent;
     border: none;

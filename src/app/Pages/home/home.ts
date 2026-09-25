@@ -1,5 +1,5 @@
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { Comanda, Estabelecimento } from '../../models';
 import { AuthService } from '../../services/auth.service';
 import { HomeService } from '../../services/home.service';
@@ -19,8 +19,10 @@ export class HomePage implements OnInit {
   private supabase = inject(SupabaseService);
   private authService = inject(AuthService);
   private homeService = inject(HomeService);
+  private router = inject(Router);
 
   protected readonly carregando = signal(true);
+  protected readonly logado = signal(false);
   protected readonly nome = signal('');
   protected readonly comandaAtiva = signal<Comanda | null>(null);
   protected readonly estabelecimentos = signal<EstabelecimentoComLotacao[]>([]);
@@ -68,10 +70,16 @@ export class HomePage implements OnInit {
       this.carregarEstabelecimentosComLotacao(),
     ]);
 
+    this.logado.set(user !== null);
     this.nome.set(nome);
     this.comandaAtiva.set(comandaAtiva);
     this.estabelecimentos.set(estabelecimentos);
     this.carregando.set(false);
+  }
+
+  protected async sair(): Promise<void> {
+    await this.authService.sair();
+    await this.router.navigateByUrl('/login');
   }
 
   protected inicial(nome: string): string {

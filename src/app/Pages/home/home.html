@@ -3,8 +3,15 @@
 } @else {
   <div class="tela">
     <header class="cabecalho">
-      <h1>Pronto para o rolê, {{ nome() }}? 🎉</h1>
-      <p class="subtitulo">O rolê de hoje começa agora.</p>
+      <div class="saudacao">
+        <h1>Pronto para o rolê, {{ nome() }}? 🎉</h1>
+        <p class="subtitulo">O rolê de hoje começa agora.</p>
+      </div>
+      @if (logado()) {
+        <button class="botao-conta" type="button" (click)="sair()">Sair</button>
+      } @else {
+        <a class="botao-conta" routerLink="/login">Entrar</a>
+      }
     </header>
 
     <a class="card-comanda" [routerLink]="linkComanda()">

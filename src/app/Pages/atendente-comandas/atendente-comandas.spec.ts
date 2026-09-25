@@ -2,8 +2,9 @@ import { registerLocaleData } from '@angular/common';
 import localePt from '@angular/common/locales/pt';
 import { LOCALE_ID } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { provideRouter } from '@angular/router';
+import { Router, provideRouter } from '@angular/router';
 import { ComandaPendente } from '../../models';
+import { AuthService } from '../../services/auth.service';
 import { ComandasAtendenteService } from '../../services/comandas-atendente.service';
 import { AtendenteComandas } from './atendente-comandas';
 
@@ -27,6 +28,7 @@ describe('AtendenteComandas', () => {
     liberar: ReturnType<typeof vi.fn>;
     confirmarPagamento: ReturnType<typeof vi.fn>;
   };
+  let authService: { sair: ReturnType<typeof vi.fn> };
 
   function tela(): HTMLElement {
     fixture.detectChanges();
@@ -48,6 +50,7 @@ describe('AtendenteComandas', () => {
       liberar: vi.fn().mockResolvedValue(undefined),
       confirmarPagamento: vi.fn().mockResolvedValue(undefined),
     };
+    authService = { sair: vi.fn().mockResolvedValue(undefined) };
 
     await TestBed.configureTestingModule({
       imports: [AtendenteComandas],
@@ -55,6 +58,7 @@ describe('AtendenteComandas', () => {
         provideRouter([]),
         { provide: LOCALE_ID, useValue: 'pt-BR' },
         { provide: ComandasAtendenteService, useValue: service },
+        { provide: AuthService, useValue: authService },
       ],
     }).compileComponents();
 
@@ -111,5 +115,16 @@ describe('AtendenteComandas', () => {
 
     expect(tela().textContent).toContain('Carlos');
     expect(tela().textContent).toContain('Não foi possível atualizar a comanda');
+  });
+
+  it('sai da conta e volta para o login', async () => {
+    const router = TestBed.inject(Router);
+    vi.spyOn(router, 'navigateByUrl').mockResolvedValue(true);
+
+    botao('Sair').click();
+    await fixture.whenStable();
+
+    expect(authService.sair).toHaveBeenCalled();
+    expect(router.navigateByUrl).toHaveBeenCalledWith('/login');
   });
 });

@@ -32,6 +32,11 @@ export class AuthService {
     if (error) throw error;
   }
 
+  async sair(): Promise<void> {
+    const { error } = await this.supabase.client.auth.signOut();
+    if (error) throw error;
+  }
+
   async buscarNomeAtual(): Promise<string> {
     const { data: sessionData, error: erroSessao } = await this.supabase.client.auth.getUser();
     if (erroSessao) throw erroSessao;
