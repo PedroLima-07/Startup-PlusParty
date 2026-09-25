@@ -27,8 +27,11 @@ begin
     new.id,
     coalesce(new.raw_user_meta_data ->> 'nome', ''),
     new.email,
-    coalesce(new.raw_user_meta_data ->> 'tipo', 'cliente'),
-    nullif(new.raw_user_meta_data ->> 'estabelecimento_id', '')::uuid
+    -- Nunca ler tipo/estabelecimento do signUp(): o próprio usuário controla
+    -- esses metadados e poderia se cadastrar como gerente. Funcionários são
+    -- promovidos pela equipe no painel (ver seed_novo_bar.sql).
+    'cliente',
+    null
   );
   return new;
 end;
@@ -46,7 +49,7 @@ create trigger ao_criar_usuario
 -- await supabase.auth.signUp({
 --   email,
 --   password,
---   options: { data: { nome, tipo: 'cliente' } },
+--   options: { data: { nome } },
 -- });
 --
 -- Não é mais necessário inserir em "perfis" manualmente depois do

@@ -1,0 +1,221 @@
+$cor-primaria: #0F1F4B;
+$cor-secundaria: #2F6BFF;
+$cor-fundo: #F8F9FA;
+$cor-borda: #E0E0E0;
+
+:host {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background-color: $cor-fundo;
+  font-family: sans-serif;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: $cor-primaria;
+  color: white;
+  padding: 16px 20px;
+
+  .brand h1 {
+    margin: 0;
+    font-size: 1.5rem;
+  }
+
+  .btn-refresh {
+    background: transparent;
+    border: none;
+    color: white;
+    cursor: pointer;
+    min-width: 44px;
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+}
+
+.nav-staff {
+  display: flex;
+  background: $cor-primaria;
+
+  a {
+    flex: 1;
+    padding: 10px;
+    text-align: center;
+    text-decoration: none;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.6);
+    border-bottom: 3px solid transparent;
+
+    &.ativo {
+      color: white;
+      border-bottom-color: white;
+    }
+  }
+}
+
+.mensagem-erro {
+  margin: 12px 16px 0;
+  padding: 10px 14px;
+  border-radius: 10px;
+  background: #fef2f2;
+  color: #dc2626;
+}
+
+.conteudo {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+
+  section {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  h2 {
+    margin: 0;
+    font-size: 1.1rem;
+    color: $cor-primaria;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .contador {
+    background: $cor-primaria;
+    color: white;
+    border-radius: 999px;
+    padding: 2px 10px;
+    font-size: 0.85rem;
+  }
+}
+
+.card {
+  background: white;
+  border: 1px solid $cor-borda;
+  border-radius: 12px;
+  padding: 16px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.03);
+
+  .card-topo {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 4px;
+  }
+
+  .local {
+    font-size: 1.4rem;
+    font-weight: 900;
+    color: $cor-primaria;
+  }
+
+  .hora {
+    color: #666;
+  }
+
+  .total {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: $cor-primaria;
+  }
+
+  .cliente {
+    margin: 0 0 12px;
+    font-size: 1.05rem;
+    color: #444;
+  }
+}
+
+.btn-acao {
+  width: 100%;
+  min-height: 52px;
+  border: none;
+  border-radius: 12px;
+  background: $cor-secundaria;
+  color: white;
+  font-size: 1.05rem;
+  font-weight: bold;
+  cursor: pointer;
+  touch-action: manipulation;
+
+  &.btn-pagamento {
+    background: $cor-primaria;
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+}
+
+.vazio {
+  margin: 0;
+  padding: 16px;
+  text-align: center;
+  color: #666;
+}
+
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: flex-end;
+  z-index: 1000;
+
+  .modal-content {
+    background: white;
+    width: 100%;
+    padding: 24px 20px 32px;
+    border-radius: 24px 24px 0 0;
+
+    h3 {
+      margin: 0 0 8px;
+      color: $cor-primaria;
+      font-size: 1.3rem;
+    }
+
+    .modal-detalhe {
+      margin: 0 0 8px;
+      color: #666;
+      font-size: 1.1rem;
+    }
+
+    .modal-aviso {
+      margin: 0 0 24px;
+      color: #666;
+      font-size: 0.9rem;
+    }
+
+    .modal-actions {
+      display: flex;
+      gap: 12px;
+
+      button {
+        flex: 1;
+        min-height: 60px;
+        border: none;
+        border-radius: 12px;
+        font-size: 1.1rem;
+        font-weight: bold;
+        cursor: pointer;
+      }
+
+      .btn-cancelar {
+        background: #E0E0E0;
+        color: #333;
+      }
+
+      .btn-confirmar {
+        background: $cor-secundaria;
+        color: white;
+      }
+    }
+  }
+}

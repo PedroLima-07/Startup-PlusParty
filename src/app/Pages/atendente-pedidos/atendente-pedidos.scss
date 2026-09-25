@@ -43,6 +43,26 @@ $cor-andamento-texto: #FFFFFF;
   }
 }
 
+.nav-staff {
+  display: flex;
+  background: $cor-primaria;
+
+  a {
+    flex: 1;
+    padding: 10px;
+    text-align: center;
+    text-decoration: none;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.6);
+    border-bottom: 3px solid transparent;
+
+    &.ativo {
+      color: white;
+      border-bottom-color: white;
+    }
+  }
+}
+
 .tabs {
   display: flex;
   background: white;

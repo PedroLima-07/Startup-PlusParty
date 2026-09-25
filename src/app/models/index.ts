@@ -104,6 +104,16 @@ export interface PedidoSetor {
   itens: { nome: string; quantidade: number }[];
 }
 
+/** Comanda que precisa de ação do atendente: liberar a entrada ou confirmar o pagamento. */
+export interface ComandaPendente {
+  id: string;
+  status: Extract<StatusComanda, 'aguardando_liberacao' | 'aguardando_pagamento'>;
+  mesa: string | null;
+  cliente: string;
+  criada_em: string;
+  total: number;
+}
+
 export interface Alerta {
   id: string;
   comanda_id: string;

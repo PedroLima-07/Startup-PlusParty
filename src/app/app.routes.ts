@@ -50,6 +50,12 @@ export const routes: Routes = [
     canActivate: [staffGuard],
   },
   {
+    path: 'atendente/comandas',
+    loadComponent: () =>
+      import('./Pages/atendente-comandas/atendente-comandas').then((m) => m.AtendenteComandas),
+    canActivate: [staffGuard],
+  },
+  {
     path: 'cliente',
     redirectTo: 'cliente/discovery',
     pathMatch: 'full',
