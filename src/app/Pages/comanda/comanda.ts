@@ -1,8 +1,9 @@
 import { CurrencyPipe } from '@angular/common';
-import { Component, OnInit, computed, inject, input, signal } from '@angular/core';
+import { Component, DestroyRef, OnInit, computed, inject, input, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { ComandaDetalhada, PedidoItemDetalhado, StatusPedidoItem } from '../../models';
 import { ComandaService } from '../../services/comanda.service';
+import { SupabaseService } from '../../services/supabase.service';
 
 const ROTULOS_STATUS_ITEM: Record<StatusPedidoItem, string> = {
   novo: 'Enviado',
@@ -18,6 +19,8 @@ const ROTULOS_STATUS_ITEM: Record<StatusPedidoItem, string> = {
 })
 export class ComandaPage implements OnInit {
   private comandaService = inject(ComandaService);
+  private supabase = inject(SupabaseService);
+  private destroyRef = inject(DestroyRef);
 
   id = input.required<string>();
 
@@ -38,6 +41,13 @@ export class ComandaPage implements OnInit {
   );
 
   async ngOnInit(): Promise<void> {
+    // Atualiza sozinha quando o atendente libera, avança um item ou confirma o pagamento.
+    const pararDeEscutar = this.supabase.escutarMudancas(
+      [{ tabela: 'comandas', filtro: `id=eq.${this.id()}` }, { tabela: 'pedido_itens' }],
+      () => void this.carregarDados(true),
+    );
+    this.destroyRef.onDestroy(pararDeEscutar);
+
     await this.carregarDados();
   }
 
@@ -71,8 +81,9 @@ export class ComandaPage implements OnInit {
     await this.carregarDados();
   }
 
-  private async carregarDados(): Promise<void> {
-    this.carregando.set(true);
+  /** `silencioso` recarrega sem trocar a tela por "Carregando...". */
+  private async carregarDados(silencioso = false): Promise<void> {
+    if (!silencioso) this.carregando.set(true);
     const [comanda, itens] = await Promise.all([
       this.comandaService.buscarComanda(this.id()),
       this.comandaService.buscarItensPedidos(this.id()),

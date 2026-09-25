@@ -1,7 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Router, provideRouter } from '@angular/router';
 import { Estabelecimento } from '../../../models';
-import { ComandaService } from '../../../services/comanda.service';
+import { ComandaEmOutroLugarError, ComandaService } from '../../../services/comanda.service';
 import { EstabelecimentosService } from '../../../services/estabelecimentos.service';
 import { AbrirComandaLocalComponent } from './local';
 
@@ -104,5 +104,17 @@ describe('AbrirComandaLocalComponent', () => {
     expect(router.navigate).not.toHaveBeenCalled();
     expect(component['mensagem']()).toContain('Não foi possível abrir a comanda');
     expect(component.podeAbrirComanda()).toBe(true);
+  });
+
+  it('explica quando o cliente já tem comanda aberta em outro bar', async () => {
+    comandaService.abrirComanda.mockRejectedValueOnce(new ComandaEmOutroLugarError('Neon Club'));
+    component.selecionarLocal('balcao');
+
+    await component.abrirComanda();
+
+    expect(router.navigate).not.toHaveBeenCalled();
+    expect(component['mensagem']()).toBe(
+      'Você já tem uma comanda aberta no Neon Club. Pague ela antes de abrir outra.',
+    );
   });
 });

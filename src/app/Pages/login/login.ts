@@ -1,6 +1,6 @@
 import { Component, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 
 type Modo = 'login' | 'cadastro';
@@ -15,6 +15,7 @@ export class LoginPage {
   private fb = inject(FormBuilder);
   private authService = inject(AuthService);
   private router = inject(Router);
+  private route = inject(ActivatedRoute);
 
   protected readonly modo = signal<Modo>('login');
   protected readonly carregando = signal(false);
@@ -58,12 +59,18 @@ export class LoginPage {
 
       const tipo = await this.authService.buscarTipoAtual();
       const staff = tipo === 'funcionario' || tipo === 'gerente';
-      await this.router.navigateByUrl(staff ? '/atendente/pedidos' : '/cliente/home');
+      await this.router.navigateByUrl(staff ? '/atendente/pedidos' : this.destinoCliente());
     } catch (erro) {
       this.erro.set(this.traduzirErro(erro));
     } finally {
       this.carregando.set(false);
     }
+  }
+
+  /** Volta para a página que pediu login, se for uma página do cliente deste app. */
+  private destinoCliente(): string {
+    const voltar = this.route.snapshot.queryParamMap.get('voltar');
+    return voltar?.startsWith('/cliente/') ? voltar : '/cliente/home';
   }
 
   private traduzirErro(erro: unknown): string {

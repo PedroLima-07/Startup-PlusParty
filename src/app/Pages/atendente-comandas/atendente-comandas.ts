@@ -1,8 +1,9 @@
 import { CurrencyPipe, DatePipe } from '@angular/common';
-import { Component, OnInit, computed, inject, signal } from '@angular/core';
+import { Component, DestroyRef, OnInit, computed, inject, signal } from '@angular/core';
 import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { ComandaPendente } from '../../models';
 import { AuthService } from '../../services/auth.service';
+import { SupabaseService } from '../../services/supabase.service';
 import { ComandasAtendenteService } from '../../services/comandas-atendente.service';
 
 @Component({
@@ -13,6 +14,8 @@ import { ComandasAtendenteService } from '../../services/comandas-atendente.serv
 })
 export class AtendenteComandas implements OnInit {
   private comandasService = inject(ComandasAtendenteService);
+  private supabase = inject(SupabaseService);
+  private destroyRef = inject(DestroyRef);
   private authService = inject(AuthService);
   private router = inject(Router);
 
@@ -31,6 +34,13 @@ export class AtendenteComandas implements OnInit {
   );
 
   async ngOnInit(): Promise<void> {
+    // Comanda aberta ou fechada pelo cliente aparece sozinha; itens mudam o total.
+    const pararDeEscutar = this.supabase.escutarMudancas(
+      [{ tabela: 'comandas' }, { tabela: 'pedido_itens' }],
+      () => void this.atualizarLista(true),
+    );
+    this.destroyRef.onDestroy(pararDeEscutar);
+
     await this.atualizarLista();
   }
 
@@ -39,8 +49,9 @@ export class AtendenteComandas implements OnInit {
     await this.router.navigateByUrl('/login');
   }
 
-  protected async atualizarLista(): Promise<void> {
-    this.carregando.set(true);
+  /** `silencioso` recarrega sem trocar a lista por "Carregando...". */
+  protected async atualizarLista(silencioso = false): Promise<void> {
+    if (!silencioso) this.carregando.set(true);
     this.erro.set(null);
 
     try {
