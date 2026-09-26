@@ -1,0 +1,53 @@
+<div class="movimento-container">
+  <!-- Status Cards -->
+  <div class="cards-grid">
+    <div class="status-card">
+      <div class="bolinha" [ngClass]="movimentoService.statusMovimento()"></div>
+      <div class="status-info">
+        <span class="status-label">{{ movimentoService.statusMovimento() | titlecase }}</span>
+        <span class="status-count">{{ movimentoService.comandasAbertasCount() }} abertas agora</span>
+      </div>
+    </div>
+    
+    <div class="stats-row">
+      <div class="stat-card">
+        <span class="stat-label">Comandas do dia</span>
+        <span class="stat-value">{{ movimentoService.comandasDoDiaCount() }}</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-label">Consumido no dia</span>
+        <span class="stat-value">{{ movimentoService.consumidoNoDia() | currency:'BRL' }}</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Filtros -->
+  <div class="filtros">
+    <button class="chip" [class.active]="filtroAtual() === 'todas'" (click)="setFiltro('todas')">Todas</button>
+    <button class="chip" [class.active]="filtroAtual() === 'abertas'" (click)="setFiltro('abertas')">Abertas</button>
+    <button class="chip" [class.active]="filtroAtual() === 'aguardando_pagamento'" (click)="setFiltro('aguardando_pagamento')">Aguardando pagamento</button>
+    <button class="chip" [class.active]="filtroAtual() === 'pagas'" (click)="setFiltro('pagas')">Pagas</button>
+  </div>
+
+  <!-- Lista de Comandas -->
+  <div class="comandas-list">
+    <div class="comanda-card" *ngFor="let comanda of comandasFiltradas()">
+      <div class="comanda-header">
+        <span class="comanda-numero">#{{ comanda.numero }}</span>
+        <span class="comanda-horario">{{ comanda.horario }}</span>
+      </div>
+      <div class="comanda-body">
+        <div class="cliente-info">
+          <strong>{{ comanda.cliente }}</strong>
+          <span>Mesa: {{ comanda.mesa }}</span>
+        </div>
+        <div class="valor-status">
+          <span class="valor">{{ comanda.valor | currency:'BRL' }}</span>
+          <span class="status-badge" [ngClass]="comanda.status">
+            {{ comanda.status.replace('_', ' ') | titlecase }}
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

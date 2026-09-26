@@ -1,0 +1,158 @@
+.movimento-container {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.cards-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.status-card {
+  background: white;
+  padding: 15px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+
+  .bolinha {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    &.normal { background-color: #28a745; }
+    &.moderado { background-color: #ffc107; }
+    &.lotado { background-color: #dc3545; }
+  }
+
+  .status-info {
+    display: flex;
+    flex-direction: column;
+
+    .status-label {
+      font-weight: bold;
+      font-size: 16px;
+    }
+
+    .status-count {
+      color: #666;
+      font-size: 14px;
+    }
+  }
+}
+
+.stats-row {
+  display: flex;
+  gap: 15px;
+
+  .stat-card {
+    flex: 1;
+    background: white;
+    padding: 15px;
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+
+    .stat-label {
+      font-size: 12px;
+      color: #666;
+      margin-bottom: 5px;
+    }
+
+    .stat-value {
+      font-size: 18px;
+      font-weight: bold;
+    }
+  }
+}
+
+.filtros {
+  display: flex;
+  gap: 10px;
+  overflow-x: auto;
+  padding-bottom: 5px;
+
+  .chip {
+    padding: 8px 16px;
+    border-radius: 20px;
+    border: 1px solid #ddd;
+    background: white;
+    white-space: nowrap;
+    cursor: pointer;
+    font-size: 14px;
+
+    &.active {
+      background: #007bff;
+      color: white;
+      border-color: #007bff;
+    }
+  }
+}
+
+.comandas-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.comanda-card {
+  background: white;
+  padding: 15px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+
+  .comanda-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 10px;
+    color: #666;
+    font-size: 14px;
+
+    .comanda-numero {
+      font-weight: bold;
+      color: #333;
+    }
+  }
+
+  .comanda-body {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    .cliente-info {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      
+      strong { font-size: 16px; }
+      span { font-size: 14px; color: #666; }
+    }
+
+    .valor-status {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 6px;
+
+      .valor {
+        font-weight: bold;
+        font-size: 16px;
+      }
+
+      .status-badge {
+        padding: 4px 8px;
+        border-radius: 12px;
+        font-size: 12px;
+        font-weight: bold;
+
+        &.aberta { background: #e3f2fd; color: #0d47a1; }
+        &.aguardando_pagamento { background: #fff3cd; color: #856404; }
+        &.paga { background: #d4edda; color: #155724; }
+      }
+    }
+  }
+}
