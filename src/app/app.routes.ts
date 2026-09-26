@@ -71,7 +71,7 @@ export const routes: Routes = [
       { path: '', redirectTo: 'movimento', pathMatch: 'full' },
       { path: 'movimento', loadComponent: () => import('./Pages/gerente/movimento/movimento').then(m => m.Movimento) },
       { path: 'postagens', loadComponent: () => import('./Pages/gerente/postagens/postagens').then(m => m.Postagens) },
-      { path: 'perfil-bar', loadComponent: () => import('./Pages/gerente/perfil-bar/perfil-bar').then(m => m.PerfilBar) }
+      { path: 'perfil-bar', loadComponent: () => import('./Pages/gerente/perfil-bar/perfil-bar').then(m => m.PerfilBarComponent) }
     ]
   },
   {

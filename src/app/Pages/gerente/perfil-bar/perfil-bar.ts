@@ -12,7 +12,7 @@ import { PerfilBar } from '../../../models';
   templateUrl: './perfil-bar.html',
   styleUrls: ['./perfil-bar.scss']
 })
-export class PerfilBar implements OnInit {
+export class PerfilBarComponent implements OnInit {
   barPerfilService = inject(BarPerfilService);
   authService = inject(GerenteAuthService);
 
