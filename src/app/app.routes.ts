@@ -2,6 +2,7 @@ import { Routes } from '@angular/router';
 import { authGuard } from './guards/auth.guard';
 import { semSessaoGuard } from './guards/sem-sessao.guard';
 import { staffGuard } from './guards/staff.guard';
+import { gerenteGuard } from './guards/gerente.guard';
 
 // Navegar pelos bares (discovery, perfil, cardápio em modo visualizar, home)
 // não exige login, para demonstrar sem conta. Abrir e usar uma comanda exige.
@@ -57,6 +58,21 @@ export const routes: Routes = [
     loadComponent: () =>
       import('./Pages/atendente-comandas/atendente-comandas').then((m) => m.AtendenteComandas),
     canActivate: [staffGuard],
+  },
+  {
+    path: 'login-gerente',
+    loadComponent: () => import('./Pages/login-gerente/login-gerente').then(m => m.LoginGerente)
+  },
+  {
+    path: 'gerente',
+    canActivate: [gerenteGuard],
+    loadComponent: () => import('./Pages/gerente/gerente-layout/gerente-layout').then(m => m.GerenteLayout),
+    children: [
+      { path: '', redirectTo: 'movimento', pathMatch: 'full' },
+      { path: 'movimento', loadComponent: () => import('./Pages/gerente/movimento/movimento').then(m => m.Movimento) },
+      { path: 'postagens', loadComponent: () => import('./Pages/gerente/postagens/postagens').then(m => m.Postagens) },
+      { path: 'perfil-bar', loadComponent: () => import('./Pages/gerente/perfil-bar/perfil-bar').then(m => m.PerfilBar) }
+    ]
   },
   {
     path: 'cliente',
