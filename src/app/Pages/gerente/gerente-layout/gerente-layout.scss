@@ -80,10 +80,18 @@
     &.active {
       color: #007bff;
       font-weight: bold;
+
+      .nav-icon {
+        filter: invert(29%) sepia(100%) saturate(1500%) hue-rotate(200deg) brightness(95%);
+      }
     }
 
-    .icon {
-      font-size: 24px;
+    .nav-icon {
+      width: 26px;
+      height: 26px;
+      object-fit: contain;
+      filter: grayscale(100%) opacity(0.5);
+      transition: filter 0.2s ease;
     }
 
     .label {
