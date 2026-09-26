@@ -1,0 +1,44 @@
+<div class="postagens-container">
+  
+  <!-- Criar nova postagem -->
+  <div class="criar-postagem-card">
+    <textarea 
+      [(ngModel)]="textoPostagem" 
+      placeholder="Escreva sua postagem..." 
+      rows="4">
+    </textarea>
+    
+    <div *ngIf="fotoPreviewUrl" class="foto-preview">
+      <img [src]="fotoPreviewUrl" alt="Preview da foto">
+      <button class="remover-foto" (click)="fotoPreviewUrl = null">Remover</button>
+    </div>
+
+    <div class="actions">
+      <label class="btn-adicionar-foto">
+        + Adicionar foto
+        <input type="file" accept="image/*" (change)="onFileSelected($event)" hidden>
+      </label>
+      
+      <button 
+        class="btn-publicar" 
+        [disabled]="!textoPostagem.trim() && !fotoPreviewUrl"
+        (click)="publicar()">
+        Publicar
+      </button>
+    </div>
+  </div>
+
+  <!-- Feed de últimas postagens -->
+  <h2 class="section-title">Últimas postagens</h2>
+  <div class="feed-list">
+    <div class="postagem-card" *ngFor="let post of postagemService.postagens()">
+      <div class="post-header">
+        <span class="data">{{ post.criadoEm | date:'dd/MM/yyyy HH:mm' }}</span>
+      </div>
+      <div class="post-body">
+        <p>{{ post.texto }}</p>
+        <img *ngIf="post.fotoUrl" [src]="post.fotoUrl" alt="Foto da postagem">
+      </div>
+    </div>
+  </div>
+</div>
