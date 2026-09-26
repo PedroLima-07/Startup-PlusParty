@@ -1,0 +1,34 @@
+<div class="gerente-layout-container">
+  <!-- Header -->
+  <header class="gerente-header">
+    <div class="logo-area">
+      <span class="logo">+party</span>
+      <span class="tag-gerente">GERENTE</span>
+    </div>
+    <div class="info-area">
+      <span class="nome-estabelecimento">{{ authService.nomeGerente() }}</span>
+      <h1 class="page-title">{{ tituloPagina }}</h1>
+    </div>
+  </header>
+
+  <!-- Main Content (scrollable) -->
+  <main class="gerente-content">
+    <router-outlet></router-outlet>
+  </main>
+
+  <!-- Bottom Nav -->
+  <nav class="gerente-bottom-nav">
+    <a routerLink="/gerente/movimento" routerLinkActive="active" class="nav-item">
+      <span class="icon">📊</span>
+      <span class="label">Movimento</span>
+    </a>
+    <a routerLink="/gerente/postagens" routerLinkActive="active" class="nav-item">
+      <span class="icon">📸</span>
+      <span class="label">Postagens</span>
+    </a>
+    <a routerLink="/gerente/perfil-bar" routerLinkActive="active" class="nav-item">
+      <span class="icon">🏪</span>
+      <span class="label">Perfil do bar</span>
+    </a>
+  </nav>
+</div>
