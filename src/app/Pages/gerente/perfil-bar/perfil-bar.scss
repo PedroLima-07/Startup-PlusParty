@@ -98,4 +98,29 @@
   font-weight: bold;
   cursor: pointer;
   text-align: center;
+  min-height: 44px;
+}
+
+@media (max-width: 560px) {
+  .perfil-bar-container {
+    gap: 14px;
+  }
+
+  .foto-capa {
+    height: 130px;
+  }
+
+  .perfil-form {
+    padding: 14px;
+
+    .form-group {
+      margin-bottom: 12px;
+
+      input,
+      textarea {
+        /* 16px evita o zoom automatico do iOS ao focar o campo */
+        font-size: 16px;
+      }
+    }
+  }
 }
