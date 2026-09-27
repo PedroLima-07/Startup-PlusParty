@@ -10,11 +10,11 @@
 .login-box {
   background: white;
   padding: 30px;
-  border-radius: 8px;
-  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+  border-radius: 15px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   width: 100%;
   max-width: 400px;
-  
+
   h1 {
     margin-bottom: 20px;
     font-size: 24px;
@@ -24,18 +24,18 @@
 
   .input-group {
     margin-bottom: 15px;
-    
+
     label {
       display: block;
       margin-bottom: 5px;
       color: #666;
     }
-    
+
     input {
       width: 100%;
       padding: 10px;
       border: 1px solid #ddd;
-      border-radius: 4px;
+      border-radius: 8px;
       font-size: 16px;
     }
   }
@@ -46,11 +46,11 @@
     background-color: #007bff;
     color: white;
     border: none;
-    border-radius: 4px;
+    border-radius: 8px;
     font-size: 16px;
     cursor: pointer;
     margin-top: 10px;
-    
+
     &:disabled {
       background-color: #ccc;
       cursor: not-allowed;
