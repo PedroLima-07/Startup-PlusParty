@@ -2,7 +2,7 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 100vh;
+  height: 100dvh;
   background-color: #f5f5f5;
   padding: 20px;
 }
@@ -54,6 +54,21 @@
     &:disabled {
       background-color: #ccc;
       cursor: not-allowed;
+    }
+  }
+}
+
+@media (max-width: 560px) {
+  .login-container {
+    padding: 14px;
+  }
+
+  .login-box {
+    padding: 20px;
+
+    h1 {
+      font-size: 20px;
+      margin-bottom: 16px;
     }
   }
 }
