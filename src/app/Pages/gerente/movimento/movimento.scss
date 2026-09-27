@@ -50,6 +50,7 @@
 
   .stat-card {
     flex: 1;
+    min-width: 0;
     background: white;
     padding: 15px;
     border-radius: 8px;
@@ -70,28 +71,29 @@
   }
 }
 
-.filtros {
-  display: flex;
-  gap: 10px;
-  overflow-x: auto;
-  padding-bottom: 5px;
+  .filtros {
+    display: flex;
+    gap: 10px;
+    overflow-x: auto;
+    padding-bottom: 5px;
 
-  .chip {
-    padding: 8px 16px;
-    border-radius: 20px;
-    border: 1px solid #ddd;
-    background: white;
-    white-space: nowrap;
-    cursor: pointer;
-    font-size: 14px;
+    .chip {
+      padding: 8px 16px;
+      border-radius: 20px;
+      border: 1px solid #ddd;
+      background: white;
+      white-space: nowrap;
+      cursor: pointer;
+      font-size: 14px;
+      min-height: 44px;
 
-    &.active {
-      background: #007bff;
-      color: white;
-      border-color: #007bff;
+      &.active {
+        background: #007bff;
+        color: white;
+        border-color: #007bff;
+      }
     }
   }
-}
 
 .comandas-list {
   display: flex;
@@ -122,14 +124,25 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
+    gap: 10px;
 
     .cliente-info {
       display: flex;
       flex-direction: column;
       gap: 4px;
-      
-      strong { font-size: 16px; }
-      span { font-size: 14px; color: #666; }
+      min-width: 0;
+
+      strong {
+        font-size: 16px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      span {
+        font-size: 14px;
+        color: #666;
+      }
     }
 
     .valor-status {
@@ -137,10 +150,12 @@
       flex-direction: column;
       align-items: flex-end;
       gap: 6px;
+      flex-shrink: 0;
 
       .valor {
         font-weight: bold;
         font-size: 16px;
+        white-space: nowrap;
       }
 
       .status-badge {
@@ -148,11 +163,56 @@
         border-radius: 12px;
         font-size: 12px;
         font-weight: bold;
+        white-space: nowrap;
 
         &.aberta { background: #e3f2fd; color: #0d47a1; }
         &.aguardando_pagamento { background: #fff3cd; color: #856404; }
         &.paga { background: #d4edda; color: #155724; }
       }
+    }
+  }
+}
+
+@media (max-width: 560px) {
+  .movimento-container {
+    gap: 14px;
+  }
+
+  .cards-grid {
+    gap: 10px;
+  }
+
+  .status-card {
+    padding: 12px;
+    gap: 12px;
+
+    .status-info .status-label {
+      font-size: 15px;
+    }
+  }
+
+  .stats-row {
+    flex-direction: column;
+    gap: 10px;
+
+    .stat-card {
+      flex-direction: row;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 12px;
+
+      .stat-label {
+        margin-bottom: 0;
+      }
+    }
+  }
+
+  .comanda-card {
+    padding: 12px;
+
+    .comanda-body .valor-status .valor {
+      font-size: 15px;
     }
   }
 }
