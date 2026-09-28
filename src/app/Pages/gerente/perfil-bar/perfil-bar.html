@@ -1,0 +1,38 @@
+<div class="perfil-bar-container">
+  
+  <div class="foto-capa">
+    <div class="capa-placeholder" *ngIf="!perfilEdit.fotoCapaUrl">Sem foto</div>
+    <img *ngIf="perfilEdit.fotoCapaUrl" [src]="perfilEdit.fotoCapaUrl" alt="Capa">
+    <label class="btn-trocar-foto">
+      Trocar foto
+      <input type="file" accept="image/*" (change)="onFotoSelected($event)" hidden>
+    </label>
+  </div>
+
+  <form class="perfil-form" (ngSubmit)="salvar()">
+    <div class="form-group">
+      <label>Nome do estabelecimento</label>
+      <input type="text" [(ngModel)]="perfilEdit.nome" name="nome" required>
+    </div>
+
+    <div class="form-group">
+      <label>Descrição curta</label>
+      <textarea [(ngModel)]="perfilEdit.descricaoCurta" name="descricao" rows="2"></textarea>
+    </div>
+
+    <div class="form-group">
+      <label>Endereço</label>
+      <input type="text" [(ngModel)]="perfilEdit.endereco" name="endereco">
+    </div>
+
+    <div class="form-group">
+      <label>Horário de funcionamento</label>
+      <input type="text" [(ngModel)]="perfilEdit.horarioFuncionamento" name="horario">
+    </div>
+
+    <button type="submit" class="btn-salvar">Salvar alterações</button>
+  </form>
+
+  <button type="button" class="btn-sair" (click)="sair()">Sair (Logout)</button>
+
+</div>

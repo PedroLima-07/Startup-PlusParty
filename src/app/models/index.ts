@@ -129,3 +129,30 @@ export interface Postagem {
   imagem_url: string | null;
   criada_em: string;
 }
+
+export interface ComandaResumo {
+  numero: string;
+  cliente: string;
+  mesa: string;
+  horario: string;
+  valor: number;
+  status: 'aberta' | 'aguardando_pagamento' | 'paga';
+}
+
+export interface PostagemGerente {
+  id: string;
+  texto: string;
+  fotoUrl?: string;
+  criadoEm: Date;
+}
+
+export interface PerfilBar {
+  nome: string;
+  descricaoCurta: string;
+  endereco: string;
+  horarioFuncionamento: string;
+  fotoCapaUrl?: string;
+}
+
+export type StatusMovimento = 'normal' | 'moderado' | 'lotado';
+
