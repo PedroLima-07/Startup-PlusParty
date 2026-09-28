@@ -60,10 +60,6 @@ export const routes: Routes = [
     canActivate: [staffGuard],
   },
   {
-    path: 'login-gerente',
-    loadComponent: () => import('./Pages/login-gerente/login-gerente').then(m => m.LoginGerente)
-  },
-  {
     path: 'gerente',
     canActivate: [gerenteGuard],
     loadComponent: () => import('./Pages/gerente/gerente-layout/gerente-layout').then(m => m.GerenteLayout),
@@ -83,5 +79,9 @@ export const routes: Routes = [
     path: '',
     redirectTo: 'cliente/discovery',
     pathMatch: 'full',
+  },
+  {
+    path: '**',
+    redirectTo: 'cliente/discovery',
   },
 ];

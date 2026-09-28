@@ -53,7 +53,32 @@ export class AuthService {
 
   /** Tela onde cada tipo de usuário começa depois de entrar. */
   telaInicial(tipo: TipoPerfil | null): string {
-    return tipo === 'funcionario' || tipo === 'gerente' ? '/atendente/pedidos' : '/cliente/home';
+    switch (tipo) {
+      case 'gerente':
+        return '/gerente/movimento';
+      case 'funcionario':
+        return '/atendente/pedidos';
+      default:
+        return '/cliente/home';
+    }
+  }
+
+  /** Nome do estabelecimento ao qual o funcionário/gerente logado pertence. */
+  async buscarNomeEstabelecimentoAtual(): Promise<string | null> {
+    const {
+      data: { user },
+    } = await this.supabase.client.auth.getUser();
+    if (!user) return null;
+
+    const { data, error } = await this.supabase.client
+      .from('perfis')
+      .select('estabelecimento:estabelecimentos(nome)')
+      .eq('id', user.id)
+      .single();
+
+    if (error) throw error;
+    const estabelecimento = data.estabelecimento as unknown as { nome: string } | null;
+    return estabelecimento?.nome ?? null;
   }
 
   /** Tipo do usuário logado, ou null se não houver sessão. */

@@ -1,14 +1,15 @@
 import { inject } from '@angular/core';
 import { CanActivateFn, Router } from '@angular/router';
-import { GerenteAuthService } from '../services/gerente-auth.service';
+import { AuthService } from '../services/auth.service';
 
-export const gerenteGuard: CanActivateFn = (route, state) => {
-  const authService = inject(GerenteAuthService);
+/** Área do gerente: só perfis do tipo gerente. Os demais vão para a própria tela inicial. */
+export const gerenteGuard: CanActivateFn = async () => {
+  const authService = inject(AuthService);
   const router = inject(Router);
 
-  if (authService.logado()) {
-    return true;
-  }
+  const tipo = await authService.buscarTipoAtual().catch(() => null);
 
-  return router.parseUrl('/login-gerente');
+  if (tipo === 'gerente') return true;
+  if (tipo) return router.parseUrl(authService.telaInicial(tipo));
+  return router.parseUrl('/login');
 };
