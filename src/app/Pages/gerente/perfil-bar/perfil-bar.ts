@@ -1,8 +1,9 @@
 import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
 import { BarPerfilService } from '../../../services/bar-perfil.service';
-import { GerenteAuthService } from '../../../services/gerente-auth.service';
+import { AuthService } from '../../../services/auth.service';
 import { PerfilBar } from '../../../models';
 
 @Component({
@@ -14,7 +15,8 @@ import { PerfilBar } from '../../../models';
 })
 export class PerfilBarComponent implements OnInit {
   barPerfilService = inject(BarPerfilService);
-  authService = inject(GerenteAuthService);
+  private authService = inject(AuthService);
+  private router = inject(Router);
 
   perfilEdit!: PerfilBar;
 
@@ -38,7 +40,8 @@ export class PerfilBarComponent implements OnInit {
     alert('Perfil salvo com sucesso!');
   }
 
-  sair() {
-    this.authService.logout();
+  async sair() {
+    await this.authService.sair();
+    await this.router.navigateByUrl('/login');
   }
 }

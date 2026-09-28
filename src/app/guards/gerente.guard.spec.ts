@@ -3,9 +3,9 @@ import { ActivatedRouteSnapshot, Router, RouterStateSnapshot, UrlTree, provideRo
 import { TipoPerfil } from '../models';
 import { AuthService } from '../services/auth.service';
 import { SupabaseService } from '../services/supabase.service';
-import { semSessaoGuard } from './sem-sessao.guard';
+import { gerenteGuard } from './gerente.guard';
 
-describe('semSessaoGuard', () => {
+describe('gerenteGuard', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
       providers: [provideRouter([]), { provide: SupabaseService, useValue: {} }],
@@ -16,25 +16,25 @@ describe('semSessaoGuard', () => {
     vi.spyOn(TestBed.inject(AuthService), 'buscarTipoAtual').mockResolvedValue(tipo);
 
     const resultado = await TestBed.runInInjectionContext(() =>
-      semSessaoGuard({} as ActivatedRouteSnapshot, {} as RouterStateSnapshot),
+      gerenteGuard({} as ActivatedRouteSnapshot, {} as RouterStateSnapshot),
     );
     if (resultado === true) return true;
     return TestBed.inject(Router).serializeUrl(resultado as UrlTree);
   }
 
-  it('deixa quem não está logado ver a tela de login', async () => {
-    expect(await rodarGuard(null)).toBe(true);
+  it('deixa o gerente entrar', async () => {
+    expect(await rodarGuard('gerente')).toBe(true);
   });
 
-  it('manda o cliente logado para a home dele', async () => {
-    expect(await rodarGuard('cliente')).toBe('/cliente/home');
-  });
-
-  it('manda o funcionário logado para a tela do atendente', async () => {
+  it('manda o funcionário para a tela do atendente', async () => {
     expect(await rodarGuard('funcionario')).toBe('/atendente/pedidos');
   });
 
-  it('manda o gerente logado para a área do gerente', async () => {
-    expect(await rodarGuard('gerente')).toBe('/gerente/movimento');
+  it('manda o cliente para a home dele', async () => {
+    expect(await rodarGuard('cliente')).toBe('/cliente/home');
+  });
+
+  it('manda quem não está logado para o login', async () => {
+    expect(await rodarGuard(null)).toBe('/login');
   });
 });
