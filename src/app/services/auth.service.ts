@@ -32,6 +32,26 @@ export class AuthService {
     if (error) throw error;
   }
 
+  /**
+   * Pede ao Supabase o e-mail de recuperação. O link do e-mail abre
+   * /redefinir-senha já com uma sessão de recuperação. O endereço precisa estar
+   * em Authentication → URL Configuration → Redirect URLs.
+   * Para e-mail não cadastrado o Supabase também responde sem erro, de propósito.
+   */
+  async pedirRedefinicaoSenha(email: string): Promise<void> {
+    const { error } = await this.supabase.client.auth.resetPasswordForEmail(email, {
+      redirectTo: `${location.origin}/redefinir-senha`,
+    });
+
+    if (error) throw error;
+  }
+
+  /** Troca a senha do usuário da sessão atual (a sessão aberta pelo link do e-mail). */
+  async definirNovaSenha(senha: string): Promise<void> {
+    const { error } = await this.supabase.client.auth.updateUser({ password: senha });
+    if (error) throw error;
+  }
+
   async sair(): Promise<void> {
     const { error } = await this.supabase.client.auth.signOut();
     if (error) throw error;

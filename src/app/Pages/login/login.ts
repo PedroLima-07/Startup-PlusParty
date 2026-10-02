@@ -4,7 +4,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { TipoPerfil } from '../../models';
 import { AuthService } from '../../services/auth.service';
 
-type Modo = 'login' | 'cadastro';
+type Modo = 'login' | 'cadastro' | 'recuperar';
 
 @Component({
   selector: 'app-login',
@@ -21,6 +21,7 @@ export class LoginPage {
   protected readonly modo = signal<Modo>('login');
   protected readonly carregando = signal(false);
   protected readonly erro = signal<string | null>(null);
+  protected readonly aviso = signal<string | null>(null);
 
   protected readonly form = this.fb.nonNullable.group({
     nome: [''],
@@ -28,17 +29,19 @@ export class LoginPage {
     senha: ['', [Validators.required, Validators.minLength(6)]],
   });
 
-  protected alternarModo(): void {
+  /** Cada modo exige campos diferentes: nome só no cadastro, senha só fora do "recuperar". */
+  protected mudarModo(modo: Modo): void {
     this.erro.set(null);
-    this.modo.update((atual) => (atual === 'login' ? 'cadastro' : 'login'));
+    this.aviso.set(null);
+    this.modo.set(modo);
 
-    const nomeControl = this.form.controls.nome;
-    if (this.modo() === 'cadastro') {
-      nomeControl.addValidators(Validators.required);
-    } else {
-      nomeControl.clearValidators();
-    }
-    nomeControl.updateValueAndValidity();
+    const { nome, senha } = this.form.controls;
+    nome.setValidators(modo === 'cadastro' ? [Validators.required] : []);
+    senha.setValidators(
+      modo === 'recuperar' ? [] : [Validators.required, Validators.minLength(6)],
+    );
+    nome.updateValueAndValidity();
+    senha.updateValueAndValidity();
   }
 
   protected async enviar(): Promise<void> {
@@ -48,10 +51,18 @@ export class LoginPage {
     }
 
     this.erro.set(null);
+    this.aviso.set(null);
     this.carregando.set(true);
     const { nome, email, senha } = this.form.getRawValue();
 
     try {
+      if (this.modo() === 'recuperar') {
+        await this.authService.pedirRedefinicaoSenha(email);
+        // Mesma mensagem exista ou não a conta, para não revelar quem é cadastrado.
+        this.aviso.set('Se esse e-mail estiver cadastrado, enviamos um link para criar uma nova senha.');
+        return;
+      }
+
       if (this.modo() === 'login') {
         await this.authService.login(email, senha);
       } else {
@@ -86,6 +97,9 @@ export class LoginPage {
     }
     if (mensagem.includes('Password should be at least')) {
       return 'A senha precisa ter pelo menos 6 caracteres.';
+    }
+    if (mensagem.includes('rate limit') || mensagem.includes('For security purposes')) {
+      return 'Muitas tentativas. Aguarde alguns minutos e tente de novo.';
     }
     if (mensagem.includes('Email not confirmed')) {
       return 'Confirme seu e-mail antes de entrar — verifique sua caixa de entrada.';

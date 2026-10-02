@@ -1,0 +1,54 @@
+<div class="tela">
+  <div class="card-login">
+    <div class="logo">
+      <span class="logo-icone">+</span>
+      <span>party</span>
+    </div>
+
+    @switch (estado()) {
+      @case ('verificando') {
+        <p class="tagline">Verificando o link...</p>
+      }
+
+      @case ('link_invalido') {
+        <p class="tagline">Link inválido ou expirado</p>
+        <p class="instrucao">
+          Esse link de recuperação não vale mais. Peça um novo na tela de login, em "Esqueceu a senha?".
+        </p>
+        <a class="botao-primario" routerLink="/login">Voltar para o login</a>
+      }
+
+      @case ('pronto') {
+        <p class="tagline">Crie uma nova senha</p>
+
+        <form [formGroup]="form" (ngSubmit)="salvar()">
+          <label class="campo">
+            Nova senha
+            <input type="password" formControlName="senha" autocomplete="new-password" />
+            @if (form.controls.senha.invalid && form.controls.senha.touched) {
+              <span class="erro-campo">Mínimo de 6 caracteres.</span>
+            }
+          </label>
+
+          <label class="campo">
+            Repita a nova senha
+            <input type="password" formControlName="confirmacao" autocomplete="new-password" />
+            @if (senhasDiferentes()) {
+              <span class="erro-campo">As senhas não são iguais.</span>
+            }
+          </label>
+
+          @if (erro(); as mensagem) {
+            <p class="erro-geral" role="alert">{{ mensagem }}</p>
+          }
+
+          <button class="botao-primario" type="submit" [disabled]="salvando()">
+            {{ salvando() ? 'Salvando...' : 'SALVAR NOVA SENHA' }}
+          </button>
+        </form>
+      }
+    }
+  </div>
+
+  <p class="rodape">+party 2026 · São Paulo</p>
+</div>
