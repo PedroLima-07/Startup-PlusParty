@@ -111,6 +111,23 @@ form {
   margin: 0;
 }
 
+.aviso-geral {
+  background: #eff6ff;
+  color: #1d4ed8;
+  border-radius: 8px;
+  padding: 10px 12px;
+  font-size: 0.85rem;
+  text-align: center;
+  margin: 0;
+}
+
+.instrucao {
+  color: var(--cinza-texto);
+  font-size: 0.85rem;
+  text-align: center;
+  margin: 0 0 16px;
+}
+
 .botao-primario {
   margin-top: 4px;
   padding: 14px;
@@ -122,6 +139,10 @@ form {
   font-weight: 700;
   letter-spacing: 0.02em;
   cursor: pointer;
+  // Também é usado em <a> (tela de redefinir senha).
+  display: block;
+  text-align: center;
+  text-decoration: none;
 
   &:disabled {
     opacity: 0.6;

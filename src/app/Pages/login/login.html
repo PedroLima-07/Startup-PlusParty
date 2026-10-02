@@ -6,6 +6,10 @@
     </div>
     <p class="tagline">Seu rolê começa aqui</p>
 
+      @if (modo() === 'recuperar') {
+        <p class="instrucao">Informe seu e-mail e enviaremos um link para criar uma nova senha.</p>
+      }
+
       <form [formGroup]="form" (ngSubmit)="enviar()">
         @if (modo() === 'cadastro') {
           <label class="campo">
@@ -30,41 +34,52 @@
           }
         </label>
 
-        <label class="campo">
-          Senha
-          <input
-            type="password"
-            formControlName="senha"
-            autocomplete="current-password"
-          />
-          @if (form.controls.senha.invalid && form.controls.senha.touched) {
-            <span class="erro-campo">Mínimo de 6 caracteres.</span>
-          }
-        </label>
+        @if (modo() !== 'recuperar') {
+          <label class="campo">
+            Senha
+            <input
+              type="password"
+              formControlName="senha"
+              [autocomplete]="modo() === 'cadastro' ? 'new-password' : 'current-password'"
+            />
+            @if (form.controls.senha.invalid && form.controls.senha.touched) {
+              <span class="erro-campo">Mínimo de 6 caracteres.</span>
+            }
+          </label>
+        }
 
         @if (erro(); as mensagem) {
-          <p class="erro-geral">{{ mensagem }}</p>
+          <p class="erro-geral" role="alert">{{ mensagem }}</p>
+        }
+        @if (aviso(); as mensagem) {
+          <p class="aviso-geral" role="status">{{ mensagem }}</p>
         }
 
         <button class="botao-primario" type="submit" [disabled]="carregando()">
           @if (carregando()) {
-            {{ modo() === 'login' ? 'Entrando...' : 'Cadastrando...' }}
+            Aguarde...
           } @else {
-            {{ modo() === 'login' ? 'LOGIN' : 'CADASTRAR' }}
+            @switch (modo()) {
+              @case ('login') { LOGIN }
+              @case ('cadastro') { CADASTRAR }
+              @case ('recuperar') { ENVIAR LINK }
+            }
           }
         </button>
       </form>
 
       @if (modo() === 'login') {
-        <button class="link" type="button">Esqueceu a senha? Clique aqui</button>
+        <button class="link" type="button" (click)="mudarModo('recuperar')">
+          Esqueceu a senha? Clique aqui
+        </button>
         <p class="rodape-link">
           Não tem conta?
-          <button class="link" type="button" (click)="alternarModo()">Cadastre-se</button>
+          <button class="link" type="button" (click)="mudarModo('cadastro')">Cadastre-se</button>
         </p>
       } @else {
         <p class="rodape-link">
-          Já tem conta?
-          <button class="link" type="button" (click)="alternarModo()">Entrar</button>
+          {{ modo() === 'cadastro' ? 'Já tem conta?' : 'Lembrou a senha?' }}
+          <button class="link" type="button" (click)="mudarModo('login')">Entrar</button>
         </p>
       }
   </div>

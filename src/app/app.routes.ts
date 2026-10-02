@@ -13,6 +13,11 @@ export const routes: Routes = [
     canActivate: [semSessaoGuard],
   },
   {
+    path: 'redefinir-senha',
+    loadComponent: () =>
+      import('./Pages/redefinir-senha/redefinir-senha').then((m) => m.RedefinirSenhaPage),
+  },
+  {
     path: 'cliente/discovery',
     loadComponent: () => import('./Pages/discovery/discovery').then((m) => m.DiscoveryPage),
   },
