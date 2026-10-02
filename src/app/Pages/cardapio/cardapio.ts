@@ -5,6 +5,7 @@ import { Item, ItemCarrinho } from '../../models';
 import { CardapioService } from '../../services/cardapio.service';
 import { ComandaService } from '../../services/comanda.service';
 import { EstabelecimentosService } from '../../services/estabelecimentos.service';
+import { PedidoService } from '../../services/pedido.service';
 
 type ModoCardapio = 'pedir' | 'visualizar';
 
@@ -20,6 +21,7 @@ export class CardapioPage implements OnInit {
   private comandaService = inject(ComandaService);
   private cardapioService = inject(CardapioService);
   private estabelecimentosService = inject(EstabelecimentosService);
+  private pedidoService = inject(PedidoService);
 
   /**
    * No modo 'pedir', é o id da comanda. No modo 'visualizar', é o id do
@@ -110,7 +112,7 @@ export class CardapioPage implements OnInit {
       .filter((itemCarrinho): itemCarrinho is ItemCarrinho => itemCarrinho !== null);
 
     try {
-      await this.cardapioService.confirmarPedido(this.comandaId, itensCarrinho);
+      await this.pedidoService.criarPedido(this.comandaId, itensCarrinho);
       void this.router.navigate(['/cliente/comanda', this.comandaId]);
     } catch {
       this.erro.set('Não foi possível confirmar o pedido agora. Tente novamente.');
