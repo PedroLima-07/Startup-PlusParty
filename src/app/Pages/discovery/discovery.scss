@@ -10,8 +10,7 @@
   position: sticky;
   top: 0;
   z-index: 20;
-  background: #fff;
-  border-bottom: 1px solid #e5e7eb;
+  background: #0f1f4b;
 }
 
 .header-content {
@@ -25,7 +24,7 @@
 
 .header-content h1 {
   margin: 0;
-  color: #0f1f4b;
+  color: #fff;
   font-size: 19px;
   font-weight: 800;
   line-height: 1.2;
@@ -34,7 +33,7 @@
 .page-content {
   max-width: 760px;
   margin: 0 auto;
-  padding: 20px 16px 42px;
+  padding: 20px 16px 96px;
 }
 
 .carregando {
@@ -85,7 +84,7 @@
 
 .bars-list {
   display: grid;
-  gap: 10px;
+  gap: 16px;
 }
 
 .bar-card {
@@ -106,14 +105,33 @@
 }
 
 .bar-card:hover {
-  border-color: #c7d3f4;
-  box-shadow: 0 6px 18px rgba(15, 31, 75, 0.09);
-  transform: translateY(-1px);
+  border-color: #2f6bff;
+  box-shadow: 0 0 0 2px #2f6bff, 0 12px 26px rgba(47, 107, 255, 0.22);
+  transform: translateY(-3px);
 }
 
 .bar-card:focus-visible {
   outline: 3px solid rgba(47, 107, 255, 0.2);
   outline-offset: 2px;
+}
+
+.bar-card.com-foto {
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0;
+  padding: 0;
+  overflow: hidden;
+
+  .bar-info {
+    padding: 13px 14px 15px;
+  }
+}
+
+.bar-foto {
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+  background: #e1e5ee;
 }
 
 .bar-avatar {
@@ -151,17 +169,6 @@
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 2;
   line-clamp: 2;
-}
-
-.bar-rating {
-  color: #4d5565;
-  font-size: 12px;
-  font-weight: 700;
-}
-
-.star {
-  margin-right: 4px;
-  color: #f0a51a;
 }
 
 .card-chevron {

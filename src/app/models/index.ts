@@ -22,6 +22,14 @@ export interface Estabelecimento {
   capacidade: number | null;
   avaliacao: number | null;
   criado_em: string;
+  foto_url: string | null;
+  sobre: string | null;
+  tags: string[];
+  /** 'HH:MM:SS'; se fecha antes de abrir, fecha no dia seguinte. */
+  horario_abre: string | null;
+  horario_fecha: string | null;
+  /** 0 = domingo ... 6 = sábado */
+  dias_abertos: number[];
 }
 
 export interface Perfil {

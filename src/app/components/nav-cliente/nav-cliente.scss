@@ -1,0 +1,65 @@
+.nav-inferior {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 30;
+  display: flex;
+  background: rgba(255, 255, 255, 0.95);
+  border-top: 1px solid rgba(0, 0, 0, 0.05);
+  padding: 6px 8px calc(4px + env(safe-area-inset-bottom));
+  font-family: system-ui, sans-serif;
+}
+
+.item-nav {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 0;
+  background: none;
+  border: none;
+  color: rgba(10, 10, 10, 0.45);
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.icone {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+
+  svg {
+    width: 21px;
+    height: 21px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+}
+
+.rotulo {
+  font-size: 10px;
+  font-weight: 600;
+}
+
+.item-nav.ativo {
+  .icone {
+    background: #e7f0ff;
+    color: #3d7bff;
+
+    svg {
+      stroke-width: 2.4;
+    }
+  }
+
+  .rotulo {
+    color: #0b1e4b;
+  }
+}

@@ -16,8 +16,7 @@
   position: sticky;
   top: 0;
   z-index: 20;
-  background: #fff;
-  border-bottom: 1px solid #e5e7eb;
+  background: #0f1f4b;
 }
 
 .header-content {
@@ -32,7 +31,7 @@
 
 .header-content h1 {
   margin: 0;
-  color: #0f1f4b;
+  color: #fff;
   font-size: 18px;
   font-weight: 800;
   line-height: 1.2;
@@ -45,7 +44,7 @@
   border: 0;
   border-radius: 50%;
   background: transparent;
-  color: #0f1f4b;
+  color: #fff;
   display: grid;
   place-items: center;
   cursor: pointer;
@@ -54,7 +53,7 @@
 
 .back-button:hover,
 .back-button:focus-visible {
-  background: #eef2ff;
+  background: rgba(255, 255, 255, 0.14);
   outline: none;
 }
 
@@ -72,24 +71,71 @@
   padding: 20px 16px 42px;
 }
 
-.descricao {
-  margin: 0 0 8px;
-  color: #4d5565;
-  font-size: 14px;
-  line-height: 1.4;
+.foto-capa {
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  margin-bottom: 16px;
+  border-radius: 14px;
+  object-fit: cover;
+  background: #e1e5ee;
 }
 
-.avaliacao {
+.destaques {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.indicado {
+  color: #2f6bff;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.status {
   display: flex;
   align-items: center;
-  gap: 5px;
-  margin-bottom: 20px;
-  font-size: 14px;
-  font-weight: 700;
-  color: #4d5565;
+  gap: 8px;
+  margin: 0 0 14px;
+  color: #6b7280;
+  font-size: 13px;
+  font-weight: 600;
 
-  .star {
-    color: #f0a51a;
+  .ponto {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #9ca3af;
+  }
+
+  &.aberto {
+    color: #15803d;
+
+    .ponto {
+      background: #22c55e;
+      box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.2);
+    }
+  }
+}
+
+.tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0 0 20px;
+  padding: 0;
+  list-style: none;
+
+  li {
+    padding: 5px 12px;
+    border-radius: 999px;
+    background: #eef2ff;
+    color: #2f6bff;
+    font-size: 12px;
+    font-weight: 700;
   }
 }
 
@@ -121,7 +167,9 @@
   color: #0f1f4b;
 }
 
-.secao-endereco {
+.secao {
+  margin-bottom: 24px;
+
   h2 {
     margin: 0 0 10px;
     font-size: 15px;
@@ -130,7 +178,14 @@
   }
 }
 
-.linha-endereco {
+.sobre {
+  margin: 0;
+  color: #4d5565;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.linha-info {
   display: flex;
   align-items: center;
   justify-content: space-between;

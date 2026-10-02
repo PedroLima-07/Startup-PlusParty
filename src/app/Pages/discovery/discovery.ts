@@ -1,13 +1,15 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
+import { NavCliente } from '../../components/nav-cliente/nav-cliente';
+import { NotaBar } from '../../components/nota-bar/nota-bar';
 import { Estabelecimento } from '../../models';
 import { EstabelecimentosService } from '../../services/estabelecimentos.service';
 
 @Component({
   selector: 'app-discovery',
   standalone: true,
-  imports: [FormsModule],
+  imports: [FormsModule, NavCliente, NotaBar],
   templateUrl: './discovery.html',
   styleUrl: './discovery.scss',
 })

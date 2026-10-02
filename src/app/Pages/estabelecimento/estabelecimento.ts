@@ -1,12 +1,16 @@
-import { Component, OnInit, inject, input, signal } from '@angular/core';
+import { Component, OnInit, computed, inject, input, signal } from '@angular/core';
 import { Router } from '@angular/router';
+import { NotaBar } from '../../components/nota-bar/nota-bar';
+import { formatarHora, resumirDias, statusHorario } from '../../horario-funcionamento';
 import { Estabelecimento } from '../../models';
 import { EstabelecimentosService } from '../../services/estabelecimentos.service';
+
+const NOTA_BEM_AVALIADO = 4.5;
 
 @Component({
   selector: 'app-estabelecimento',
   standalone: true,
-  imports: [],
+  imports: [NotaBar],
   templateUrl: './estabelecimento.html',
   styleUrl: './estabelecimento.scss',
 })
@@ -19,6 +23,21 @@ export class EstabelecimentoPage implements OnInit {
   protected readonly carregando = signal(true);
   protected readonly estabelecimento = signal<Estabelecimento | null>(null);
   protected readonly enderecoCopiado = signal(false);
+
+  protected readonly status = computed(() => {
+    const e = this.estabelecimento();
+    return e ? statusHorario(e) : null;
+  });
+
+  protected readonly horario = computed(() => {
+    const e = this.estabelecimento();
+    if (!e?.horario_abre || !e.horario_fecha || e.dias_abertos.length === 0) return null;
+    return `${resumirDias(e.dias_abertos)} · ${formatarHora(e.horario_abre)} às ${formatarHora(e.horario_fecha)}`;
+  });
+
+  protected readonly bemAvaliado = computed(
+    () => (this.estabelecimento()?.avaliacao ?? 0) >= NOTA_BEM_AVALIADO,
+  );
 
   async ngOnInit(): Promise<void> {
     this.estabelecimento.set(await this.estabelecimentosService.buscarPorId(this.id()));

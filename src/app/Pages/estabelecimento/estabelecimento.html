@@ -11,22 +11,53 @@
   </header>
 
   <main class="page-content">
-    <p class="descricao">{{ e.descricao }}</p>
+    @if (e.foto_url) {
+      <img class="foto-capa" [src]="e.foto_url" alt="" />
+    }
 
-    <div class="avaliacao">
-      <span class="star" aria-hidden="true">★</span>
-      <span>{{ (e.avaliacao ?? 0).toFixed(1) }}</span>
+    <div class="destaques">
+      <app-nota-bar [nota]="e.avaliacao" />
+      @if (bemAvaliado()) {
+        <span class="indicado">Bem avaliado pelos clientes</span>
+      }
     </div>
+
+    @if (status(); as s) {
+      <p class="status" [class.aberto]="s.aberto">
+        <span class="ponto" aria-hidden="true"></span>
+        {{ s.texto }}
+      </p>
+    }
+
+    @if (e.tags.length > 0) {
+      <ul class="tags">
+        @for (tag of e.tags; track tag) {
+          <li>{{ tag }}</li>
+        }
+      </ul>
+    }
 
     <div class="acoes">
       <button type="button" class="botao-primario" (click)="abrirComanda()">Abrir comanda</button>
       <button type="button" class="botao-secundario" (click)="verCardapio()">Ver cardápio</button>
     </div>
 
+    <section class="secao">
+      <h2>Sobre o bar</h2>
+      <p class="sobre">{{ e.sobre ?? e.descricao }}</p>
+    </section>
+
+    @if (horario(); as h) {
+      <section class="secao">
+        <h2>Horário de funcionamento</h2>
+        <div class="linha-info">{{ h }}</div>
+      </section>
+    }
+
     @if (e.endereco) {
-      <section class="secao-endereco">
+      <section class="secao">
         <h2>Endereço</h2>
-        <div class="linha-endereco">
+        <div class="linha-info">
           <span>{{ e.endereco }}</span>
           <button type="button" class="botao-copiar" (click)="copiarEndereco(e.endereco)">
             {{ enderecoCopiado() ? 'Copiado!' : 'Copiar' }}

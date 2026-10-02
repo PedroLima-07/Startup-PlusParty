@@ -1,5 +1,6 @@
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
+import { NavCliente } from '../../components/nav-cliente/nav-cliente';
 import { Comanda, Estabelecimento } from '../../models';
 import { AuthService } from '../../services/auth.service';
 import { HomeService } from '../../services/home.service';
@@ -11,7 +12,7 @@ interface EstabelecimentoComLotacao extends Estabelecimento {
 
 @Component({
   selector: 'app-home',
-  imports: [RouterLink],
+  imports: [RouterLink, NavCliente],
   templateUrl: './home.html',
   styleUrl: './home.scss',
 })

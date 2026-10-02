@@ -13,6 +13,12 @@ const BAR: Estabelecimento = {
   capacidade: 100,
   avaliacao: 4.5,
   criado_em: '2026-01-01',
+  foto_url: null,
+  sobre: null,
+  tags: [],
+  horario_abre: null,
+  horario_fecha: null,
+  dias_abertos: [],
 };
 
 describe('AbrirComandaLocalComponent', () => {

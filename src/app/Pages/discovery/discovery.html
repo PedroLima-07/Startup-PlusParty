@@ -22,19 +22,28 @@
   } @else {
     <div class="bars-list">
       @for (estabelecimento of estabelecimentosFiltrados; track estabelecimento.id) {
-        <button type="button" class="bar-card" (click)="abrirPerfil(estabelecimento)">
-          <span class="bar-avatar" aria-hidden="true">{{ iniciais(estabelecimento.nome) }}</span>
+        @let foto = estabelecimento.foto_url;
+        <button
+          type="button"
+          class="bar-card"
+          [class.com-foto]="foto"
+          (click)="abrirPerfil(estabelecimento)"
+        >
+          @if (foto) {
+            <img class="bar-foto" [src]="foto" alt="" loading="lazy" />
+          } @else {
+            <span class="bar-avatar" aria-hidden="true">{{ iniciais(estabelecimento.nome) }}</span>
+          }
 
           <span class="bar-info">
             <span class="bar-name">{{ estabelecimento.nome }}</span>
             <span class="bar-description">{{ estabelecimento.descricao }}</span>
-            <span class="bar-rating" aria-label="Avaliação {{ estabelecimento.avaliacao }} de 5">
-              <span class="star" aria-hidden="true">★</span>
-              <span>{{ (estabelecimento.avaliacao ?? 0).toFixed(1) }}</span>
-            </span>
+            <app-nota-bar [nota]="estabelecimento.avaliacao" />
           </span>
 
-          <span class="card-chevron" aria-hidden="true">›</span>
+          @if (!foto) {
+            <span class="card-chevron" aria-hidden="true">›</span>
+          }
         </button>
       } @empty {
         <div class="empty-state">
@@ -46,3 +55,5 @@
     </div>
   }
 </main>
+
+<app-nav-cliente />

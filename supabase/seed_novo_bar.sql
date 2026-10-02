@@ -12,13 +12,25 @@
 -- =====================================================================
 
 -- 1. Estabelecimento
-insert into estabelecimentos (id, nome, descricao, endereco, capacidade)
+-- descricao é o resumo do card no Discovery; sobre é o texto do perfil.
+-- A foto fica em public/img/estabelecimentos (commitada no app).
+-- dias_abertos: 0 = domingo ... 6 = sábado. Detalhes em estabelecimentos_detalhes.sql.
+insert into estabelecimentos (
+  id, nome, descricao, endereco, capacidade,
+  foto_url, sobre, tags, horario_abre, horario_fecha, dias_abertos
+)
 values (
   gen_random_uuid(),
   'Nome do Bar',
   'Descrição curta do bar',
   'Endereço completo',
-  50
+  50,
+  'img/estabelecimentos/nome-do-bar.jpg',
+  'Texto mais completo: clima, temática e pra quem é o lugar.',
+  array['Agitado', 'Bom pro rolê'],
+  '18:00',
+  '02:00',
+  '{2,3,4,5,6}'
 )
 returning id; -- guarde esse id, é o estabelecimento_id usado abaixo
 
