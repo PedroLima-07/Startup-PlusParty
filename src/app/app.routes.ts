@@ -75,13 +75,15 @@ export const routes: Routes = [
     redirectTo: 'cliente/discovery',
     pathMatch: 'full',
   },
+  // A raiz e endereços desconhecidos vão para o login. Quem já está logado
+  // é mandado de lá para a própria tela inicial (semSessaoGuard).
   {
     path: '',
-    redirectTo: 'cliente/discovery',
+    redirectTo: 'login',
     pathMatch: 'full',
   },
   {
     path: '**',
-    redirectTo: 'cliente/discovery',
+    redirectTo: 'login',
   },
 ];
