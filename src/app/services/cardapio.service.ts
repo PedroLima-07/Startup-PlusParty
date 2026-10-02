@@ -31,29 +31,4 @@ export class CardapioService {
   calcularTotalCarrinho(carrinho: ItemCarrinho[]): number {
     return carrinho.reduce((total, { item, quantidade }) => total + item.preco * quantidade, 0);
   }
-
-  /** Confirma o carrinho: cria o pedido e os itens pedidos de uma vez. */
-  async confirmarPedido(comandaId: string, carrinho: ItemCarrinho[]): Promise<void> {
-    const { data: pedido, error: erroPedido } = await this.supabase.client
-      .from('pedidos')
-      .insert({ comanda_id: comandaId })
-      .select()
-      .single();
-
-    if (erroPedido) throw erroPedido;
-
-    const pedidoItens = carrinho.map(({ item, quantidade }) => ({
-      pedido_id: pedido.id,
-      item_id: item.id,
-      quantidade,
-      preco_unitario: item.preco,
-      status: 'novo' as const,
-    }));
-
-    const { error: erroItens } = await this.supabase.client
-      .from('pedido_itens')
-      .insert(pedidoItens);
-
-    if (erroItens) throw erroItens;
-  }
 }
