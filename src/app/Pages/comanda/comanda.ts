@@ -1,6 +1,6 @@
 import { CurrencyPipe } from '@angular/common';
 import { Component, DestroyRef, OnInit, computed, inject, input, signal } from '@angular/core';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { ComandaDetalhada, PedidoItemDetalhado, StatusPedidoItem } from '../../models';
 import { ComandaService } from '../../services/comanda.service';
 import { SupabaseService } from '../../services/supabase.service';
@@ -23,6 +23,7 @@ export class ComandaPage implements OnInit {
   private comandaService = inject(ComandaService);
   private supabase = inject(SupabaseService);
   private destroyRef = inject(DestroyRef);
+  private router = inject(Router);
 
   id = input.required<string>();
 
@@ -30,6 +31,8 @@ export class ComandaPage implements OnInit {
   protected readonly comanda = signal<ComandaDetalhada | null>(null);
   protected readonly itens = signal<PedidoItemDetalhado[]>([]);
   protected readonly confirmandoRecebimento = signal(false);
+  protected readonly cancelando = signal(false);
+  protected readonly erroCancelamento = signal<string | null>(null);
 
   protected readonly total = computed(() => this.comandaService.calcularTotal(this.itens()));
 
@@ -46,7 +49,10 @@ export class ComandaPage implements OnInit {
     // Atualiza sozinha quando o atendente libera, avança um item ou confirma o pagamento.
     const pararDeEscutar = this.supabase.escutarMudancas(
       [{ tabela: 'comandas', filtro: `id=eq.${this.id()}` }, { tabela: 'pedido_itens' }],
-      () => void this.carregarDados(true),
+      () => {
+        // Durante o cancelamento a comanda some do banco; recarregar daria erro.
+        if (!this.cancelando()) void this.carregarDados(true);
+      },
     );
     this.destroyRef.onDestroy(pararDeEscutar);
 
@@ -67,6 +73,27 @@ export class ComandaPage implements OnInit {
 
   protected async verificarLiberacao(): Promise<void> {
     await this.carregarDados();
+  }
+
+  protected async cancelarSolicitacao(): Promise<void> {
+    if (this.cancelando()) return;
+
+    this.cancelando.set(true);
+    this.erroCancelamento.set(null);
+
+    try {
+      if (await this.comandaService.cancelarSolicitacao(this.id())) {
+        await this.router.navigateByUrl('/cliente/home');
+        return;
+      }
+
+      // Não cancelou: o atendente liberou antes. Mostra a comanda como está.
+      this.cancelando.set(false);
+      await this.carregarDados();
+    } catch {
+      this.erroCancelamento.set('Não foi possível cancelar agora. Tente novamente.');
+      this.cancelando.set(false);
+    }
   }
 
   protected abrirConfirmacaoRecebimento(): void {
