@@ -1,5 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { Comanda, ComandaDetalhada, PedidoItemDetalhado } from '../models';
+import { AuthService } from './auth.service';
 import { SupabaseService } from './supabase.service';
 
 export class ComandaEmOutroLugarError extends Error {
@@ -13,6 +14,7 @@ export class ComandaEmOutroLugarError extends Error {
 })
 export class ComandaService {
   private supabase = inject(SupabaseService);
+  private authService = inject(AuthService);
 
   /**
    * Abre a comanda no estabelecimento. Se o cliente já tem uma comanda ativa
@@ -20,11 +22,7 @@ export class ComandaService {
    * Se a comanda ativa for em outro lugar, recusa com ComandaEmOutroLugarError.
    */
   async abrirComanda(estabelecimentoId: string, mesa: string | null): Promise<Pick<Comanda, 'id'>> {
-    const {
-      data: { user },
-      error: erroUsuario,
-    } = await this.supabase.client.auth.getUser();
-    if (erroUsuario) throw erroUsuario;
+    const user = await this.authService.usuarioAtual();
     if (!user) throw new Error('Usuário não autenticado.');
 
     const { data: ativa, error: erroAtiva } = await this.supabase.client

@@ -3,7 +3,6 @@ import { Component, OnInit, computed, inject, input, signal } from '@angular/cor
 import { ActivatedRoute, Router } from '@angular/router';
 import { Item, ItemCarrinho } from '../../models';
 import { CardapioService } from '../../services/cardapio.service';
-import { ComandaService } from '../../services/comanda.service';
 import { EstabelecimentosService } from '../../services/estabelecimentos.service';
 import { PedidoService } from '../../services/pedido.service';
 import { NavCliente } from '../../components/nav-cliente/nav-cliente';
@@ -20,7 +19,6 @@ type ModoCardapio = 'pedir' | 'visualizar';
 export class CardapioPage implements OnInit {
   private route = inject(ActivatedRoute);
   private router = inject(Router);
-  private comandaService = inject(ComandaService);
   private cardapioService = inject(CardapioService);
   private estabelecimentosService = inject(EstabelecimentosService);
   private pedidoService = inject(PedidoService);
@@ -67,20 +65,22 @@ export class CardapioPage implements OnInit {
   });
 
   async ngOnInit(): Promise<void> {
-    let estabelecimentoId: string;
+    let itens: Item[];
 
     if (this.modo === 'visualizar') {
-      estabelecimentoId = this.id();
-      const estabelecimento = await this.estabelecimentosService.buscarPorId(estabelecimentoId);
+      const [estabelecimento, cardapio] = await Promise.all([
+        this.estabelecimentosService.buscarPorId(this.id()),
+        this.cardapioService.buscarCardapio(this.id()),
+      ]);
       this.nomeEstabelecimento.set(estabelecimento?.nome ?? '');
+      itens = cardapio;
     } else {
       this.comandaId = this.id();
-      const comanda = await this.comandaService.buscarComanda(this.comandaId);
-      estabelecimentoId = comanda.estabelecimento_id;
-      this.nomeEstabelecimento.set(comanda.estabelecimento.nome);
+      const cardapio = await this.cardapioService.buscarCardapioDaComanda(this.comandaId);
+      this.nomeEstabelecimento.set(cardapio.nomeEstabelecimento);
+      itens = cardapio.itens;
     }
 
-    const itens = await this.cardapioService.buscarCardapio(estabelecimentoId);
     this.itensPorId = new Map(itens.map((item) => [item.id, item]));
     this.categorias.set(Object.entries(this.cardapioService.agruparPorCategoria(itens)));
 

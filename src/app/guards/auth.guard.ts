@@ -1,17 +1,13 @@
 import { inject } from '@angular/core';
 import { CanActivateFn, Router } from '@angular/router';
-import { SupabaseService } from '../services/supabase.service';
+import { AuthService } from '../services/auth.service';
 
 /** Sem sessão, manda para o login lembrando a página pedida, para voltar depois. */
 export const authGuard: CanActivateFn = async (_rota, estado) => {
-  const supabase = inject(SupabaseService);
+  const authService = inject(AuthService);
   const router = inject(Router);
 
-  const {
-    data: { user },
-  } = await supabase.client.auth.getUser();
-
-  if (user) return true;
+  if (await authService.usuarioAtual()) return true;
 
   return router.createUrlTree(['/login'], { queryParams: { voltar: estado.url } });
 };
