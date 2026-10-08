@@ -4,7 +4,6 @@ import { NavCliente } from '../../components/nav-cliente/nav-cliente';
 import { Comanda, Estabelecimento } from '../../models';
 import { AuthService } from '../../services/auth.service';
 import { HomeService } from '../../services/home.service';
-import { SupabaseService } from '../../services/supabase.service';
 import { Carregando } from '../../components/carregando/carregando';
 
 interface EstabelecimentoComLotacao extends Estabelecimento {
@@ -18,7 +17,6 @@ interface EstabelecimentoComLotacao extends Estabelecimento {
   styleUrl: './home.scss',
 })
 export class HomePage implements OnInit {
-  private supabase = inject(SupabaseService);
   private authService = inject(AuthService);
   private homeService = inject(HomeService);
   private router = inject(Router);
@@ -61,9 +59,7 @@ export class HomePage implements OnInit {
   });
 
   async ngOnInit(): Promise<void> {
-    const {
-      data: { user },
-    } = await this.supabase.client.auth.getUser();
+    const user = await this.authService.usuarioAtual();
 
     // TODO: exigir sessão de verdade assim que o authGuard voltar (ver app.routes.ts).
     const [nome, comandaAtiva, estabelecimentos] = await Promise.all([
