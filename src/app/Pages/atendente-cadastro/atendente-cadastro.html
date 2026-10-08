@@ -1,0 +1,101 @@
+<div class="tela">
+  <div class="card-login">
+    <div class="logo">
+      <span class="logo-icone">+</span>
+      <span>party</span>
+    </div>
+    <p class="tagline">Cadastro de atendente</p>
+
+    @if (carregando()) {
+      <app-carregando />
+    } @else {
+      <p class="instrucao">
+        Escolha o bar onde você trabalha. O gerente recebe o seu pedido e libera o acesso.
+      </p>
+
+      <form [formGroup]="form" (ngSubmit)="enviar()">
+        @if (contaLogada() !== null) {
+          <p class="conta-atual">Pedido em nome de <strong>{{ contaLogada() || 'sua conta' }}</strong></p>
+        } @else {
+          <label class="campo">
+            Nome
+            <input type="text" formControlName="nome" autocomplete="name" />
+            @if (form.controls.nome.invalid && form.controls.nome.touched) {
+              <span class="erro-campo">Informe seu nome.</span>
+            }
+          </label>
+
+          <label class="campo">
+            E-mail
+            <input
+              type="email"
+              formControlName="email"
+              placeholder="seuemail@party.app"
+              autocomplete="email"
+            />
+            @if (form.controls.email.invalid && form.controls.email.touched) {
+              <span class="erro-campo">Informe um e-mail válido.</span>
+            }
+          </label>
+
+          <label class="campo">
+            Senha
+            <input type="password" formControlName="senha" autocomplete="new-password" />
+            @if (form.controls.senha.invalid && form.controls.senha.touched) {
+              <span class="erro-campo">Mínimo de 6 caracteres.</span>
+            }
+          </label>
+        }
+
+        <label class="campo">
+          Telefone
+          <input
+            type="tel"
+            formControlName="telefone"
+            placeholder="(15) 99999-0000"
+            autocomplete="tel"
+          />
+          @if (form.controls.telefone.invalid && form.controls.telefone.touched) {
+            <span class="erro-campo">Informe um telefone com DDD.</span>
+          }
+        </label>
+
+        <label class="campo">
+          Bar onde você trabalha
+          <select formControlName="estabelecimentoId">
+            <option value="" disabled>Selecione</option>
+            @for (estabelecimento of estabelecimentos(); track estabelecimento.id) {
+              <option [value]="estabelecimento.id">{{ estabelecimento.nome }}</option>
+            }
+          </select>
+          @if (form.controls.estabelecimentoId.invalid && form.controls.estabelecimentoId.touched) {
+            <span class="erro-campo">Escolha o bar.</span>
+          }
+        </label>
+
+        @if (erro(); as mensagem) {
+          <p class="erro-geral" role="alert">{{ mensagem }}</p>
+        }
+        @if (aviso(); as mensagem) {
+          <p class="aviso-geral" role="status">{{ mensagem }}</p>
+        }
+
+        <button class="botao-primario" type="submit" [disabled]="enviando()">
+          {{ enviando() ? 'Enviando...' : 'ENVIAR PEDIDO' }}
+        </button>
+      </form>
+
+      @if (contaLogada() === null) {
+        <p class="rodape-link">
+          Já tem conta?
+          <a class="link" routerLink="/login" [queryParams]="{ voltar: rotaDestaTela }">Entrar</a>
+        </p>
+        <a class="link" routerLink="/login">Voltar para o login</a>
+      } @else {
+        <a class="link" routerLink="/cliente/home">Voltar para o início</a>
+      }
+    }
+  </div>
+
+  <p class="rodape">+party 2026 · São Paulo</p>
+</div>

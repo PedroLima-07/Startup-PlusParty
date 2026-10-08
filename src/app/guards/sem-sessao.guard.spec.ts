@@ -1,20 +1,20 @@
 import { TestBed } from '@angular/core/testing';
 import { ActivatedRouteSnapshot, Router, RouterStateSnapshot, UrlTree, provideRouter } from '@angular/router';
-import { TipoPerfil } from '../models';
-import { AuthService } from '../services/auth.service';
-import { SupabaseService } from '../services/supabase.service';
+import { EquipeService } from '../services/equipe.service';
 import { semSessaoGuard } from './sem-sessao.guard';
 
 describe('semSessaoGuard', () => {
+  let telaInicial: ReturnType<typeof vi.fn>;
+
   beforeEach(() => {
+    telaInicial = vi.fn();
+
     TestBed.configureTestingModule({
-      providers: [provideRouter([]), { provide: SupabaseService, useValue: {} }],
+      providers: [provideRouter([]), { provide: EquipeService, useValue: { telaInicial } }],
     });
   });
 
-  async function rodarGuard(tipo: TipoPerfil | null): Promise<true | string> {
-    vi.spyOn(TestBed.inject(AuthService), 'buscarTipoAtual').mockResolvedValue(tipo);
-
+  async function rodarGuard(): Promise<true | string> {
     const resultado = await TestBed.runInInjectionContext(() =>
       semSessaoGuard({} as ActivatedRouteSnapshot, {} as RouterStateSnapshot),
     );
@@ -23,18 +23,20 @@ describe('semSessaoGuard', () => {
   }
 
   it('deixa quem não está logado ver a tela de login', async () => {
-    expect(await rodarGuard(null)).toBe(true);
+    telaInicial.mockResolvedValue(null);
+
+    expect(await rodarGuard()).toBe(true);
   });
 
-  it('manda o cliente logado para a home dele', async () => {
-    expect(await rodarGuard('cliente')).toBe('/cliente/home');
+  it('manda quem já está logado para a tela inicial dele', async () => {
+    telaInicial.mockResolvedValue('/atendente/pedidos');
+
+    expect(await rodarGuard()).toBe('/atendente/pedidos');
   });
 
-  it('manda o funcionário logado para a tela do atendente', async () => {
-    expect(await rodarGuard('funcionario')).toBe('/atendente/pedidos');
-  });
+  it('mostra o login se não der para descobrir a tela inicial', async () => {
+    telaInicial.mockRejectedValue(new Error('sem rede'));
 
-  it('manda o gerente logado para a área do gerente', async () => {
-    expect(await rodarGuard('gerente')).toBe('/gerente/movimento');
+    expect(await rodarGuard()).toBe(true);
   });
 });

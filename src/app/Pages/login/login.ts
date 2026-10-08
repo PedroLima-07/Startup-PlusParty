@@ -1,20 +1,22 @@
 import { Component, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { ActivatedRoute, Router } from '@angular/router';
-import { TipoPerfil } from '../../models';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { traduzirErroAuth } from '../../erros-auth';
 import { AuthService } from '../../services/auth.service';
+import { EquipeService, ROTA_CADASTRO_ATENDENTE } from '../../services/equipe.service';
 
 type Modo = 'login' | 'cadastro' | 'recuperar';
 
 @Component({
   selector: 'app-login',
-  imports: [ReactiveFormsModule],
+  imports: [ReactiveFormsModule, RouterLink],
   templateUrl: './login.html',
   styleUrl: './login.scss',
 })
 export class LoginPage {
   private fb = inject(FormBuilder);
   private authService = inject(AuthService);
+  private equipeService = inject(EquipeService);
   private router = inject(Router);
   private route = inject(ActivatedRoute);
 
@@ -22,6 +24,7 @@ export class LoginPage {
   protected readonly carregando = signal(false);
   protected readonly erro = signal<string | null>(null);
   protected readonly aviso = signal<string | null>(null);
+  protected readonly rotaCadastroAtendente = ROTA_CADASTRO_ATENDENTE;
 
   protected readonly form = this.fb.nonNullable.group({
     nome: [''],
@@ -70,41 +73,25 @@ export class LoginPage {
       }
 
       // replaceUrl tira o login do histórico: o "voltar" não cai de novo aqui.
-      const tipo = await this.authService.buscarTipoAtual();
-      await this.router.navigateByUrl(this.destino(tipo), { replaceUrl: true });
+      await this.router.navigateByUrl(await this.destino(), { replaceUrl: true });
     } catch (erro) {
-      this.erro.set(this.traduzirErro(erro));
+      this.erro.set(traduzirErroAuth(erro));
     } finally {
       this.carregando.set(false);
     }
   }
 
-  /** Volta para a página que pediu login, se for uma página do cliente deste app. */
-  private destino(tipo: TipoPerfil | null): string {
+  /**
+   * Volta para a página que pediu login, se for uma página que o cliente pode
+   * abrir. Senão, vai para a tela inicial de quem entrou.
+   */
+  private async destino(): Promise<string> {
     const voltar = this.route.snapshot.queryParamMap.get('voltar');
-    if (tipo === 'cliente' && voltar?.startsWith('/cliente/')) return voltar;
-    return this.authService.telaInicial(tipo);
-  }
+    const tipo = await this.authService.buscarTipoAtual();
 
-  private traduzirErro(erro: unknown): string {
-    const mensagem = erro instanceof Error ? erro.message : '';
+    const abertaAoCliente = voltar?.startsWith('/cliente/') || voltar === ROTA_CADASTRO_ATENDENTE;
+    if (tipo === 'cliente' && voltar && abertaAoCliente) return voltar;
 
-    if (mensagem.includes('Invalid login credentials')) {
-      return 'E-mail ou senha incorretos.';
-    }
-    if (mensagem.includes('already registered') || mensagem.includes('User already registered')) {
-      return 'Esse e-mail já está cadastrado.';
-    }
-    if (mensagem.includes('Password should be at least')) {
-      return 'A senha precisa ter pelo menos 6 caracteres.';
-    }
-    if (mensagem.includes('rate limit') || mensagem.includes('For security purposes')) {
-      return 'Muitas tentativas. Aguarde alguns minutos e tente de novo.';
-    }
-    if (mensagem.includes('Email not confirmed')) {
-      return 'Confirme seu e-mail antes de entrar — verifique sua caixa de entrada.';
-    }
-
-    return 'Não foi possível concluir. Tente novamente.';
+    return (await this.equipeService.telaInicial()) ?? this.authService.telaInicial(tipo);
   }
 }

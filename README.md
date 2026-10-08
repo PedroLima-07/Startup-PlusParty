@@ -136,7 +136,8 @@ Os scripts ficam versionados na pasta [`supabase/`](supabase/) e são aplicados 
 | `criar_pedido.sql` | Grava o pedido e os itens numa única transação |
 | `realtime.sql` | Liga a atualização em tempo real |
 | `estabelecimentos_detalhes.sql` | Foto, descrição, tags e horário de funcionamento do bar |
-| `seed_novo_bar.sql` | Modelo para cadastrar um bar novo e o seu cardápio |
+| `seed_novo_bar.sql` | Modelo para cadastrar um bar novo, o seu cardápio e o gerente |
+| `equipe.sql` | Atendente pede para entrar na equipe de um bar e o gerente aprova, recusa ou remove |
 
 ### Segurança
 

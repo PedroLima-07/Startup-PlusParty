@@ -119,6 +119,42 @@
       text-overflow: ellipsis;
       white-space: nowrap;
     }
+
+    // O ícone da Equipe é um SVG (os outros são PNG pretos coloridos por
+    // filtro). Traço preto para o filtro de "inativo" dar o mesmo cinza.
+    svg.nav-icon {
+      fill: none;
+      stroke: #000;
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    &.active svg.nav-icon {
+      stroke: #007bff;
+      filter: none;
+    }
+
+    .icone-com-contador {
+      position: relative;
+      display: flex;
+    }
+
+    .contador {
+      position: absolute;
+      top: -6px;
+      right: -12px;
+      min-width: 18px;
+      height: 18px;
+      padding: 0 5px;
+      border-radius: 9px;
+      background: #dc3545;
+      color: #fff;
+      font-size: 11px;
+      font-weight: bold;
+      line-height: 18px;
+      text-align: center;
+    }
   }
 }
 

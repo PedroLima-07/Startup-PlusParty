@@ -1,0 +1,65 @@
+// O visual base vem de login.scss; aqui só o que esta tela tem a mais.
+
+// Dentro do cartão a ampulheta não precisa ocupar meia tela.
+app-carregando {
+  min-height: 140px;
+  padding: 0;
+}
+
+.icone-estado {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 64px;
+  height: 64px;
+  margin: 12px 0 8px;
+  border-radius: 50%;
+  background: #eef2ff;
+  color: var(--azul-acao);
+  font-size: 1.7rem;
+
+  &.aprovado {
+    background: #dcfce7;
+    color: #15803d;
+  }
+
+  &.recusado {
+    background: #fef2f2;
+    color: #dc2626;
+  }
+}
+
+.titulo-estado {
+  margin: 0 0 8px;
+  font-size: 1.15rem;
+  font-weight: 700;
+}
+
+.instrucao strong {
+  color: var(--azul-marinho);
+}
+
+.botao-primario {
+  width: 100%;
+}
+
+.erro-geral {
+  width: 100%;
+  margin-top: 12px;
+}
+
+.link {
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  &.perigo {
+    color: #dc2626;
+  }
+
+  &.discreto {
+    color: var(--cinza-texto);
+    font-weight: 400;
+  }
+}

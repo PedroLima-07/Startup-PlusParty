@@ -122,6 +122,32 @@ export interface ComandaPendente {
   total: number;
 }
 
+export type StatusSolicitacaoEquipe = 'pendente' | 'aprovada' | 'recusada';
+
+/** O pedido de alguém para trabalhar num bar, como a própria pessoa o vê. */
+export interface MinhaSolicitacaoEquipe {
+  id: string;
+  status: StatusSolicitacaoEquipe;
+  estabelecimento: Pick<Estabelecimento, 'nome'>;
+}
+
+/** Um pedido esperando resposta, como o gerente o vê na aba Equipe. */
+export interface SolicitacaoPendente {
+  id: string;
+  nome: string;
+  email: string;
+  telefone: string;
+  criada_em: string;
+}
+
+/** Atendente que já trabalha no bar do gerente. */
+export interface Funcionario {
+  id: string;
+  nome: string;
+  email: string;
+  telefone: string | null;
+}
+
 export interface Alerta {
   id: string;
   comanda_id: string;

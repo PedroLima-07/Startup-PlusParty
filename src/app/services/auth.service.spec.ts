@@ -5,7 +5,7 @@ import { SupabaseService } from './supabase.service';
 const ATENDENTE: PerfilAtual = {
   nome: 'Ana',
   tipo: 'funcionario',
-  estabelecimento: { nome: "Bar D'Zé" },
+  estabelecimento: { id: 'b1', nome: "Bar D'Zé" },
 };
 
 describe('AuthService — sessão e perfil', () => {
@@ -77,6 +77,14 @@ describe('AuthService — sessão e perfil', () => {
     await service.perfilAtual();
 
     expect(signOut).toHaveBeenCalled();
+    expect(single).toHaveBeenCalledTimes(2);
+  });
+
+  it('busca de novo quando pedem para esquecer o perfil', async () => {
+    await service.perfilAtual();
+    service.esquecerPerfil();
+    await service.perfilAtual();
+
     expect(single).toHaveBeenCalledTimes(2);
   });
 

@@ -8,7 +8,7 @@ export interface PerfilAtual {
   nome: string;
   tipo: TipoPerfil;
   /** Bar do funcionário/gerente; `null` para cliente. */
-  estabelecimento: { nome: string } | null;
+  estabelecimento: { id: string; nome: string } | null;
 }
 
 @Injectable({
@@ -110,6 +110,14 @@ export class AuthService {
     return this.perfilGuardado.perfil;
   }
 
+  /**
+   * Faz a próxima consulta ao perfil ir ao banco. Para quando se sabe que ele
+   * mudou por lá, como logo depois de o gerente aprovar o atendente.
+   */
+  esquecerPerfil(): void {
+    this.perfilGuardado = null;
+  }
+
   async buscarNomeAtual(): Promise<string> {
     return (await this.perfilAtual())?.nome ?? '';
   }
@@ -139,7 +147,7 @@ export class AuthService {
   private async buscarPerfil(usuarioId: string): Promise<PerfilAtual> {
     const { data, error } = await this.supabase.client
       .from('perfis')
-      .select('nome, tipo, estabelecimento:estabelecimentos(nome)')
+      .select('nome, tipo, estabelecimento:estabelecimentos(id, nome)')
       .eq('id', usuarioId)
       .single();
 

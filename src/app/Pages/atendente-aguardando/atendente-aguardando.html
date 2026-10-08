@@ -1,0 +1,65 @@
+<div class="tela">
+  <div class="card-login">
+    <div class="logo">
+      <span class="logo-icone">+</span>
+      <span>party</span>
+    </div>
+
+    @if (carregando()) {
+      <app-carregando texto="Consultando o seu pedido" />
+    } @else {
+      @if (solicitacao(); as s) {
+        @switch (s.status) {
+          @case ('pendente') {
+            <div class="icone-estado" aria-hidden="true">⏳</div>
+            <p class="titulo-estado">Aguardando liberação</p>
+            <p class="instrucao">
+              O gerente do <strong>{{ s.estabelecimento.nome }}</strong> precisa aprovar o seu
+              acesso. Esta tela muda sozinha quando ele responder.
+            </p>
+            <button class="botao-primario" type="button" (click)="usarComoCliente()">
+              Usar o app como cliente
+            </button>
+            <button class="link perigo" type="button" [disabled]="processando()" (click)="cancelarPedido()">
+              {{ processando() ? 'Cancelando...' : 'Cancelar pedido' }}
+            </button>
+          }
+
+          @case ('aprovada') {
+            <div class="icone-estado aprovado" aria-hidden="true">✓</div>
+            <p class="titulo-estado">Acesso liberado!</p>
+            <p class="instrucao">
+              Você agora faz parte da equipe do <strong>{{ s.estabelecimento.nome }}</strong>.
+            </p>
+            <button class="botao-primario" type="button" (click)="entrar()">
+              Entrar na área do atendente
+            </button>
+          }
+
+          @case ('recusada') {
+            <div class="icone-estado recusado" aria-hidden="true">✕</div>
+            <p class="titulo-estado">Pedido não aprovado</p>
+            <p class="instrucao">
+              O gerente do <strong>{{ s.estabelecimento.nome }}</strong> não aprovou o seu pedido.
+              Se foi engano, fale com ele e peça de novo.
+            </p>
+            <button class="botao-primario" type="button" [disabled]="processando()" (click)="pedirDeNovo()">
+              Pedir de novo
+            </button>
+            <button class="link" type="button" [disabled]="processando()" (click)="cancelarPedido()">
+              Continuar como cliente
+            </button>
+          }
+        }
+      }
+
+      @if (erro(); as mensagem) {
+        <p class="erro-geral" role="alert">{{ mensagem }}</p>
+      }
+
+      <button class="link discreto" type="button" (click)="sair()">Sair da conta</button>
+    }
+  </div>
+
+  <p class="rodape">+party 2026 · São Paulo</p>
+</div>

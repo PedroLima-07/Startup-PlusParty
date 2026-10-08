@@ -159,6 +159,8 @@ form {
   cursor: pointer;
   padding: 0;
   margin-top: 16px;
+  // Também é usado em <a> (cadastro de atendente).
+  text-decoration: none;
 }
 
 .rodape-link {
