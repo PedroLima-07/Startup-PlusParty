@@ -4,13 +4,14 @@ import { NotaBar } from '../../components/nota-bar/nota-bar';
 import { formatarHora, resumirDias, statusHorario } from '../../horario-funcionamento';
 import { Estabelecimento } from '../../models';
 import { EstabelecimentosService } from '../../services/estabelecimentos.service';
+import { NavCliente } from '../../components/nav-cliente/nav-cliente';
 
 const NOTA_BEM_AVALIADO = 4.5;
 
 @Component({
   selector: 'app-estabelecimento',
   standalone: true,
-  imports: [NotaBar],
+  imports: [NavCliente, NotaBar],
   templateUrl: './estabelecimento.html',
   styleUrl: './estabelecimento.scss',
 })

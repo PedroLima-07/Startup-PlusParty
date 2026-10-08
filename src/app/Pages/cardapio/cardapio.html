@@ -59,6 +59,25 @@
       }
 
       <footer class="rodape">
+        <!-- Resumo do carrinho: aparece só no painel lateral do desktop -->
+        <div class="resumo">
+          <h2>Seu pedido</h2>
+          @for (linha of itensDoCarrinho(); track linha.item.id) {
+            <div class="linha-resumo">
+              <span>{{ linha.quantidade }}x {{ linha.item.nome }}</span>
+              <span>{{ linha.item.preco * linha.quantidade | currency: 'BRL' }}</span>
+            </div>
+          } @empty {
+            <p class="resumo-vazio">Adicione itens do cardápio para montar o seu pedido.</p>
+          }
+          @if (totalItensCarrinho() > 0) {
+            <div class="linha-resumo total">
+              <span>Total</span>
+              <strong>{{ totalCarrinho() | currency: 'BRL' }}</strong>
+            </div>
+          }
+        </div>
+
         <button
           class="botao-primario"
           type="button"
@@ -77,3 +96,5 @@
     }
   </div>
 }
+
+<app-nav-cliente class="apenas-desktop" />

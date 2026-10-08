@@ -1,3 +1,5 @@
+@use '../../../../styles/desktop' as d;
+
 :host {
   display: block;
   min-height: 100dvh;
@@ -281,4 +283,79 @@
   padding: 40px;
   text-align: center;
   color: #6b7280;
+}
+
+// ---------------------------------------------------------------------
+// Desktop: menu lateral e conteúdo centralizado, mais espaçoso
+// ---------------------------------------------------------------------
+@include d.desktop {
+  :host {
+    padding-left: d.$largura-menu;
+  }
+
+  .app-header {
+    position: static;
+    background: transparent;
+    box-shadow: none;
+  }
+
+  .header-content {
+    max-width: 900px;
+    min-height: 0;
+    padding: 40px 40px 0;
+    gap: 16px;
+  }
+
+  .header-content h1 {
+    color: #0f1f4b;
+    font-size: 22px;
+  }
+
+  .back-button {
+    @include d.botao-voltar-claro;
+    flex-basis: 40px;
+  }
+
+  .page-content {
+    max-width: 900px;
+    padding: 48px 40px 56px;
+  }
+
+  .intro-section {
+    margin-bottom: 36px;
+  }
+
+  .intro-section h2 {
+    font-size: 36px;
+    letter-spacing: -0.02em;
+  }
+
+  .local-options {
+    gap: 24px;
+  }
+
+  .local-card {
+    min-height: 270px;
+    border-radius: 20px;
+  }
+
+  .local-card-title {
+    font-size: 20px;
+  }
+
+  .local-card-description {
+    font-size: 14px;
+  }
+
+  .mesa-form,
+  .balcao-action {
+    max-width: 520px;
+    margin: 32px auto 0;
+  }
+
+  .mensagem-erro {
+    max-width: 520px;
+    margin: 16px auto 0;
+    font-size: 14px;
+  }
 }

@@ -1,0 +1,36 @@
+// Layout de desktop da área do cliente.
+// Tudo que é específico de tela grande fica dentro de `@include desktop`,
+// para o layout mobile (o padrão de cada tela) não ser afetado.
+
+$largura-menu: 248px;
+
+@mixin desktop {
+  @media (min-width: 1024px) {
+    @content;
+  }
+}
+
+// Cabeçalho das telas: no mobile é uma barra azul-marinho; no desktop, com o
+// menu lateral já em azul-marinho, vira um título claro no topo do conteúdo.
+@mixin botao-voltar-claro {
+  width: 40px;
+  height: 40px;
+  border: 1px solid #dfe3eb;
+  border-radius: 50%;
+  background: #fff;
+  color: #0f1f4b;
+
+  &:hover,
+  &:focus-visible {
+    background: #eef2ff;
+    border-color: #2f6bff;
+  }
+}
+
+// Notebooks e janelas menores: o desktop continua valendo, mas com a coluna
+// lateral mais estreita para a coluna principal não ficar espremida.
+@mixin desktop-compacto {
+  @media (min-width: 1024px) and (max-width: 1279px) {
+    @content;
+  }
+}
