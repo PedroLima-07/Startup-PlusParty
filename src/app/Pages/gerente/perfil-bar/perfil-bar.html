@@ -1,38 +1,60 @@
-<div class="perfil-bar-container">
-  
-  <div class="foto-capa">
-    <div class="capa-placeholder" *ngIf="!perfilEdit.fotoCapaUrl">Sem foto</div>
-    <img *ngIf="perfilEdit.fotoCapaUrl" [src]="perfilEdit.fotoCapaUrl" alt="Capa">
-    <label class="btn-trocar-foto">
-      Trocar foto
-      <input type="file" accept="image/*" (change)="onFotoSelected($event)" hidden>
+<div class="pagina">
+  <h2>Perfil do bar</h2>
+
+  <form class="cartao" (ngSubmit)="salvar()" (input)="salvo.set(false)">
+    <div class="grupo">
+      <span class="rotulo">Foto de capa</span>
+      <div class="capa">
+        @if (fotoDeCapa(); as foto) {
+          <img [src]="foto" alt="Foto de capa do bar" />
+        } @else {
+          <app-icone nome="camera" />
+        }
+        <label class="trocar-foto">
+          <app-icone nome="camera" /> Trocar foto
+          <input type="file" accept="image/*" hidden (change)="escolherFoto($event)" />
+        </label>
+      </div>
+    </div>
+
+    <label class="grupo">
+      <span class="rotulo">Nome do estabelecimento</span>
+      <input type="text" name="nome" required [(ngModel)]="perfil.nome" />
+      <span class="dica">Aparece na saudação do painel e no app dos clientes.</span>
     </label>
-  </div>
 
-  <form class="perfil-form" (ngSubmit)="salvar()">
-    <div class="form-group">
-      <label>Nome do estabelecimento</label>
-      <input type="text" [(ngModel)]="perfilEdit.nome" name="nome" required>
-    </div>
+    <label class="grupo">
+      <span class="rotulo">Descrição curta</span>
+      <textarea name="descricao" rows="2" [(ngModel)]="perfil.descricaoCurta"></textarea>
+      <span class="dica">Uma frase que resume o bar para quem está procurando onde ir.</span>
+    </label>
 
-    <div class="form-group">
-      <label>Descrição curta</label>
-      <textarea [(ngModel)]="perfilEdit.descricaoCurta" name="descricao" rows="2"></textarea>
-    </div>
+    <label class="grupo">
+      <span class="rotulo">Endereço</span>
+      <input type="text" name="endereco" [(ngModel)]="perfil.endereco" />
+    </label>
 
-    <div class="form-group">
-      <label>Endereço</label>
-      <input type="text" [(ngModel)]="perfilEdit.endereco" name="endereco">
-    </div>
+    <label class="grupo">
+      <span class="rotulo">Capacidade</span>
+      <span class="com-unidade">
+        <input type="number" name="capacidade" min="1" inputmode="numeric" [(ngModel)]="perfil.capacidade" />
+        <span>pessoas</span>
+      </span>
+      <span class="dica">Usada para calcular o selo de movimento (Normal ou Quente).</span>
+    </label>
 
-    <div class="form-group">
-      <label>Horário de funcionamento</label>
-      <input type="text" [(ngModel)]="perfilEdit.horarioFuncionamento" name="horario">
-    </div>
+    <label class="grupo">
+      <span class="rotulo">Horário de funcionamento</span>
+      <input type="text" name="horario" [(ngModel)]="perfil.horarioFuncionamento" />
+      <span class="dica">Exibido no perfil público do bar.</span>
+    </label>
 
-    <button type="submit" class="btn-salvar">Salvar alterações</button>
+    @if (salvo()) {
+      <p class="aviso" role="status">Alterações salvas.</p>
+    }
+
+    <button type="submit" class="botao-marinho">Salvar</button>
   </form>
 
-  <button type="button" class="btn-sair" (click)="sair()">Sair (Logout)</button>
-
+  <button type="button" class="sair" (click)="sair()">Sair da conta</button>
 </div>

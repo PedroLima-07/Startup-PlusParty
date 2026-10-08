@@ -1,50 +1,54 @@
-<div class="gerente-layout-container">
-  <!-- Header -->
-  <header class="gerente-header">
-    <div class="logo-area">
-      <span class="logo">+party</span>
-      <span class="tag-gerente">GERENTE</span>
-    </div>
-    <div class="info-area">
-      <span class="nome-estabelecimento">{{ nomeEstabelecimento() }}</span>
-      <h1 class="page-title">{{ tituloPagina }}</h1>
+<div class="gerente">
+  <header class="topo">
+    <div class="topo-conteudo">
+      @if (subpagina(); as pagina) {
+        <a class="botao-topo" [routerLink]="pagina.voltar" aria-label="Voltar">
+          <app-icone nome="voltar" />
+        </a>
+        <h1>{{ pagina.titulo }}</h1>
+      } @else {
+        <a class="logo" routerLink="/gerente/movimento" aria-label="+party, ir para o Movimento">
+          <span aria-hidden="true">+</span>party
+        </a>
+        <a class="botao-topo" routerLink="/gerente/configuracoes" aria-label="Configurações">
+          <app-icone nome="configuracoes" />
+        </a>
+      }
     </div>
   </header>
 
-  <!-- Main Content (scrollable) -->
-  <main class="gerente-content">
-    <router-outlet></router-outlet>
+  <main class="conteudo">
+    <router-outlet />
   </main>
 
-  <!-- Bottom Nav -->
-  <nav class="gerente-bottom-nav">
-    <a routerLink="/gerente/movimento" routerLinkActive="active" class="nav-item">
-      <img class="nav-icon" src="icons/gerente/compras.png" alt="Movimento">
-      <span class="label">Movimento</span>
-    </a>
-    <a routerLink="/gerente/postagens" routerLinkActive="active" class="nav-item">
-      <img class="nav-icon" src="icons/gerente/social.png" alt="Postagens">
-      <span class="label">Postagens</span>
-    </a>
-    <a routerLink="/gerente/perfil-bar" routerLinkActive="active" class="nav-item">
-      <img class="nav-icon" src="icons/gerente/empresa.png" alt="Perfil do bar">
-      <span class="label">Perfil do bar</span>
-    </a>
-    <a routerLink="/gerente/equipe" routerLinkActive="active" class="nav-item">
-      <span class="icone-com-contador">
-        <svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true">
-          <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
-          <circle cx="9" cy="7" r="4" />
-          <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
-          <path d="M16 3.13a4 4 0 0 1 0 7.75" />
-        </svg>
-        @if (pedidosPendentes() > 0) {
-          <span class="contador" [attr.aria-label]="pedidosPendentes() + ' pedidos esperando resposta'">
-            {{ pedidosPendentes() }}
-          </span>
-        }
-      </span>
-      <span class="label">Equipe</span>
-    </a>
+  <nav class="menu" aria-label="Área do gerente">
+    <div class="menu-conteudo">
+      <a routerLink="/gerente/movimento" routerLinkActive="ativo" class="item">
+        <app-icone nome="movimento" />
+        <span>Movimento</span>
+      </a>
+      <a routerLink="/gerente/resultados" routerLinkActive="ativo" class="item">
+        <app-icone nome="resultados" />
+        <span>Resultados</span>
+      </a>
+      <a routerLink="/gerente/postagens" routerLinkActive="ativo" class="item">
+        <app-icone nome="postagens" />
+        <span>Postagens</span>
+      </a>
+      <a routerLink="/gerente/equipe" routerLinkActive="ativo" class="item">
+        <span class="icone-com-contador">
+          <app-icone nome="equipe" />
+          @if (pedidosPendentes() > 0) {
+            <span
+              class="contador"
+              [attr.aria-label]="pedidosPendentes() + ' pedidos esperando resposta'"
+            >
+              {{ pedidosPendentes() }}
+            </span>
+          }
+        </span>
+        <span>Equipe</span>
+      </a>
+    </div>
   </nav>
 </div>

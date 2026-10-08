@@ -44,7 +44,7 @@ O sistema tem **três acessos**, todos pela mesma tela de login. O app identific
 |---|---|---|
 | 🍹 **Cliente** | Quem está no bar | Encontra o bar, abre a comanda, faz pedidos e fecha a conta |
 | 👨‍🍳 **Atendente** | Barman, cozinha e caixa | Libera a entrada, acompanha bar e cozinha e confirma o pagamento |
-| 📊 **Gerente** | Dono do bar | Acompanha o movimento, publica postagens e edita o perfil do bar |
+| 📊 **Gerente** | Dono do bar | Acompanha o movimento e os resultados da noite, publica postagens, monta a equipe e edita o perfil do bar |
 
 ## ⚡ Experimente
 
@@ -104,7 +104,7 @@ O fluxo completo funciona de ponta a ponta, com dados reais:
 - **Comanda digital** em mesa ou balcão, sem comandas duplicadas
 - **Cardápio por categoria** com carrinho; o pedido é gravado numa única transação no banco
 - **Telas do atendente** separadas em Bar e Cozinha, e uma tela para liberar e cobrar comandas
-- **Área do gerente** com movimento, postagens e perfil do bar
+- **Área do gerente** com movimento, resumo da noite, resultados, postagens, equipe e perfil do bar
 - **Atualização em tempo real** entre a tela do cliente e a do atendente (requer o script `realtime.sql` aplicado no banco)
 - **Segurança no banco**: as regras valem mesmo para quem chama a API diretamente
 

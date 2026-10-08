@@ -1,23 +1,40 @@
 import { Injectable, signal } from '@angular/core';
 import { PostagemGerente } from '../models';
 
+const UM_DIA = 24 * 60 * 60 * 1000;
+
+/**
+ * Postagens do bar.
+ *
+ * TODO: dados de exemplo, guardados só na memória da aba. Ainda não grava na
+ * tabela `postagens` do Supabase.
+ */
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class PostagemService {
-  postagens = signal<PostagemGerente[]>([
-    { id: '1', texto: 'Hoje tem dose dupla de chopp até as 20h!', criadoEm: new Date(Date.now() - 3600000) },
-    { id: '2', texto: 'Música ao vivo com a banda Rock in Roll, couvert R$ 15,00', criadoEm: new Date(Date.now() - 86400000) }
+  readonly postagens = signal<PostagemGerente[]>([
+    {
+      id: '1',
+      texto: 'Hoje tem roda de samba a partir das 20h! Chegue cedo para garantir mesa. 🎶',
+      fotoUrl: 'img/estabelecimentos/bar-dze.jpg',
+      criadoEm: new Date(Date.now() - 2 * UM_DIA),
+    },
+    {
+      id: '2',
+      texto: 'Novo drink no cardápio: Gin Tropical com maracujá. Venha experimentar!',
+      criadoEm: new Date(Date.now() - 5 * UM_DIA),
+    },
   ]);
 
-  publicar(texto: string, fotoUrl?: string) {
+  /** A postagem nova entra no topo da lista. */
+  publicar(texto: string, fotoUrl?: string): void {
     const novaPostagem: PostagemGerente = {
-      id: Math.random().toString(36).substring(2, 9),
+      id: crypto.randomUUID(),
       texto,
       fotoUrl,
-      criadoEm: new Date()
+      criadoEm: new Date(),
     };
-    // Add to the top
-    this.postagens.update(posts => [novaPostagem, ...posts]);
+    this.postagens.update((postagens) => [novaPostagem, ...postagens]);
   }
 }

@@ -1,7 +1,15 @@
+@use '../gerente' as g;
+
 .equipe-container {
-  display: flex;
-  flex-direction: column;
-  gap: 24px;
+  @include g.pagina;
+  gap: 22px;
+}
+
+h1 {
+  margin: 0 0 -6px;
+  font-size: 24px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
 }
 
 section {
@@ -11,32 +19,29 @@ section {
 }
 
 h2 {
+  @include g.rotulo;
   display: flex;
   align-items: center;
   gap: 8px;
-  margin: 0 0 2px;
-  font-size: 16px;
 
   .contador {
-    min-width: 22px;
-    padding: 2px 7px;
-    border-radius: 11px;
-    background: #e3f2fd;
-    color: #0d47a1;
-    font-size: 12px;
+    min-width: 20px;
+    padding: 1px 6px;
+    border-radius: 10px;
+    background: #e4ecff;
+    color: #1d4ed8;
+    letter-spacing: 0;
     text-align: center;
   }
 }
 
 .card {
-  background: white;
-  padding: 15px;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  @include g.cartao;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 12px;
+  padding: 14px 16px;
 }
 
 .pessoa {
@@ -44,12 +49,12 @@ h2 {
   flex-direction: column;
   gap: 3px;
   min-width: 0;
-  font-size: 14px;
-  color: #666;
+  font-size: 13px;
+  color: g.$texto-suave;
 
   strong {
-    font-size: 16px;
-    color: #333;
+    font-size: 15px;
+    color: g.$marinho;
   }
 
   strong,
@@ -61,7 +66,7 @@ h2 {
   }
 
   a {
-    color: #007bff;
+    color: g.$azul;
     text-decoration: none;
   }
 
@@ -77,40 +82,31 @@ h2 {
 }
 
 .botao {
-  min-height: 44px;
-  padding: 8px 16px;
-  border-radius: 20px;
-  border: 1px solid #ddd;
-  background: white;
-  font-size: 14px;
-  font-weight: bold;
-  white-space: nowrap;
-  cursor: pointer;
+  @include g.botao;
+  background: #fff;
+  border-color: g.$borda;
+  color: g.$marinho;
 
   &.primario {
-    background: #007bff;
-    border-color: #007bff;
-    color: white;
+    background: g.$azul;
+    border-color: g.$azul;
+    color: #fff;
   }
 
   &.perigo {
-    border-color: #dc3545;
-    color: #dc3545;
-  }
-
-  &:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
+    border-color: g.$perigo;
+    color: g.$perigo;
   }
 }
 
 .vazio {
   margin: 0;
-  padding: 16px;
-  background: white;
-  border-radius: 8px;
-  color: #666;
-  font-size: 14px;
+  padding: 18px 16px;
+  border: 1px dashed g.$borda;
+  border-radius: 14px;
+  background: #fff;
+  color: g.$texto-suave;
+  font-size: 13px;
   line-height: 1.5;
   text-align: center;
 }
@@ -118,10 +114,10 @@ h2 {
 .mensagem-erro {
   margin: 0;
   padding: 10px 12px;
-  border-radius: 8px;
-  background: #f8d7da;
-  color: #721c24;
-  font-size: 14px;
+  border-radius: 10px;
+  background: #fde8e8;
+  color: #991b1b;
+  font-size: 13px;
 }
 
 .overlay {
@@ -132,15 +128,15 @@ h2 {
   align-items: center;
   justify-content: center;
   padding: 20px;
-  background: rgba(0, 0, 0, 0.45);
+  background: rgba(15, 31, 75, 0.45);
 }
 
 .modal {
   width: 100%;
   max-width: 360px;
   padding: 20px;
-  border-radius: 12px;
-  background: white;
+  border-radius: 16px;
+  background: #fff;
 
   h3 {
     margin: 0 0 8px;
@@ -149,7 +145,7 @@ h2 {
 
   p {
     margin: 0 0 18px;
-    color: #666;
+    color: g.$texto-suave;
     font-size: 14px;
     line-height: 1.5;
   }
@@ -163,7 +159,6 @@ h2 {
   .card {
     flex-direction: column;
     align-items: stretch;
-    padding: 12px;
   }
 
   .acoes .botao {

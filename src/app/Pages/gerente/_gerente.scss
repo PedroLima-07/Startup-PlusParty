@@ -1,0 +1,126 @@
+// Base visual da área do gerente: as cores e os blocos que todas as telas
+// dela repetem (cartão, rótulo de seção, botões, número em destaque).
+
+$marinho: #0f1f4b;
+$azul: #2f6bff;
+$azul-claro: #cddafd;
+$fundo: #f5f6fa;
+$borda: #e3e7ef;
+$texto-suave: #6b7280;
+$rotulo: #8a93a6;
+$perigo: #dc2626;
+
+// Valores e números de comanda usam fonte monoespaçada, como no painel modelado.
+$mono: ui-monospace, 'SF Mono', 'Cascadia Mono', 'Roboto Mono', Consolas, monospace;
+
+@mixin pagina {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  width: 100%;
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 20px 16px 28px;
+  color: $marinho;
+}
+
+@mixin cartao {
+  background: #fff;
+  border: 1px solid $borda;
+  border-radius: 16px;
+  padding: 18px 16px;
+  box-shadow: 0 1px 2px rgba(15, 31, 75, 0.04);
+}
+
+@mixin rotulo {
+  margin: 0;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: $rotulo;
+}
+
+@mixin numero {
+  font-family: $mono;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+}
+
+@mixin botao {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 40px;
+  padding: 9px 16px;
+  border: 1.5px solid transparent;
+  border-radius: 10px;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  text-decoration: none;
+  white-space: nowrap;
+  cursor: pointer;
+
+  &:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+  }
+}
+
+@mixin botao-azul {
+  @include botao;
+  background: $azul;
+  color: #fff;
+}
+
+@mixin botao-marinho {
+  @include botao;
+  background: $marinho;
+  color: #fff;
+}
+
+@mixin botao-contorno {
+  @include botao;
+  background: #fff;
+  border-color: $marinho;
+  color: $marinho;
+}
+
+// O "?" ao lado de um título: a explicação aparece ao passar o mouse ou focar.
+@mixin ajuda {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+  background: #e6eaf2;
+  color: $texto-suave;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0;
+  text-transform: none;
+  cursor: help;
+}
+
+@mixin campo {
+  width: 100%;
+  padding: 12px 14px;
+  border: 1px solid $borda;
+  border-radius: 10px;
+  background: #fff;
+  color: $marinho;
+  font: inherit;
+  font-size: 14px;
+  outline: none;
+
+  &:focus {
+    border-color: $azul;
+  }
+
+  &::placeholder {
+    color: #9aa3b5;
+  }
+}

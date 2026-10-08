@@ -1,0 +1,36 @@
+<div class="pagina">
+  <header class="cabecalho">
+    <h1>Resultados</h1>
+    <p>Como foi a noite de hoje até agora</p>
+  </header>
+
+  <section class="cartao">
+    <h2>
+      Lotação por hora
+      <span class="ajuda" title="Quantas comandas estavam abertas ao mesmo tempo em cada hora.">?</span>
+    </h2>
+    <p class="subtitulo">Comandas abertas em cada faixa de horário, hoje</p>
+    <app-grafico-horas [dados]="movimento.lotacaoPorHora()" />
+  </section>
+
+  <section class="cartao">
+    <h2>
+      Mais vendidos
+      <span class="ajuda" title="Soma das quantidades de cada item em todos os pedidos de hoje.">?</span>
+    </h2>
+    <p class="subtitulo">Itens mais pedidos hoje</p>
+    <app-mais-vendidos [itens]="movimento.maisVendidos()" />
+  </section>
+
+  <section class="cartao">
+    <h2>
+      Tempo médio de preparo
+      <span class="ajuda" title="Tempo entre o pedido chegar e o setor marcar como pronto.">?</span>
+    </h2>
+    <p class="subtitulo">Do pedido enviado até marcado como pronto</p>
+    <app-tempo-preparo
+      [bar]="movimento.minutosPreparoBar()"
+      [cozinha]="movimento.minutosPreparoCozinha()"
+    />
+  </section>
+</div>

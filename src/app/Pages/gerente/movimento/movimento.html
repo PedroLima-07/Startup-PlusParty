@@ -1,53 +1,181 @@
-<div class="movimento-container">
-  <!-- Status Cards -->
-  <div class="cards-grid">
-    <div class="status-card">
-      <div class="bolinha" [ngClass]="movimentoService.statusMovimento()"></div>
-      <div class="status-info">
-        <span class="status-label">{{ movimentoService.statusMovimento() | titlecase }}</span>
-        <span class="status-count">{{ movimentoService.comandasAbertasCount() }} abertas agora</span>
-      </div>
-    </div>
-    
-    <div class="stats-row">
-      <div class="stat-card">
-        <span class="stat-label">Comandas do dia</span>
-        <span class="stat-value">{{ movimentoService.comandasDoDiaCount() }}</span>
-      </div>
-      <div class="stat-card">
-        <span class="stat-label">Consumido no dia</span>
-        <span class="stat-value">{{ movimentoService.consumidoNoDia() | currency:'BRL' }}</span>
-      </div>
-    </div>
-  </div>
+<section class="saudacao">
+  <div class="saudacao-conteudo">
+    <h1>Olá, {{ nomeDoBar() || 'gerente' }}</h1>
+    <p class="data">{{ hoje | date: "EEEE, d 'de' MMMM" }}</p>
 
-  <!-- Filtros -->
-  <div class="filtros">
-    <button class="chip" [class.active]="filtroAtual() === 'todas'" (click)="setFiltro('todas')">Todas</button>
-    <button class="chip" [class.active]="filtroAtual() === 'abertas'" (click)="setFiltro('abertas')">Abertas</button>
-    <button class="chip" [class.active]="filtroAtual() === 'aguardando_pagamento'" (click)="setFiltro('aguardando_pagamento')">Aguardando pagamento</button>
-    <button class="chip" [class.active]="filtroAtual() === 'pagas'" (click)="setFiltro('pagas')">Pagas</button>
-  </div>
-
-  <!-- Lista de Comandas -->
-  <div class="comandas-list">
-    <div class="comanda-card" *ngFor="let comanda of comandasFiltradas()">
-      <div class="comanda-header">
-        <span class="comanda-numero">#{{ comanda.numero }}</span>
-        <span class="comanda-horario">{{ comanda.horario }}</span>
+    <dl class="numeros">
+      <div>
+        <dt>comandas abertas</dt>
+        <dd>{{ movimento.comandasAbertas() }}</dd>
       </div>
-      <div class="comanda-body">
-        <div class="cliente-info">
-          <strong>{{ comanda.cliente }}</strong>
-          <span>Mesa: {{ comanda.mesa }}</span>
+      <div>
+        <dt>pagas hoje</dt>
+        <dd>{{ movimento.comandasPagas() }}</dd>
+      </div>
+      <div>
+        <dt>aguardando pgto</dt>
+        <dd>{{ movimento.comandasAguardandoPagamento() }}</dd>
+      </div>
+    </dl>
+  </div>
+</section>
+
+<div class="pagina">
+  <section class="atencao" aria-labelledby="titulo-atencao">
+    <h2 id="titulo-atencao">
+      Precisa de atenção
+      @if (movimento.alertas().length > 0) {
+        <span class="contador">{{ movimento.alertas().length }}</span>
+      }
+    </h2>
+    <p class="explicacao">
+      Os itens saem desta lista automaticamente quando a situação é resolvida pela equipe.
+    </p>
+
+    @for (alerta of movimento.alertas(); track alerta.id) {
+      <article class="alerta" [class]="alerta.tipo">
+        <span class="alerta-icone"><app-icone [nome]="aparencia(alerta).icone" /></span>
+        <div class="alerta-texto">
+          <strong>{{ alerta.titulo }}</strong>
+          <span>{{ alerta.detalhe }}</span>
         </div>
-        <div class="valor-status">
-          <span class="valor">{{ comanda.valor | currency:'BRL' }}</span>
-          <span class="status-badge" [ngClass]="comanda.status">
-            {{ comanda.status.replace('_', ' ') | titlecase }}
-          </span>
-        </div>
+        @if (avisados().has(alerta.id)) {
+          <span class="avisado">Atendente avisado</span>
+        } @else {
+          <button type="button" class="botao-azul" (click)="agir(alerta)">
+            {{ aparencia(alerta).acao }}
+          </button>
+        }
+      </article>
+    } @empty {
+      <p class="vazio">Tudo em ordem: nada precisa de atenção agora.</p>
+    }
+  </section>
+
+  <section class="cartao">
+    <h2 class="rotulo">
+      Status do movimento
+      <span class="ajuda" title="Normal ou Quente, conforme as comandas abertas em relação à capacidade do bar.">?</span>
+    </h2>
+    <div class="status">
+      <span class="selo" [class.quente]="movimento.statusMovimento() === 'quente'">
+        {{ movimento.statusMovimento() === 'quente' ? 'Quente' : 'Normal' }}
+      </span>
+      <div class="status-numero">
+        <strong>{{ movimento.comandasAbertas() }}</strong>
+        <span>abertas agora</span>
       </div>
     </div>
-  </div>
+  </section>
+
+  <section class="cartao faturamento">
+    <div class="cartao-topo">
+      <h2 class="rotulo">Faturamento da noite</h2>
+      <button
+        type="button"
+        class="olho"
+        [attr.aria-label]="valoresOcultos() ? 'Mostrar valores' : 'Esconder valores'"
+        [attr.aria-pressed]="valoresOcultos()"
+        (click)="alternarValores()"
+      >
+        <app-icone [nome]="valoresOcultos() ? 'olho-fechado' : 'olho'" />
+      </button>
+    </div>
+
+    <p class="total">
+      {{ valoresOcultos() ? 'R$ ••••' : (movimento.faturamento() | currency: 'BRL') }}
+    </p>
+
+    <dl class="detalhes">
+      <div>
+        <dt>Comandas pagas</dt>
+        <dd>{{ movimento.comandasPagas() }}</dd>
+      </div>
+      <div>
+        <dt>
+          Ticket médio
+          <span class="ajuda" title="Faturamento dividido pelo número de comandas pagas.">?</span>
+        </dt>
+        <dd>{{ valoresOcultos() ? 'R$ ••••' : (movimento.ticketMedio() | currency: 'BRL') }}</dd>
+      </div>
+    </dl>
+
+    @if (!valoresOcultos()) {
+      <div class="meta">
+        <span>
+          <strong>{{ movimento.faturamento() | currency: 'BRL' : 'symbol' : '1.0-0' }}</strong>
+          de {{ movimento.metaFaturamento() | currency: 'BRL' : 'symbol' : '1.0-0' }}
+        </span>
+        <strong class="percentual">{{ movimento.percentualDaMeta() }}%</strong>
+      </div>
+      <div
+        class="progresso"
+        role="progressbar"
+        aria-label="Meta de faturamento"
+        aria-valuemin="0"
+        aria-valuemax="100"
+        [attr.aria-valuenow]="movimento.percentualDaMeta()"
+      >
+        <span [style.width.%]="movimento.percentualDaMeta()"></span>
+      </div>
+    }
+
+    <p class="nota">
+      Soma apenas as comandas já pagas. As comandas em aberto aparecem separadas porque o valor
+      ainda pode mudar.
+    </p>
+    <p class="em-aberto">
+      Em aberto:
+      <strong>{{ valoresOcultos() ? 'R$ ••••' : (movimento.valorEmAberto() | currency: 'BRL') }}</strong>
+      em {{ movimento.comandasAbertas() }} comandas
+    </p>
+
+    <a class="botao-contorno" routerLink="/gerente/movimento/resumo">
+      Ver resumo completo da noite <app-icone nome="seta" />
+    </a>
+  </section>
+
+  <section #listaDeComandas class="comandas" aria-labelledby="titulo-comandas">
+    <h2 id="titulo-comandas" class="rotulo">Comandas do dia</h2>
+
+    <label class="busca">
+      <app-icone nome="busca" />
+      <input
+        type="search"
+        placeholder="Buscar por cliente, mesa ou número da comanda"
+        aria-label="Buscar comanda"
+        [value]="busca()"
+        (input)="busca.set($any($event.target).value)"
+      />
+    </label>
+
+    <div class="filtros">
+      @for (opcao of filtros; track opcao.valor) {
+        <button
+          type="button"
+          class="filtro"
+          [class.ativo]="filtro() === opcao.valor"
+          [attr.aria-pressed]="filtro() === opcao.valor"
+          (click)="filtro.set(opcao.valor)"
+        >
+          {{ opcao.rotulo }}
+        </button>
+      }
+    </div>
+
+    @for (comanda of comandasFiltradas(); track comanda.numero) {
+      <article class="comanda">
+        <div class="comanda-identificacao">
+          <strong class="comanda-numero">Comanda {{ comanda.numero }}</strong>
+          <span class="selo-status" [class]="comanda.status">{{ rotuloStatus(comanda) }}</span>
+        </div>
+        <strong class="comanda-valor">{{ comanda.valor | currency: 'BRL' }}</strong>
+        <span class="comanda-detalhe">
+          {{ comanda.cliente }} · {{ local(comanda) }} · {{ comanda.horario }}
+        </span>
+      </article>
+    } @empty {
+      <p class="vazio">Nenhuma comanda encontrada.</p>
+    }
+  </section>
 </div>
