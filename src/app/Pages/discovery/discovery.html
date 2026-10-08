@@ -18,7 +18,7 @@
   </label>
 
   @if (carregando()) {
-    <p class="carregando">Carregando bares...</p>
+    <app-carregando texto="Carregando bares" />
   } @else {
     <div class="bars-list">
       @for (estabelecimento of estabelecimentosFiltrados; track estabelecimento.id) {

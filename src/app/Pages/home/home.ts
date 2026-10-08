@@ -5,6 +5,7 @@ import { Comanda, Estabelecimento } from '../../models';
 import { AuthService } from '../../services/auth.service';
 import { HomeService } from '../../services/home.service';
 import { SupabaseService } from '../../services/supabase.service';
+import { Carregando } from '../../components/carregando/carregando';
 
 interface EstabelecimentoComLotacao extends Estabelecimento {
   lotacao: 'normal' | 'quente';
@@ -12,7 +13,7 @@ interface EstabelecimentoComLotacao extends Estabelecimento {
 
 @Component({
   selector: 'app-home',
-  imports: [RouterLink, NavCliente],
+  imports: [Carregando, RouterLink, NavCliente],
   templateUrl: './home.html',
   styleUrl: './home.scss',
 })

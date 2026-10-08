@@ -5,10 +5,11 @@ import { ComandaPendente } from '../../models';
 import { AuthService } from '../../services/auth.service';
 import { SupabaseService } from '../../services/supabase.service';
 import { ComandasAtendenteService } from '../../services/comandas-atendente.service';
+import { Carregando } from '../../components/carregando/carregando';
 
 @Component({
   selector: 'app-atendente-comandas',
-  imports: [CurrencyPipe, DatePipe, RouterLink, RouterLinkActive],
+  imports: [Carregando, CurrencyPipe, DatePipe, RouterLink, RouterLinkActive],
   templateUrl: './atendente-comandas.html',
   styleUrl: './atendente-comandas.scss',
 })

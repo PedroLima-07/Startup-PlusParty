@@ -27,7 +27,7 @@
 
 <main class="conteudo">
   @if (carregando()) {
-    <p class="vazio">Carregando comandas...</p>
+    <app-carregando texto="Carregando comandas" />
   } @else {
     <section aria-labelledby="titulo-liberacao">
       <h2 id="titulo-liberacao">Aguardando liberação <span class="contador">{{ aguardandoLiberacao().length }}</span></h2>

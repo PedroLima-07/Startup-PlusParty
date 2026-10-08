@@ -5,12 +5,13 @@ import { PedidoSetor, SetorItem } from '../../models';
 import { AuthService } from '../../services/auth.service';
 import { SupabaseService } from '../../services/supabase.service';
 import { PedidosAtendenteService } from '../../services/pedidos-atendente.service';
+import { Carregando } from '../../components/carregando/carregando';
 
 type AcaoModal = 'comecar' | 'pronto';
 
 @Component({
   selector: 'app-atendente-pedidos',
-  imports: [DatePipe, NgClass, RouterLink, RouterLinkActive],
+  imports: [Carregando, DatePipe, NgClass, RouterLink, RouterLinkActive],
   templateUrl: './atendente-pedidos.html',
   styleUrls: ['./atendente-pedidos.scss'],
 })

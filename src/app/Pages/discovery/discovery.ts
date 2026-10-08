@@ -5,11 +5,12 @@ import { NavCliente } from '../../components/nav-cliente/nav-cliente';
 import { NotaBar } from '../../components/nota-bar/nota-bar';
 import { Estabelecimento } from '../../models';
 import { EstabelecimentosService } from '../../services/estabelecimentos.service';
+import { Carregando } from '../../components/carregando/carregando';
 
 @Component({
   selector: 'app-discovery',
   standalone: true,
-  imports: [FormsModule, NavCliente, NotaBar],
+  imports: [Carregando, FormsModule, NavCliente, NotaBar],
   templateUrl: './discovery.html',
   styleUrl: './discovery.scss',
 })

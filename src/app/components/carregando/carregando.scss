@@ -1,0 +1,107 @@
+// Um ciclo: a areia escorre e, no fim, a ampulheta vira de cabeça para baixo.
+// Virada, a parte de baixo cheia fica igual à de cima no começo, então o
+// ciclo recomeça sem dar salto.
+$ciclo: 1.8s;
+$fim-da-areia: 62%;
+$queda: 7.1px; // altura que o nível da areia percorre (unidades do viewBox)
+
+:host {
+  display: grid;
+  place-items: center;
+  min-height: 50dvh;
+  padding: 40px 20px;
+}
+
+.carregando {
+  // Só aparece se a espera passar de um instante: carregamentos rápidos
+  // não chegam a piscar a ampulheta.
+  animation: surgir 240ms 120ms both;
+}
+
+.ampulheta {
+  display: block;
+  width: 44px;
+  height: 44px;
+  animation: virar $ciclo infinite;
+}
+
+.vidro {
+  fill: none;
+  stroke: var(--cor-ampulheta, #0f1f4b);
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.areia {
+  fill: var(--cor-areia, #2f6bff);
+}
+
+.fio {
+  fill: none;
+  stroke: var(--cor-areia, #2f6bff);
+  stroke-width: 0.9;
+  animation: escorrer $ciclo linear infinite;
+}
+
+.nivel-de-cima {
+  animation: descer $ciclo linear infinite;
+}
+
+.nivel-de-baixo {
+  animation: subir $ciclo linear infinite;
+}
+
+.texto {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+@keyframes surgir {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes virar {
+  0%,
+  #{$fim-da-areia} {
+    transform: rotate(0);
+    animation-timing-function: cubic-bezier(0.65, 0, 0.35, 1);
+  }
+
+  100% {
+    transform: rotate(180deg);
+  }
+}
+
+@keyframes descer {
+  #{$fim-da-areia},
+  100% {
+    transform: translateY($queda);
+  }
+}
+
+@keyframes subir {
+  #{$fim-da-areia},
+  100% {
+    transform: translateY(-$queda);
+  }
+}
+
+@keyframes escorrer {
+  0%,
+  #{$fim-da-areia},
+  100% {
+    opacity: 0;
+  }
+
+  5%,
+  55% {
+    opacity: 1;
+  }
+}
