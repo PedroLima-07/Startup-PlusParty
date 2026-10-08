@@ -1,126 +1,134 @@
-.perfil-bar-container {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
+@use '../gerente' as g;
+
+.pagina {
+  @include g.pagina;
 }
 
-.foto-capa {
+h2 {
+  margin: 0;
+  font-size: 18px;
+}
+
+.cartao {
+  @include g.cartao;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.grupo {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+
+  input,
+  textarea {
+    @include g.campo;
+  }
+
+  textarea {
+    resize: vertical;
+    line-height: 1.5;
+  }
+}
+
+.rotulo {
+  @include g.rotulo;
+}
+
+.dica {
+  font-size: 12px;
+  line-height: 1.45;
+  color: g.$rotulo;
+}
+
+// ------------------------------------------------------------------ capa
+.capa {
   position: relative;
-  height: 150px;
-  background-color: #e9ecef;
-  border-radius: 8px;
-  overflow: hidden;
   display: flex;
   align-items: center;
   justify-content: center;
-
-  .capa-placeholder {
-    color: #adb5bd;
-    font-size: 14px;
-  }
+  aspect-ratio: 16 / 7;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #1746c9, g.$azul);
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 30px;
+  overflow: hidden;
 
   img {
+    position: absolute;
+    inset: 0;
     width: 100%;
     height: 100%;
     object-fit: cover;
   }
-
-  .btn-trocar-foto {
-    position: absolute;
-    bottom: 10px;
-    right: 10px;
-    background: rgba(0, 0, 0, 0.6);
-    color: white;
-    padding: 6px 12px;
-    border-radius: 4px;
-    font-size: 12px;
-    cursor: pointer;
-    font-weight: bold;
-  }
 }
 
-.perfil-form {
-  background: white;
-  padding: 20px;
+.trocar-foto {
+  position: absolute;
+  right: 10px;
+  bottom: 10px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 12px;
   border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-
-  .form-group {
-    margin-bottom: 15px;
-
-    label {
-      display: block;
-      margin-bottom: 5px;
-      color: #666;
-      font-size: 14px;
-    }
-
-    input, textarea {
-      width: 100%;
-      padding: 10px;
-      border: 1px solid #ddd;
-      border-radius: 4px;
-      font-size: 14px;
-      font-family: inherit;
-
-      &:focus {
-        outline: none;
-        border-color: #007bff;
-      }
-    }
-
-    textarea {
-      resize: vertical;
-    }
-  }
-
-  .btn-salvar {
-    width: 100%;
-    background-color: #28a745;
-    color: white;
-    border: none;
-    padding: 12px;
-    border-radius: 4px;
-    font-size: 16px;
-    font-weight: bold;
-    cursor: pointer;
-    margin-top: 10px;
-  }
-}
-
-.btn-sair {
-  background-color: transparent;
-  color: #dc3545;
-  border: 1px solid #dc3545;
-  padding: 12px;
-  border-radius: 4px;
-  font-size: 16px;
-  font-weight: bold;
+  background: rgba(255, 255, 255, 0.92);
+  color: g.$marinho;
+  font-size: 12px;
+  font-weight: 700;
   cursor: pointer;
-  text-align: center;
-  min-height: 44px;
+
+  app-icone {
+    font-size: 15px;
+  }
 }
 
-@media (max-width: 560px) {
-  .perfil-bar-container {
-    gap: 14px;
+// O campo de capacidade traz a unidade dentro da própria caixa.
+.com-unidade {
+  position: relative;
+  display: block;
+
+  input {
+    padding-right: 76px;
   }
 
-  .foto-capa {
-    height: 130px;
+  span {
+    position: absolute;
+    top: 50%;
+    right: 14px;
+    transform: translateY(-50%);
+    font-size: 13px;
+    color: g.$rotulo;
+    pointer-events: none;
   }
+}
 
-  .perfil-form {
-    padding: 14px;
+.aviso {
+  margin: 0;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: #e8f6ee;
+  color: #15803d;
+  font-size: 13px;
+  font-weight: 600;
+  text-align: center;
+}
 
-    .form-group {
-      margin-bottom: 12px;
+.botao-marinho {
+  @include g.botao-marinho;
+  min-height: 48px;
+  font-size: 15px;
+}
 
-      input,
-      textarea {
-        /* 16px evita o zoom automatico do iOS ao focar o campo */
-        font-size: 16px;
-      }
-    }
-  }
+.sair {
+  align-self: center;
+  padding: 10px 16px;
+  border: 0;
+  background: none;
+  color: g.$perigo;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
 }

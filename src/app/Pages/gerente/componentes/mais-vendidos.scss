@@ -1,0 +1,78 @@
+@use '../gerente' as g;
+
+:host {
+  display: block;
+}
+
+ol {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+li {
+  display: grid;
+  grid-template-columns: 24px minmax(0, 1fr) auto;
+  grid-template-areas:
+    'posicao nome quantidade'
+    'posicao trilho quantidade';
+  align-items: center;
+  column-gap: 12px;
+  row-gap: 6px;
+}
+
+.posicao {
+  grid-area: posicao;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: #eef2fb;
+  color: g.$texto-suave;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.primeiro .posicao {
+  background: g.$marinho;
+  color: #fff;
+}
+
+.nome {
+  grid-area: nome;
+  font-size: 14px;
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.quantidade {
+  grid-area: quantidade;
+  font-size: 14px;
+}
+
+.trilho {
+  grid-area: trilho;
+  height: 5px;
+  border-radius: 3px;
+  background: #eef2fb;
+
+  span {
+    display: block;
+    height: 100%;
+    border-radius: 3px;
+    background: g.$azul;
+  }
+}
+
+.vazio {
+  display: block;
+  font-size: 13px;
+  color: g.$texto-suave;
+}

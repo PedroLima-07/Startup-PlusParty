@@ -1,44 +1,45 @@
-<div class="postagens-container">
-  
-  <!-- Criar nova postagem -->
-  <div class="criar-postagem-card">
-    <textarea 
-      [(ngModel)]="textoPostagem" 
-      placeholder="Escreva sua postagem..." 
-      rows="4">
-    </textarea>
-    
-    <div *ngIf="fotoPreviewUrl" class="foto-preview">
-      <img [src]="fotoPreviewUrl" alt="Preview da foto">
-      <button class="remover-foto" (click)="fotoPreviewUrl = null">Remover</button>
-    </div>
+<div class="pagina">
+  <h1>Postagens</h1>
 
-    <div class="actions">
-      <label class="btn-adicionar-foto">
-        + Adicionar foto
-        <input type="file" accept="image/*" (change)="onFileSelected($event)" hidden>
-      </label>
-      
-      <button 
-        class="btn-publicar" 
-        [disabled]="!textoPostagem.trim() && !fotoPreviewUrl"
-        (click)="publicar()">
-        Publicar
-      </button>
-    </div>
-  </div>
+  <section class="cartao nova">
+    <textarea
+      rows="4"
+      placeholder="Escreva sua postagem..."
+      aria-label="Texto da postagem"
+      [value]="texto()"
+      (input)="texto.set($any($event.target).value)"
+    ></textarea>
 
-  <!-- Feed de últimas postagens -->
-  <h2 class="section-title">Últimas postagens</h2>
-  <div class="feed-list">
-    <div class="postagem-card" *ngFor="let post of postagemService.postagens()">
-      <div class="post-header">
-        <span class="data">{{ post.criadoEm | date:'dd/MM/yyyy HH:mm' }}</span>
+    @if (fotoPrevia(); as foto) {
+      <div class="previa">
+        <img [src]="foto" alt="Foto escolhida para a postagem" />
+        <button type="button" (click)="fotoPrevia.set(null)">Remover foto</button>
       </div>
-      <div class="post-body">
-        <p>{{ post.texto }}</p>
-        <img *ngIf="post.fotoUrl" [src]="post.fotoUrl" alt="Foto da postagem">
-      </div>
-    </div>
-  </div>
+    }
+
+    <label class="adicionar-foto">
+      <app-icone nome="camera" /> + Adicionar foto
+      <input type="file" accept="image/*" hidden (change)="escolherFoto($event)" />
+    </label>
+
+    <button type="button" class="botao-marinho" [disabled]="!podePublicar()" (click)="publicar()">
+      Publicar
+    </button>
+  </section>
+
+  <h2 class="rotulo">Últimas postagens</h2>
+
+  @for (postagem of postagemService.postagens(); track postagem.id) {
+    <article class="cartao postagem">
+      @if (postagem.fotoUrl; as foto) {
+        <img [src]="foto" alt="" loading="lazy" />
+      }
+      <p>{{ postagem.texto }}</p>
+      <time [attr.datetime]="postagem.criadoEm.toISOString()">
+        {{ postagem.criadoEm | date: "dd 'de' MMM 'de' yyyy" }}
+      </time>
+    </article>
+  } @empty {
+    <p class="vazio">Nenhuma postagem ainda. A primeira aparece aqui.</p>
+  }
 </div>

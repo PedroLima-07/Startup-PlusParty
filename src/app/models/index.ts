@@ -167,10 +167,34 @@ export interface Postagem {
 export interface ComandaResumo {
   numero: string;
   cliente: string;
+  /** Número da mesa, ou 'Balcão'. */
   mesa: string;
   horario: string;
   valor: number;
   status: 'aberta' | 'aguardando_pagamento' | 'paga';
+}
+
+export type TipoAlertaGerente = 'pagamento' | 'pedido_parado' | 'liberacao' | 'sem_pedido';
+
+/** Situação que pede a atenção do gerente no painel de Movimento. */
+export interface AlertaGerente {
+  id: string;
+  tipo: TipoAlertaGerente;
+  titulo: string;
+  detalhe: string;
+  /** Número da comanda envolvida, quando ela aparece nas comandas do dia. */
+  comanda: string | null;
+}
+
+/** Comandas abertas ao mesmo tempo numa faixa de horário. */
+export interface LotacaoPorHora {
+  hora: string;
+  comandas: number;
+}
+
+export interface ItemVendido {
+  nome: string;
+  quantidade: number;
 }
 
 export interface PostagemGerente {
@@ -184,9 +208,11 @@ export interface PerfilBar {
   nome: string;
   descricaoCurta: string;
   endereco: string;
+  /** Lotação máxima; base do selo de movimento (Normal ou Quente). */
+  capacidade: number;
   horarioFuncionamento: string;
   fotoCapaUrl?: string;
 }
 
-export type StatusMovimento = 'normal' | 'moderado' | 'lotado';
+export type StatusMovimento = 'normal' | 'quente';
 

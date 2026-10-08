@@ -1,0 +1,64 @@
+@use '../gerente' as g;
+
+:host {
+  display: block;
+}
+
+.barras {
+  display: flex;
+  align-items: flex-end;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+
+  li {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+  }
+}
+
+.valor {
+  font-size: 12px;
+  color: g.$texto-suave;
+}
+
+.barra {
+  width: 100%;
+  // --altura vai de 0 a 100: a barra do pico fica com 125px.
+  height: calc(var(--altura) * 1.25px);
+  border-radius: 6px 6px 0 0;
+  background: g.$azul-claro;
+}
+
+.hora {
+  font-size: 11px;
+  color: g.$texto-suave;
+}
+
+.pico {
+  .valor,
+  .hora {
+    color: g.$marinho;
+    font-weight: 700;
+  }
+
+  .barra {
+    background: g.$marinho;
+  }
+}
+
+.resumo {
+  margin: 14px 0 0;
+  font-size: 13px;
+  line-height: 1.5;
+  color: g.$texto-suave;
+
+  strong {
+    color: g.$marinho;
+  }
+}

@@ -85,9 +85,13 @@ export const routes: Routes = [
     children: [
       { path: '', redirectTo: 'movimento', pathMatch: 'full' },
       { path: 'movimento', loadComponent: () => import('./Pages/gerente/movimento/movimento').then(m => m.Movimento) },
+      { path: 'movimento/resumo', loadComponent: () => import('./Pages/gerente/resumo/resumo').then(m => m.Resumo) },
+      { path: 'resultados', loadComponent: () => import('./Pages/gerente/resultados/resultados').then(m => m.Resultados) },
       { path: 'postagens', loadComponent: () => import('./Pages/gerente/postagens/postagens').then(m => m.Postagens) },
-      { path: 'perfil-bar', loadComponent: () => import('./Pages/gerente/perfil-bar/perfil-bar').then(m => m.PerfilBarComponent) },
-      { path: 'equipe', loadComponent: () => import('./Pages/gerente/equipe/equipe').then(m => m.Equipe) }
+      { path: 'equipe', loadComponent: () => import('./Pages/gerente/equipe/equipe').then(m => m.Equipe) },
+      // Aberta pela engrenagem do topo. O endereço antigo continua valendo.
+      { path: 'configuracoes', loadComponent: () => import('./Pages/gerente/perfil-bar/perfil-bar').then(m => m.PerfilBarComponent) },
+      { path: 'perfil-bar', redirectTo: 'configuracoes', pathMatch: 'full' }
     ]
   },
   {

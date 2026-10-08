@@ -1,0 +1,321 @@
+@use '../gerente' as g;
+
+.pagina {
+  @include g.pagina;
+}
+
+.ajuda {
+  @include g.ajuda;
+}
+
+.botao-contorno {
+  @include g.botao-contorno;
+  width: 100%;
+}
+
+// --------------------------------------------------------- data e hora
+.momento {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 13px;
+  color: g.$texto-suave;
+}
+
+.data {
+  display: block;
+
+  &::first-letter {
+    text-transform: uppercase;
+  }
+}
+
+.atualizar {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+
+  &:hover,
+  &:focus-visible {
+    color: g.$marinho;
+    outline: none;
+  }
+}
+
+// ------------------------------------------------- cartão do faturamento
+.destaque {
+  padding: 20px 18px;
+  border-radius: 16px;
+  background: g.$marinho;
+  color: #fff;
+
+  .rotulo {
+    @include g.rotulo;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: rgba(255, 255, 255, 0.7);
+  }
+
+  .ajuda {
+    background: rgba(255, 255, 255, 0.18);
+    color: #fff;
+  }
+
+  .total {
+    @include g.numero;
+    margin: 8px 0 16px;
+    font-size: 34px;
+    line-height: 1.1;
+  }
+
+  .progresso {
+    height: 8px;
+    margin: 18px 0 8px;
+    border-radius: 4px;
+    background: rgba(255, 255, 255, 0.18);
+    overflow: hidden;
+
+    span {
+      display: block;
+      height: 100%;
+      border-radius: 4px;
+      background: g.$azul;
+    }
+  }
+
+  .meta {
+    margin: 0;
+    font-size: 13px;
+    color: rgba(255, 255, 255, 0.78);
+
+    strong {
+      color: #fff;
+    }
+  }
+
+  .trio {
+    div + div {
+      border-left-color: rgba(255, 255, 255, 0.18);
+    }
+
+    dt {
+      color: rgba(255, 255, 255, 0.7);
+    }
+  }
+}
+
+// --------------------------------------------------------------- cartões
+.cartao {
+  @include g.cartao;
+
+  h2 {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin: 0;
+    font-size: 16px;
+  }
+}
+
+.subtitulo {
+  margin: 4px 0 16px;
+  font-size: 13px;
+  color: g.$texto-suave;
+}
+
+.leitura {
+  margin: 14px 0 0;
+  font-size: 13px;
+  line-height: 1.5;
+  color: g.$texto-suave;
+}
+
+.frase-numeros {
+  margin: 0 0 16px;
+  font-size: 14px;
+
+  strong {
+    @include g.numero;
+    font-size: 17px;
+  }
+}
+
+// Grupos de rótulo + número lado a lado.
+.trio,
+.par {
+  display: grid;
+  margin: 0;
+
+  dt {
+    font-size: 12px;
+    color: g.$texto-suave;
+  }
+
+  dd {
+    @include g.numero;
+    margin: 3px 0 0;
+    font-size: 15px;
+  }
+
+  &.separado {
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 1px solid g.$borda;
+  }
+}
+
+.trio {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+
+  div + div {
+    padding-left: 12px;
+    border-left: 1px solid g.$borda;
+  }
+
+  div:not(:last-child) {
+    padding-right: 8px;
+  }
+}
+
+.par {
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.quadros {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin: 0;
+
+  div {
+    display: flex;
+    // No HTML o rótulo vem antes do número; na tela o número fica em cima.
+    flex-direction: column-reverse;
+    // Com a ordem invertida, "flex-end" é o topo: o número de todos os quadros alinha em cima.
+    justify-content: flex-end;
+    gap: 4px;
+    padding: 14px;
+    border-radius: 12px;
+    background: #f5f7fc;
+  }
+
+  dt {
+    font-size: 12px;
+    color: g.$texto-suave;
+  }
+
+  dd {
+    @include g.numero;
+    margin: 0;
+    font-size: 28px;
+    line-height: 1.1;
+  }
+}
+
+// --------------------------------------------------------- mesas e balcão
+.par {
+  .mesas dt::before,
+  .balcao dt::before {
+    content: '';
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    margin-right: 6px;
+    border-radius: 50%;
+    background: g.$marinho;
+  }
+
+  .balcao dt::before {
+    background: g.$azul;
+  }
+
+  .mesas dd,
+  .balcao dd {
+    font-size: 26px;
+
+    small {
+      font-size: 13px;
+    }
+  }
+}
+
+.divisao {
+  height: 10px;
+  margin: 16px 0 8px;
+  border-radius: 5px;
+  background: g.$azul;
+  overflow: hidden;
+
+  span {
+    display: block;
+    height: 100%;
+    border-right: 2px solid #fff;
+    background: g.$marinho;
+  }
+}
+
+.divisao-legenda {
+  display: flex;
+  justify-content: space-between;
+  margin: 0;
+  font-size: 12px;
+  color: g.$texto-suave;
+}
+
+// ------------------------------------------------------------ pendências
+.pendencias {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin: 0 0 16px;
+  padding: 0;
+  list-style: none;
+  font-size: 13px;
+  line-height: 1.5;
+  color: g.$texto-suave;
+
+  li {
+    padding-left: 18px;
+    position: relative;
+
+    &::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 6px;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #f59e0b;
+    }
+  }
+
+  .vermelho::before {
+    background: g.$perigo;
+  }
+
+  .sem-pendencia::before {
+    background: #22c55e;
+  }
+
+  strong {
+    color: g.$marinho;
+  }
+}
+
+.rodape {
+  margin: 4px 0 0;
+  font-size: 12px;
+  line-height: 1.5;
+  color: g.$rotulo;
+  text-align: center;
+}

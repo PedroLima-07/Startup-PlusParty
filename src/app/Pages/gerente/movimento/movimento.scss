@@ -1,218 +1,468 @@
-.movimento-container {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
+@use '../gerente' as g;
+
+// ------------------------------------------------------------ saudação
+// Continua o azul-marinho do topo, de ponta a ponta.
+.saudacao {
+  background: g.$marinho;
+  color: #fff;
 }
 
-.cards-grid {
-  display: flex;
-  flex-direction: column;
-  gap: 15px;
+.saudacao-conteudo {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 8px 16px 22px;
+
+  h1 {
+    margin: 0;
+    font-size: 24px;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+  }
 }
 
-.status-card {
-  background: white;
-  padding: 15px;
-  border-radius: 8px;
+.data {
+  margin: 4px 0 18px;
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.72);
+
+  &::first-letter {
+    text-transform: uppercase;
+  }
+}
+
+.numeros {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  margin: 0;
+
+  div {
+    display: flex;
+    // No HTML o rótulo vem antes do número; na tela o número fica em cima.
+    flex-direction: column-reverse;
+    align-items: center;
+    gap: 2px;
+    padding: 0 6px;
+    text-align: center;
+
+    & + div {
+      border-left: 1px solid rgba(255, 255, 255, 0.18);
+    }
+  }
+
+  dd {
+    margin: 0;
+    font-size: 24px;
+    font-weight: 800;
+  }
+
+  dt {
+    font-size: 11px;
+    color: rgba(255, 255, 255, 0.72);
+  }
+}
+
+// -------------------------------------------------------------- página
+.pagina {
+  @include g.pagina;
+}
+
+.cartao {
+  @include g.cartao;
+}
+
+.rotulo {
+  @include g.rotulo;
   display: flex;
   align-items: center;
-  gap: 15px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-
-  .bolinha {
-    width: 20px;
-    height: 20px;
-    border-radius: 50%;
-    &.normal { background-color: #28a745; }
-    &.moderado { background-color: #ffc107; }
-    &.lotado { background-color: #dc3545; }
-  }
-
-  .status-info {
-    display: flex;
-    flex-direction: column;
-
-    .status-label {
-      font-weight: bold;
-      font-size: 16px;
-    }
-
-    .status-count {
-      color: #666;
-      font-size: 14px;
-    }
-  }
+  gap: 6px;
 }
 
-.stats-row {
-  display: flex;
-  gap: 15px;
-
-  .stat-card {
-    flex: 1;
-    min-width: 0;
-    background: white;
-    padding: 15px;
-    border-radius: 8px;
-    display: flex;
-    flex-direction: column;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-
-    .stat-label {
-      font-size: 12px;
-      color: #666;
-      margin-bottom: 5px;
-    }
-
-    .stat-value {
-      font-size: 18px;
-      font-weight: bold;
-    }
-  }
+.ajuda {
+  @include g.ajuda;
 }
 
-  .filtros {
-    display: flex;
-    gap: 10px;
-    overflow-x: auto;
-    padding-bottom: 5px;
+.botao-azul {
+  @include g.botao-azul;
+}
 
-    .chip {
-      padding: 8px 16px;
-      border-radius: 20px;
-      border: 1px solid #ddd;
-      background: white;
-      white-space: nowrap;
-      cursor: pointer;
-      font-size: 14px;
-      min-height: 44px;
+.botao-contorno {
+  @include g.botao-contorno;
+}
 
-      &.active {
-        background: #007bff;
-        color: white;
-        border-color: #007bff;
-      }
-    }
-  }
+.vazio {
+  margin: 0;
+  padding: 18px 16px;
+  border: 1px dashed g.$borda;
+  border-radius: 14px;
+  background: #fff;
+  color: g.$texto-suave;
+  font-size: 13px;
+  text-align: center;
+}
 
-.comandas-list {
+// ----------------------------------------------------- precisa de atenção
+.atencao {
   display: flex;
   flex-direction: column;
   gap: 10px;
-}
 
-.comanda-card {
-  background: white;
-  padding: 15px;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-
-  .comanda-header {
+  h2 {
     display: flex;
-    justify-content: space-between;
-    margin-bottom: 10px;
-    color: #666;
-    font-size: 14px;
-
-    .comanda-numero {
-      font-weight: bold;
-      color: #333;
-    }
-  }
-
-  .comanda-body {
-    display: flex;
-    justify-content: space-between;
     align-items: center;
-    gap: 10px;
+    gap: 8px;
+    margin: 0;
+    font-size: 17px;
+  }
 
-    .cliente-info {
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-      min-width: 0;
+  .contador {
+    min-width: 22px;
+    height: 22px;
+    padding: 0 6px;
+    border-radius: 11px;
+    background: g.$perigo;
+    color: #fff;
+    font-size: 12px;
+    line-height: 22px;
+    text-align: center;
+  }
+}
 
-      strong {
-        font-size: 16px;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-      }
+.explicacao {
+  margin: -4px 0 2px;
+  font-size: 12px;
+  line-height: 1.5;
+  color: g.$texto-suave;
+}
 
-      span {
-        font-size: 14px;
-        color: #666;
-      }
-    }
+.alerta {
+  @include g.cartao;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 10px 12px;
+  padding: 14px;
 
-    .valor-status {
-      display: flex;
-      flex-direction: column;
-      align-items: flex-end;
-      gap: 6px;
-      flex-shrink: 0;
+  .botao-azul,
+  .avisado {
+    grid-column: 1 / -1;
+    justify-self: end;
+  }
+}
 
-      .valor {
-        font-weight: bold;
-        font-size: 16px;
-        white-space: nowrap;
-      }
+.alerta-icone {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 9px;
+  background: #fff1e6;
+  color: #ea7a17;
+  font-size: 17px;
 
-      .status-badge {
-        padding: 4px 8px;
-        border-radius: 12px;
-        font-size: 12px;
-        font-weight: bold;
-        white-space: nowrap;
+  .pagamento & {
+    background: #fde8e8;
+    color: g.$perigo;
+  }
 
-        &.aberta { background: #e3f2fd; color: #0d47a1; }
-        &.aguardando_pagamento { background: #fff3cd; color: #856404; }
-        &.paga { background: #d4edda; color: #155724; }
-      }
+  .sem_pedido & {
+    background: #eef1f6;
+    color: g.$texto-suave;
+  }
+}
+
+.alerta-texto {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+
+  strong {
+    font-size: 14px;
+    line-height: 1.35;
+  }
+
+  span {
+    font-size: 12px;
+    line-height: 1.45;
+    color: g.$texto-suave;
+  }
+}
+
+.avisado {
+  padding: 9px 0;
+  color: #15803d;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+// ---------------------------------------------------------------- status
+.status {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-top: 14px;
+}
+
+.selo {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 16px;
+  border-radius: 999px;
+  background: #e8f6ee;
+  color: #15803d;
+  font-size: 16px;
+  font-weight: 800;
+
+  &::before {
+    content: '';
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    background: currentColor;
+  }
+
+  &.quente {
+    background: #ffedd9;
+    color: #d9600a;
+  }
+}
+
+.status-numero {
+  display: flex;
+  flex-direction: column;
+
+  strong {
+    @include g.numero;
+    font-size: 24px;
+    line-height: 1.1;
+  }
+
+  span {
+    font-size: 12px;
+    color: g.$texto-suave;
+  }
+}
+
+// ----------------------------------------------------------- faturamento
+.cartao-topo {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.olho {
+  display: flex;
+  padding: 6px;
+  margin: -6px;
+  border: 0;
+  border-radius: 50%;
+  background: none;
+  color: g.$rotulo;
+  font-size: 18px;
+  cursor: pointer;
+
+  &:hover,
+  &:focus-visible {
+    color: g.$marinho;
+    outline: none;
+  }
+}
+
+.total {
+  @include g.numero;
+  margin: 8px 0 14px;
+  font-size: 32px;
+  line-height: 1.1;
+}
+
+.detalhes {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin: 0 0 16px;
+
+  dt {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 12px;
+    color: g.$texto-suave;
+  }
+
+  dd {
+    @include g.numero;
+    margin: 3px 0 0;
+    font-size: 17px;
+  }
+}
+
+.meta {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  font-size: 13px;
+  color: g.$texto-suave;
+
+  strong {
+    color: g.$marinho;
+  }
+
+  .percentual {
+    @include g.numero;
+    color: g.$azul;
+  }
+}
+
+.progresso {
+  height: 8px;
+  margin: 8px 0 16px;
+  border-radius: 4px;
+  background: #e8edf7;
+  overflow: hidden;
+
+  span {
+    display: block;
+    height: 100%;
+    border-radius: 4px;
+    background: g.$azul;
+  }
+}
+
+.nota {
+  margin: 0 0 10px;
+  padding-top: 14px;
+  border-top: 1px solid g.$borda;
+  font-size: 12px;
+  line-height: 1.55;
+  color: g.$texto-suave;
+}
+
+.em-aberto {
+  margin: 0 0 16px;
+  font-size: 13px;
+  color: g.$texto-suave;
+
+  strong {
+    color: g.$marinho;
+  }
+}
+
+.faturamento .botao-contorno {
+  width: 100%;
+}
+
+// -------------------------------------------------------- comandas do dia
+.comandas {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  // Ao rolar até aqui pelo botão de um alerta, o título não cola na borda.
+  scroll-margin-top: 12px;
+}
+
+.busca {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 14px;
+  border: 1px solid g.$borda;
+  border-radius: 12px;
+  background: #fff;
+  color: g.$rotulo;
+  font-size: 16px;
+
+  &:focus-within {
+    border-color: g.$azul;
+  }
+
+  input {
+    flex: 1;
+    min-width: 0;
+    padding: 12px 0;
+    border: 0;
+    background: none;
+    color: g.$marinho;
+    font: inherit;
+    font-size: 14px;
+    outline: none;
+
+    &::placeholder {
+      color: #9aa3b5;
     }
   }
 }
 
-@media (max-width: 560px) {
-  .movimento-container {
-    gap: 14px;
+.filtros {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.filtro {
+  padding: 8px 14px;
+  border: 1px solid g.$borda;
+  border-radius: 999px;
+  background: #fff;
+  color: g.$marinho;
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
+
+  &.ativo {
+    border-color: g.$marinho;
+    background: g.$marinho;
+    color: #fff;
+    font-weight: 700;
+  }
+}
+
+.comanda {
+  @include g.cartao;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 6px 12px;
+  padding: 14px 16px;
+}
+
+.comanda-identificacao {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 8px;
+}
+
+.comanda-numero,
+.comanda-valor {
+  @include g.numero;
+  font-size: 15px;
+}
+
+.comanda-detalhe {
+  grid-column: 1 / -1;
+  font-size: 12px;
+  color: g.$texto-suave;
+}
+
+.selo-status {
+  padding: 2px 8px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 600;
+
+  &.aberta {
+    background: #e4ecff;
+    color: #1d4ed8;
   }
 
-  .cards-grid {
-    gap: 10px;
+  &.aguardando_pagamento {
+    background: #ffedd9;
+    color: #b45309;
   }
 
-  .status-card {
-    padding: 12px;
-    gap: 12px;
-
-    .status-info .status-label {
-      font-size: 15px;
-    }
-  }
-
-  .stats-row {
-    flex-direction: column;
-    gap: 10px;
-
-    .stat-card {
-      flex-direction: row;
-      align-items: center;
-      justify-content: space-between;
-      gap: 10px;
-      padding: 12px;
-
-      .stat-label {
-        margin-bottom: 0;
-      }
-    }
-  }
-
-  .comanda-card {
-    padding: 12px;
-
-    .comanda-body .valor-status .valor {
-      font-size: 15px;
-    }
+  &.paga {
+    background: #dcfce7;
+    color: #15803d;
   }
 }

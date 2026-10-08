@@ -1,40 +1,42 @@
-import { Component, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
+import { DatePipe } from '@angular/common';
+import { Component, computed, inject, signal } from '@angular/core';
 import { PostagemService } from '../../../services/postagem.service';
+import { Icone } from '../componentes/icone';
 
+/** O gerente escreve avisos e novidades do bar; as últimas postagens ficam listadas abaixo. */
 @Component({
   selector: 'app-postagens',
-  standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [DatePipe, Icone],
   templateUrl: './postagens.html',
-  styleUrls: ['./postagens.scss']
+  styleUrl: './postagens.scss',
 })
 export class Postagens {
-  postagemService = inject(PostagemService);
-  
-  textoPostagem = '';
-  fotoPreviewUrl: string | null = null;
+  protected readonly postagemService = inject(PostagemService);
 
-  onFileSelected(event: any) {
-    const file = event.target.files[0];
-    if (file) {
-      // Create local preview
-      const reader = new FileReader();
-      reader.onload = (e: any) => {
-        this.fotoPreviewUrl = e.target.result;
-      };
-      reader.readAsDataURL(file);
-    }
+  protected readonly texto = signal('');
+  protected readonly fotoPrevia = signal<string | null>(null);
+  protected readonly podePublicar = computed(
+    () => this.texto().trim().length > 0 || this.fotoPrevia() !== null,
+  );
+
+  /** Mostra a foto escolhida antes de publicar. */
+  protected escolherFoto(evento: Event): void {
+    const campo = evento.target as HTMLInputElement;
+    const arquivo = campo.files?.[0];
+    if (!arquivo) return;
+
+    const leitor = new FileReader();
+    leitor.onload = () => this.fotoPrevia.set(leitor.result as string);
+    leitor.readAsDataURL(arquivo);
+    // Permite escolher o mesmo arquivo de novo depois de remover a foto.
+    campo.value = '';
   }
 
-  publicar() {
-    if (this.textoPostagem.trim() || this.fotoPreviewUrl) {
-      // Call service
-      this.postagemService.publicar(this.textoPostagem, this.fotoPreviewUrl || undefined);
-      // Clean up
-      this.textoPostagem = '';
-      this.fotoPreviewUrl = null;
-    }
+  protected publicar(): void {
+    if (!this.podePublicar()) return;
+
+    this.postagemService.publicar(this.texto().trim(), this.fotoPrevia() ?? undefined);
+    this.texto.set('');
+    this.fotoPrevia.set(null);
   }
 }

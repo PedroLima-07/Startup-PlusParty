@@ -1,0 +1,202 @@
+<div class="pagina">
+  <div class="momento">
+    <span class="data">{{ atualizadoEm() | date: "EEEE, d 'de' MMMM" }}</span>
+    <button type="button" class="atualizar" (click)="atualizar()">
+      Atualizado às {{ atualizadoEm() | date: 'HH:mm' }} <app-icone nome="atualizar" />
+    </button>
+  </div>
+
+  <section class="destaque">
+    <h2 class="rotulo">
+      Faturamento até agora
+      <span class="ajuda" title="Soma apenas das comandas já pagas.">?</span>
+    </h2>
+    <p class="total">{{ movimento.faturamento() | currency: 'BRL' }}</p>
+
+    <dl class="trio">
+      <div>
+        <dt>Pagas</dt>
+        <dd>{{ movimento.comandasPagas() }} comandas</dd>
+      </div>
+      <div>
+        <dt>Ticket médio</dt>
+        <dd>{{ movimento.ticketMedio() | currency: 'BRL' }}</dd>
+      </div>
+      <div>
+        <dt>Em aberto</dt>
+        <dd>{{ movimento.valorEmAberto() | currency: 'BRL' }}</dd>
+      </div>
+    </dl>
+
+    <div
+      class="progresso"
+      role="progressbar"
+      aria-label="Meta de faturamento"
+      aria-valuemin="0"
+      aria-valuemax="100"
+      [attr.aria-valuenow]="movimento.percentualDaMeta()"
+    >
+      <span [style.width.%]="movimento.percentualDaMeta()"></span>
+    </div>
+    <p class="meta">
+      <strong>{{ movimento.percentualDaMeta() }}%</strong> da meta de
+      {{ movimento.metaFaturamento() | currency: 'BRL' : 'symbol' : '1.0-0' }}
+    </p>
+  </section>
+
+  <section class="cartao">
+    <h2>
+      Comandas
+      <span class="ajuda" title="Todas as comandas abertas desde o início da noite.">?</span>
+    </h2>
+    <p class="subtitulo">Situação de todas as comandas da noite</p>
+
+    <dl class="quadros">
+      <div>
+        <dt>abertas na noite</dt>
+        <dd>{{ movimento.totalComandas() }}</dd>
+      </div>
+      <div>
+        <dt>ainda abertas</dt>
+        <dd>{{ movimento.comandasAbertas() }}</dd>
+      </div>
+      <div>
+        <dt>pagas</dt>
+        <dd>{{ movimento.comandasPagas() }}</dd>
+      </div>
+      <div>
+        <dt>aguardando pagamento</dt>
+        <dd>{{ movimento.comandasAguardandoPagamento() }}</dd>
+      </div>
+    </dl>
+
+    <p class="leitura">
+      A noite teve {{ movimento.totalComandas() }} comandas no total,
+      {{ movimento.percentualEncerradas() }}% já foram encerradas.
+    </p>
+  </section>
+
+  <section class="cartao">
+    <h2>
+      Movimento por hora
+      <span class="ajuda" title="Quantas comandas estavam abertas ao mesmo tempo em cada hora.">?</span>
+    </h2>
+    <p class="subtitulo">Comandas abertas em cada faixa de horário</p>
+    <app-grafico-horas [dados]="movimento.lotacaoPorHora()" />
+  </section>
+
+  <section class="cartao">
+    <h2>
+      O que saiu hoje
+      <span class="ajuda" title="Soma das quantidades de cada item em todos os pedidos de hoje.">?</span>
+    </h2>
+    <p class="subtitulo">Itens pedidos desde a abertura</p>
+
+    <p class="frase-numeros">
+      <strong>{{ movimento.itensVendidos() }}</strong> itens vendidos em
+      <strong>{{ movimento.pedidos() }}</strong> pedidos
+    </p>
+    <app-mais-vendidos [itens]="movimento.maisVendidos()" />
+
+    <dl class="par separado">
+      <div>
+        <dt>Bar</dt>
+        <dd>{{ movimento.itensDoBar() }} itens</dd>
+      </div>
+      <div>
+        <dt>Cozinha</dt>
+        <dd>{{ movimento.itensDaCozinha() }} itens</dd>
+      </div>
+    </dl>
+  </section>
+
+  <section class="cartao">
+    <h2>
+      Operação
+      <span class="ajuda" title="Tempo médio entre o pedido chegar e o setor marcar como pronto.">?</span>
+    </h2>
+    <p class="subtitulo">Como a equipe está dando conta</p>
+
+    <app-tempo-preparo
+      [bar]="movimento.minutosPreparoBar()"
+      [cozinha]="movimento.minutosPreparoCozinha()"
+    />
+
+    <dl class="trio separado">
+      <div>
+        <dt>Pedidos em preparo</dt>
+        <dd>{{ movimento.pedidosEmPreparo() }}</dd>
+      </div>
+      <div>
+        <dt>Pedidos prontos</dt>
+        <dd>{{ movimento.pedidosProntos() }}</dd>
+      </div>
+      <div>
+        <dt>Chamados de garçom</dt>
+        <dd>{{ movimento.chamadosDeGarcom() }}</dd>
+      </div>
+    </dl>
+  </section>
+
+  <section class="cartao">
+    <h2>
+      Mesas e balcão
+      <span class="ajuda" title="Divisão das comandas ainda abertas entre mesas e balcão.">?</span>
+    </h2>
+    <p class="subtitulo">Onde estão as comandas abertas agora</p>
+
+    <dl class="par">
+      <div class="mesas">
+        <dt>Mesas</dt>
+        <dd>{{ movimento.comandasEmMesa() }} <small>comandas</small></dd>
+      </div>
+      <div class="balcao">
+        <dt>Balcão</dt>
+        <dd>{{ movimento.comandasNoBalcao() }} <small>comandas</small></dd>
+      </div>
+    </dl>
+
+    <div class="divisao" aria-hidden="true">
+      <span [style.width.%]="movimento.percentualEmMesa()"></span>
+    </div>
+    <p class="divisao-legenda">
+      <span>Mesas · {{ movimento.percentualEmMesa() }}%</span>
+      <span>Balcão · {{ 100 - movimento.percentualEmMesa() }}%</span>
+    </p>
+  </section>
+
+  <section class="cartao">
+    <h2>
+      Precisa de atenção
+      <span class="ajuda" title="As mesmas pendências listadas no Movimento, resumidas.">?</span>
+    </h2>
+    <p class="subtitulo">Pendências ainda abertas</p>
+
+    <ul class="pendencias">
+      @if (movimento.comandasAguardandoPagamento() > 0) {
+        <li class="vermelho">
+          <strong>{{ movimento.comandasAguardandoPagamento() }} comandas</strong>
+          aguardando pagamento · {{ movimento.valorAguardandoPagamento() | currency: 'BRL' }}
+        </li>
+      }
+      @if (movimento.pedidosParados() > 0) {
+        <li class="laranja">
+          <strong>
+            {{ movimento.pedidosParados() }}
+            {{ movimento.pedidosParados() === 1 ? 'pedido' : 'pedidos' }}
+          </strong>
+          {{ movimento.pedidosParados() === 1 ? 'parado' : 'parados' }} há mais de 15 min
+        </li>
+      }
+      @if (movimento.comandasAguardandoPagamento() === 0 && movimento.pedidosParados() === 0) {
+        <li class="sem-pendencia">Nenhuma pendência aberta.</li>
+      }
+    </ul>
+
+    <a class="botao-contorno" routerLink="/gerente/movimento">Ver detalhes no Movimento</a>
+  </section>
+
+  <p class="rodape">
+    Os dados são atualizados conforme as comandas e pedidos são registrados durante a noite.
+  </p>
+</div>

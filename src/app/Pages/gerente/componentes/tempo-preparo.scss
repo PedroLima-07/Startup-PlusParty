@@ -1,0 +1,61 @@
+@use '../gerente' as g;
+
+:host {
+  display: block;
+}
+
+.setores {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.setor {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 14px;
+  border: 1px solid g.$borda;
+  border-radius: 12px;
+  background: #f7f9fd;
+
+  &.lento {
+    border-color: #f4c95d;
+    background: #fff8e1;
+
+    .nome,
+    .tempo strong {
+      color: #b45309;
+    }
+  }
+}
+
+.nome {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: g.$texto-suave;
+}
+
+.tempo {
+  @include g.numero;
+  font-size: 14px;
+
+  strong {
+    font-size: 30px;
+    line-height: 1;
+  }
+}
+
+.legenda {
+  font-size: 11px;
+  color: g.$texto-suave;
+}
+
+.leitura {
+  margin: 14px 0 0;
+  font-size: 13px;
+  line-height: 1.5;
+  color: g.$texto-suave;
+}

@@ -1,46 +1,46 @@
-import { Component, inject, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { BarPerfilService } from '../../../services/bar-perfil.service';
-import { AuthService } from '../../../services/auth.service';
 import { PerfilBar } from '../../../models';
+import { AuthService } from '../../../services/auth.service';
+import { BarPerfilService } from '../../../services/bar-perfil.service';
+import { Icone } from '../componentes/icone';
 
+/** Tela de Configurações do gerente: os dados públicos do bar e a saída da conta. */
 @Component({
   selector: 'app-perfil-bar',
-  standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [FormsModule, Icone],
   templateUrl: './perfil-bar.html',
-  styleUrls: ['./perfil-bar.scss']
+  styleUrl: './perfil-bar.scss',
 })
-export class PerfilBarComponent implements OnInit {
-  barPerfilService = inject(BarPerfilService);
+export class PerfilBarComponent {
+  private barPerfilService = inject(BarPerfilService);
   private authService = inject(AuthService);
   private router = inject(Router);
 
-  perfilEdit!: PerfilBar;
+  /** Cópia editável: só vai para o serviço ao salvar. */
+  protected perfil: PerfilBar = { ...this.barPerfilService.perfil() };
+  protected readonly fotoDeCapa = signal(this.perfil.fotoCapaUrl);
+  protected readonly salvo = signal(false);
 
-  ngOnInit() {
-    this.perfilEdit = { ...this.barPerfilService.perfil() };
+  protected escolherFoto(evento: Event): void {
+    const arquivo = (evento.target as HTMLInputElement).files?.[0];
+    if (!arquivo) return;
+
+    const leitor = new FileReader();
+    leitor.onload = () => {
+      this.fotoDeCapa.set(leitor.result as string);
+      this.salvo.set(false);
+    };
+    leitor.readAsDataURL(arquivo);
   }
 
-  onFotoSelected(event: any) {
-    const file = event.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = (e: any) => {
-        this.perfilEdit.fotoCapaUrl = e.target.result;
-      };
-      reader.readAsDataURL(file);
-    }
+  protected salvar(): void {
+    this.barPerfilService.salvar({ ...this.perfil, fotoCapaUrl: this.fotoDeCapa() });
+    this.salvo.set(true);
   }
 
-  salvar() {
-    this.barPerfilService.salvar(this.perfilEdit);
-    alert('Perfil salvo com sucesso!');
-  }
-
-  async sair() {
+  protected async sair(): Promise<void> {
     await this.authService.sair();
     await this.router.navigateByUrl('/login');
   }
