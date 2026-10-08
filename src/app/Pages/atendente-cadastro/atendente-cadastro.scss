@@ -1,0 +1,33 @@
+// O visual base vem de login.scss; aqui só o que esta tela tem a mais.
+
+// Dentro do cartão a ampulheta não precisa ocupar meia tela.
+app-carregando {
+  min-height: 140px;
+  padding: 0;
+}
+
+.campo select {
+  font-family: inherit;
+  font-size: 1rem;
+  font-weight: 400;
+  color: var(--azul-marinho);
+  padding: 12px 14px;
+  border: 1px solid var(--cinza-borda);
+  border-radius: 10px;
+  background: #fff;
+  outline: none;
+
+  &:focus {
+    border-color: var(--azul-acao);
+  }
+}
+
+.conta-atual {
+  margin: 0;
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: #eff6ff;
+  color: var(--azul-marinho);
+  font-size: 0.85rem;
+  text-align: center;
+}

@@ -1,0 +1,172 @@
+.equipe-container {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+section {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+h2 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 2px;
+  font-size: 16px;
+
+  .contador {
+    min-width: 22px;
+    padding: 2px 7px;
+    border-radius: 11px;
+    background: #e3f2fd;
+    color: #0d47a1;
+    font-size: 12px;
+    text-align: center;
+  }
+}
+
+.card {
+  background: white;
+  padding: 15px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.pessoa {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+  font-size: 14px;
+  color: #666;
+
+  strong {
+    font-size: 16px;
+    color: #333;
+  }
+
+  strong,
+  span,
+  a {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  a {
+    color: #007bff;
+    text-decoration: none;
+  }
+
+  .quando {
+    font-size: 12px;
+  }
+}
+
+.acoes {
+  display: flex;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.botao {
+  min-height: 44px;
+  padding: 8px 16px;
+  border-radius: 20px;
+  border: 1px solid #ddd;
+  background: white;
+  font-size: 14px;
+  font-weight: bold;
+  white-space: nowrap;
+  cursor: pointer;
+
+  &.primario {
+    background: #007bff;
+    border-color: #007bff;
+    color: white;
+  }
+
+  &.perigo {
+    border-color: #dc3545;
+    color: #dc3545;
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+.vazio {
+  margin: 0;
+  padding: 16px;
+  background: white;
+  border-radius: 8px;
+  color: #666;
+  font-size: 14px;
+  line-height: 1.5;
+  text-align: center;
+}
+
+.mensagem-erro {
+  margin: 0;
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: #f8d7da;
+  color: #721c24;
+  font-size: 14px;
+}
+
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: rgba(0, 0, 0, 0.45);
+}
+
+.modal {
+  width: 100%;
+  max-width: 360px;
+  padding: 20px;
+  border-radius: 12px;
+  background: white;
+
+  h3 {
+    margin: 0 0 8px;
+    font-size: 17px;
+  }
+
+  p {
+    margin: 0 0 18px;
+    color: #666;
+    font-size: 14px;
+    line-height: 1.5;
+  }
+
+  .acoes {
+    justify-content: flex-end;
+  }
+}
+
+@media (max-width: 560px) {
+  .card {
+    flex-direction: column;
+    align-items: stretch;
+    padding: 12px;
+  }
+
+  .acoes .botao {
+    flex: 1;
+  }
+}

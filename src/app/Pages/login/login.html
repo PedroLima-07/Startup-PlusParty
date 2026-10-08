@@ -76,6 +76,10 @@
           Não tem conta?
           <button class="link" type="button" (click)="mudarModo('cadastro')">Cadastre-se</button>
         </p>
+        <p class="rodape-link">
+          Trabalha em um bar?
+          <a class="link" [routerLink]="rotaCadastroAtendente">Cadastre-se como atendente</a>
+        </p>
       } @else {
         <p class="rodape-link">
           {{ modo() === 'cadastro' ? 'Já tem conta?' : 'Lembrou a senha?' }}

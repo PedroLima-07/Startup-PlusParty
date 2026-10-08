@@ -43,14 +43,15 @@ values
   ('ESTABELECIMENTO_ID_AQUI', 'Caipirinha de Limão', 'Drinks', 22.00, 'bar', true),
   ('ESTABELECIMENTO_ID_AQUI', 'Batata Frita c/ Cheddar', 'Pra petiscar', 34.00, 'cozinha', true);
 
--- 3. (Opcional) Perfil do gerente/funcionário do bar
--- Só depois que essa pessoa tiver feito signup pelo app (supabase.auth),
--- para ter o id do auth.users. Troque AUTH_USER_ID_AQUI por esse id.
-insert into perfis (id, nome, email, tipo, estabelecimento_id)
-values (
-  'AUTH_USER_ID_AQUI',
-  'Nome do gerente',
-  'email@bar.com',
-  'gerente',
-  'ESTABELECIMENTO_ID_AQUI'
-);
+-- 3. Gerente do bar
+-- O gerente é o único papel definido por aqui: é isso que identifica quem
+-- responde pelo bar. Peça para a pessoa se cadastrar pelo app (ela nasce
+-- cliente, com o perfil já criado) e então promova pelo e-mail do cadastro.
+-- Deve responder "UPDATE 1"; "UPDATE 0" quer dizer que o e-mail não bateu.
+update perfis
+set tipo = 'gerente',
+    estabelecimento_id = 'ESTABELECIMENTO_ID_AQUI'
+where email = 'email-do-gerente@exemplo.com';
+
+-- Os atendentes não entram por aqui: cada um se cadastra pelo app, em
+-- "Sou atendente", e o gerente aprova na aba Equipe (ver equipe.sql).

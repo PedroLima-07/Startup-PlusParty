@@ -1,0 +1,112 @@
+<div class="equipe-container">
+  @if (erro(); as mensagem) {
+    <p class="mensagem-erro" role="alert">{{ mensagem }}</p>
+  }
+
+  @if (carregando()) {
+    <app-carregando texto="Carregando equipe" />
+  } @else if (carregou()) {
+    <section aria-labelledby="titulo-pedidos">
+      <h2 id="titulo-pedidos">
+        Pedidos para entrar <span class="contador">{{ pendentes().length }}</span>
+      </h2>
+
+      @for (pedido of pendentes(); track pedido.id) {
+        <article class="card">
+          <div class="pessoa">
+            <strong>{{ pedido.nome }}</strong>
+            <span>{{ pedido.email }}</span>
+            <a [href]="'tel:' + pedido.telefone">{{ pedido.telefone }}</a>
+            <span class="quando">Pediu em {{ pedido.criada_em | date: "dd/MM 'às' HH:mm" }}</span>
+          </div>
+          <div class="acoes">
+            <button
+              type="button"
+              class="botao secundario"
+              [disabled]="processando() !== null"
+              (click)="responder(pedido, false)"
+            >
+              Recusar
+            </button>
+            <button
+              type="button"
+              class="botao primario"
+              [disabled]="processando() !== null"
+              (click)="responder(pedido, true)"
+            >
+              {{ processando() === pedido.id ? 'Aguarde...' : 'Aprovar' }}
+            </button>
+          </div>
+        </article>
+      } @empty {
+        <p class="vazio">Nenhum pedido esperando resposta.</p>
+      }
+    </section>
+
+    <section aria-labelledby="titulo-atendentes">
+      <h2 id="titulo-atendentes">
+        Atendentes <span class="contador">{{ funcionarios().length }}</span>
+      </h2>
+
+      @for (funcionario of funcionarios(); track funcionario.id) {
+        <article class="card">
+          <div class="pessoa">
+            <strong>{{ funcionario.nome || 'Sem nome' }}</strong>
+            <span>{{ funcionario.email }}</span>
+            @if (funcionario.telefone; as telefone) {
+              <a [href]="'tel:' + telefone">{{ telefone }}</a>
+            }
+          </div>
+          <div class="acoes">
+            <button
+              type="button"
+              class="botao perigo"
+              [disabled]="processando() !== null"
+              (click)="pedirConfirmacaoRemocao(funcionario)"
+            >
+              Remover
+            </button>
+          </div>
+        </article>
+      } @empty {
+        <p class="vazio">
+          Ninguém na equipe ainda. Peça para o atendente se cadastrar em "Cadastre-se como
+          atendente", na tela de login, escolhendo este bar.
+        </p>
+      }
+    </section>
+  }
+
+  @if (remocaoEmConfirmacao(); as funcionario) {
+    <div class="overlay" (click)="cancelarRemocao()">
+      <div
+        class="modal"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="titulo-remocao"
+        (click)="$event.stopPropagation()"
+      >
+        <h3 id="titulo-remocao">Remover {{ funcionario.nome || 'esta pessoa' }} da equipe?</h3>
+        <p>A pessoa deixa de ver os pedidos e as comandas do bar na hora e volta a ser cliente.</p>
+        <div class="acoes">
+          <button
+            type="button"
+            class="botao secundario"
+            [disabled]="processando() !== null"
+            (click)="cancelarRemocao()"
+          >
+            Cancelar
+          </button>
+          <button
+            type="button"
+            class="botao perigo"
+            [disabled]="processando() !== null"
+            (click)="confirmarRemocao()"
+          >
+            {{ processando() ? 'Removendo...' : 'Remover' }}
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+</div>

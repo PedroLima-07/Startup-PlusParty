@@ -1,6 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
+import { EquipeService } from '../../services/equipe.service';
 import { LoginPage } from './login';
 
 describe('LoginPage — recuperar senha', () => {
@@ -40,7 +41,11 @@ describe('LoginPage — recuperar senha', () => {
 
     await TestBed.configureTestingModule({
       imports: [LoginPage],
-      providers: [provideRouter([]), { provide: AuthService, useValue: authService }],
+      providers: [
+        provideRouter([]),
+        { provide: AuthService, useValue: authService },
+        { provide: EquipeService, useValue: {} },
+      ],
     }).compileComponents();
 
     fixture = TestBed.createComponent(LoginPage);

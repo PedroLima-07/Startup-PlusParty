@@ -52,6 +52,20 @@ export const routes: Routes = [
     data: { modo: 'pedir' },
     canActivate: [authGuard],
   },
+  // Quem quer trabalhar num bar pede aqui; o gerente aprova na aba Equipe.
+  {
+    path: 'atendente/cadastro',
+    loadComponent: () =>
+      import('./Pages/atendente-cadastro/atendente-cadastro').then((m) => m.AtendenteCadastroPage),
+  },
+  {
+    path: 'atendente/aguardando',
+    loadComponent: () =>
+      import('./Pages/atendente-aguardando/atendente-aguardando').then(
+        (m) => m.AtendenteAguardandoPage,
+      ),
+    canActivate: [authGuard],
+  },
   {
     path: 'atendente/pedidos',
     loadComponent: () =>
@@ -72,7 +86,8 @@ export const routes: Routes = [
       { path: '', redirectTo: 'movimento', pathMatch: 'full' },
       { path: 'movimento', loadComponent: () => import('./Pages/gerente/movimento/movimento').then(m => m.Movimento) },
       { path: 'postagens', loadComponent: () => import('./Pages/gerente/postagens/postagens').then(m => m.Postagens) },
-      { path: 'perfil-bar', loadComponent: () => import('./Pages/gerente/perfil-bar/perfil-bar').then(m => m.PerfilBarComponent) }
+      { path: 'perfil-bar', loadComponent: () => import('./Pages/gerente/perfil-bar/perfil-bar').then(m => m.PerfilBarComponent) },
+      { path: 'equipe', loadComponent: () => import('./Pages/gerente/equipe/equipe').then(m => m.Equipe) }
     ]
   },
   {

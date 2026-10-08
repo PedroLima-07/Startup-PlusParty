@@ -75,25 +75,55 @@ create trigger validar_comanda
   for each row execute function public.validar_comanda();
 
 -- ---------------------------------------------------------------------
--- 3. perfis: tipo e estabelecimento só mudam pelo painel
+-- 3. perfis: tipo e estabelecimento só mudam pelo painel ou pelo gerente
 -- ---------------------------------------------------------------------
+-- Ninguém muda o próprio tipo nem o próprio bar. As duas únicas mudanças
+-- aceitas pelo app são as do gerente montando a equipe dele, feitas pelas
+-- funções de supabase/equipe.sql (que precisa estar aplicado):
+--   cliente     → funcionário do bar do gerente   (com solicitação aprovada)
+--   funcionário do bar do gerente → cliente       (desligamento)
 create or replace function public.proteger_perfil()
 returns trigger
 language plpgsql
 security definer
 set search_path = public
 as $$
+declare
+  bar_do_gerente uuid;
 begin
   if auth.uid() is null then
     return new;
   end if;
 
-  if new.tipo is distinct from old.tipo
-     or new.estabelecimento_id is distinct from old.estabelecimento_id then
-    raise exception 'Tipo e estabelecimento do perfil só podem ser alterados pela equipe.';
+  if new.tipo is not distinct from old.tipo
+     and new.estabelecimento_id is not distinct from old.estabelecimento_id then
+    return new;
   end if;
 
-  return new;
+  if public.meu_tipo() = 'gerente' and new.id <> auth.uid() then
+    bar_do_gerente := public.meu_estabelecimento_id();
+
+    if old.tipo = 'cliente'
+       and new.tipo = 'funcionario'
+       and new.estabelecimento_id = bar_do_gerente
+       and exists (
+         select 1 from solicitacoes_equipe s
+         where s.usuario_id = new.id
+           and s.estabelecimento_id = bar_do_gerente
+           and s.status = 'aprovada'
+       ) then
+      return new;
+    end if;
+
+    if old.tipo = 'funcionario'
+       and old.estabelecimento_id = bar_do_gerente
+       and new.tipo = 'cliente'
+       and new.estabelecimento_id is null then
+      return new;
+    end if;
+  end if;
+
+  raise exception 'Tipo e estabelecimento do perfil só podem ser alterados pela equipe.';
 end;
 $$;
 
