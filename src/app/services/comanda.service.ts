@@ -77,6 +77,23 @@ export class ComandaService {
     return (data ?? []) as unknown as PedidoItemDetalhado[];
   }
 
+  /**
+   * Desiste da comanda que ainda espera a liberação do atendente: ela é
+   * apagada (ver supabase/cancelar_comanda.sql). Devolve false se já não dava
+   * para cancelar, por exemplo porque o atendente liberou nesse meio tempo.
+   */
+  async cancelarSolicitacao(comandaId: string): Promise<boolean> {
+    const { data, error } = await this.supabase.client
+      .from('comandas')
+      .delete()
+      .eq('id', comandaId)
+      .eq('status', 'aguardando_liberacao')
+      .select('id');
+
+    if (error) throw error;
+    return (data ?? []).length > 0;
+  }
+
   calcularTotal(itens: PedidoItemDetalhado[]): number {
     return itens.reduce((total, item) => total + item.quantidade * item.preco_unitario, 0);
   }

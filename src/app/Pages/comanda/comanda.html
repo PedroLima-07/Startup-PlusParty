@@ -31,6 +31,17 @@
         <button class="botao-primario" type="button" (click)="verificarLiberacao()">
           Já fui liberado, atualizar
         </button>
+        <button
+          class="botao-cancelar"
+          type="button"
+          [disabled]="cancelando()"
+          (click)="cancelarSolicitacao()"
+        >
+          {{ cancelando() ? 'Cancelando...' : 'Cancelar solicitação' }}
+        </button>
+        @if (erroCancelamento(); as mensagem) {
+          <p class="erro-cancelamento" role="alert">{{ mensagem }}</p>
+        }
       </div>
     </div>
   } @else {
