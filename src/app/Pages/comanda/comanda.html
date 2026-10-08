@@ -1,5 +1,5 @@
 @if (carregando()) {
-  <p class="carregando">Carregando comanda...</p>
+  <app-carregando texto="Carregando comanda" />
 } @else if (comanda(); as c) {
   @if (comandaEncerrada()) {
     <div class="tela tela-fechamento">

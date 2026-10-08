@@ -14,17 +14,11 @@
   color: var(--azul-marinho);
 }
 
-.carregando {
-  padding: 40px;
-  text-align: center;
-  color: var(--cinza-texto);
-}
-
 .tela {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
-  padding: 24px 20px 88px;
+  padding: 24px 20px 116px;
   gap: 20px;
 }
 
@@ -221,11 +215,6 @@
   :host {
     --fundo: #f7f8fb;
     padding-left: d.$largura-menu;
-  }
-
-  // O menu vira lateral e fixo: não deve ocupar uma célula da grade.
-  app-nav-cliente {
-    display: contents;
   }
 
   .tela {

@@ -5,13 +5,14 @@ import { formatarHora, resumirDias, statusHorario } from '../../horario-funciona
 import { Estabelecimento } from '../../models';
 import { EstabelecimentosService } from '../../services/estabelecimentos.service';
 import { NavCliente } from '../../components/nav-cliente/nav-cliente';
+import { Carregando } from '../../components/carregando/carregando';
 
 const NOTA_BEM_AVALIADO = 4.5;
 
 @Component({
   selector: 'app-estabelecimento',
   standalone: true,
-  imports: [NavCliente, NotaBar],
+  imports: [Carregando, NavCliente, NotaBar],
   templateUrl: './estabelecimento.html',
   styleUrl: './estabelecimento.scss',
 })

@@ -1,39 +1,122 @@
 @use '../../../styles/desktop' as d;
 
+// Barra inferior do mobile: flutuante, com um recorte curvo no topo onde
+// fica a bolha do item ativo. Recorte, bolha e ícone se movem juntos.
+$itens: 4;
+$altura-barra: 64px;
+$bolha: 48px;
+$subida: 14px; // quanto a bolha (e o ícone ativo) passam do topo da barra
+$deslize: 420ms cubic-bezier(0.34, 1.3, 0.5, 1);
+
+// Formato do recorte: uma "bacia" com folga em volta da bolha e cantos
+// arredondados onde ela encontra o topo da barra.
+$recorte: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 104 40'%3E%3Cpath d='M0 0H8C17 0 22.5 4 23.07 12A29 29 0 0 0 80.93 12C81.5 4 87 0 96 0H104Z'/%3E%3C/svg%3E");
+
 .nav-inferior {
+  --posicao: 0;
+
   position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
+  bottom: calc(12px + env(safe-area-inset-bottom));
+  left: 12px;
+  right: 12px;
   z-index: 30;
   display: flex;
-  background: rgba(255, 255, 255, 0.95);
-  border-top: 1px solid rgba(0, 0, 0, 0.05);
-  padding: 6px 8px calc(4px + env(safe-area-inset-bottom));
+  height: $altura-barra;
+  max-width: 520px;
+  margin: 0 auto;
   font-family: system-ui, sans-serif;
+  filter: drop-shadow(0 8px 18px rgba(15, 31, 75, 0.28));
+}
+
+.fundo {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  border-radius: 22px;
+}
+
+// Uma faixa da largura de um item, que desliza até o item ativo. A barra é
+// pintada por ela, bem mais larga que a tela, com o recorte no centro.
+.recorte {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: calc(100% / $itens);
+  transform: translateX(calc(var(--posicao) * 100%));
+  transition: transform $deslize;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 50%;
+    width: 400vw;
+    margin-left: -200vw;
+    background: #0f1f4b;
+    mask:
+      $recorte center top / 104px 40px no-repeat,
+      linear-gradient(#000 0 0);
+    mask-composite: exclude;
+  }
+}
+
+.bolha {
+  position: absolute;
+  top: -$subida;
+  left: 0;
+  width: calc(100% / $itens);
+  transform: translateX(calc(var(--posicao) * 100%));
+  transition: transform $deslize;
+  pointer-events: none;
+
+  &::before {
+    content: '';
+    display: block;
+    width: $bolha;
+    height: $bolha;
+    margin: 0 auto;
+    border-radius: 50%;
+    background: #2f6bff;
+  }
+}
+
+// Tela sem item no menu: barra lisa, sem recorte nem bolha.
+.sem-destaque {
+  .recorte::before {
+    mask: none;
+  }
+
+  .bolha {
+    display: none;
+  }
 }
 
 .item-nav {
+  position: relative;
   flex: 1;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 4px;
-  padding: 6px 0;
+  gap: 6px;
+  padding: 12px 0 0;
   background: none;
   border: none;
-  color: rgba(10, 10, 10, 0.45);
+  color: rgba(255, 255, 255, 0.62);
   text-decoration: none;
   cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: color 200ms ease;
 }
 
 .icone {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  transition: transform $deslize;
 
   svg {
     width: 21px;
@@ -52,17 +135,24 @@
 }
 
 .item-nav.ativo {
+  color: #fff;
+
   .icone {
-    background: #e7f0ff;
-    color: #3d7bff;
+    transform: translateY(-$subida);
 
     svg {
       stroke-width: 2.4;
     }
   }
+}
 
-  .rotulo {
-    color: #0b1e4b;
+// Quem pediu menos movimento no sistema ainda vê o destaque mudar de lugar,
+// mas num deslize curto e sem o "quique" do final.
+@media (prefers-reduced-motion: reduce) {
+  .recorte,
+  .bolha,
+  .icone {
+    transition: transform 200ms ease;
   }
 }
 
@@ -84,13 +174,23 @@
 
   .nav-inferior {
     top: 0;
+    bottom: 0;
+    left: 0;
     right: auto;
     width: d.$largura-menu;
+    height: auto;
+    max-width: none;
+    margin: 0;
     flex-direction: column;
     gap: 4px;
     padding: 28px 16px 24px;
     background: #0f1f4b;
-    border-top: 0;
+    filter: none;
+  }
+
+  .fundo,
+  .bolha {
+    display: none;
   }
 
   .marca {
@@ -136,12 +236,6 @@
     }
   }
 
-  .icone {
-    width: 24px;
-    height: 24px;
-    border-radius: 0;
-  }
-
   .rotulo {
     font-size: 15px;
   }
@@ -151,12 +245,7 @@
     color: #fff;
 
     .icone {
-      background: none;
-      color: #fff;
-    }
-
-    .rotulo {
-      color: #fff;
+      transform: none;
     }
   }
 }

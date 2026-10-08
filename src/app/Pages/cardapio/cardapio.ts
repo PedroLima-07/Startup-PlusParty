@@ -7,12 +7,13 @@ import { ComandaService } from '../../services/comanda.service';
 import { EstabelecimentosService } from '../../services/estabelecimentos.service';
 import { PedidoService } from '../../services/pedido.service';
 import { NavCliente } from '../../components/nav-cliente/nav-cliente';
+import { Carregando } from '../../components/carregando/carregando';
 
 type ModoCardapio = 'pedir' | 'visualizar';
 
 @Component({
   selector: 'app-cardapio',
-  imports: [CurrencyPipe, NavCliente],
+  imports: [Carregando, CurrencyPipe, NavCliente],
   templateUrl: './cardapio.html',
   styleUrl: './cardapio.scss',
 })

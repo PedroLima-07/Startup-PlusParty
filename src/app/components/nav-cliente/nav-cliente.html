@@ -1,8 +1,18 @@
-<nav class="nav-inferior" aria-label="Navegação do cliente">
+<nav
+  class="nav-inferior"
+  aria-label="Navegação do cliente"
+  [class.sem-destaque]="posicao() === null"
+  [style.--posicao]="posicao()"
+>
   <a class="marca" routerLink="/cliente/home" aria-label="+party, ir para o início">
     <span class="marca-icone" aria-hidden="true">+</span>party
   </a>
-  <a class="item-nav" routerLink="/cliente/home" routerLinkActive="ativo">
+
+  <!-- Só no mobile: a barra com o recorte e a bolha que acompanham o item ativo. -->
+  <span class="fundo" aria-hidden="true"><span class="recorte"></span></span>
+  <span class="bolha" aria-hidden="true"></span>
+
+  <a class="item-nav" routerLink="/cliente/home" [class.ativo]="posicao() === 0">
     <span class="icone">
       <svg viewBox="0 0 24 24" aria-hidden="true">
         <path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8" />
@@ -11,7 +21,7 @@
     </span>
     <span class="rotulo">Início</span>
   </a>
-  <a class="item-nav" routerLink="/cliente/discovery" routerLinkActive="ativo">
+  <a class="item-nav" routerLink="/cliente/discovery" [class.ativo]="posicao() === 1">
     <span class="icone">
       <svg viewBox="0 0 24 24" aria-hidden="true">
         <path d="M14.536 21.686a.5.5 0 0 0 .937-.024l6.5-19a.496.496 0 0 0-.635-.635l-19 6.5a.5.5 0 0 0-.024.937l7.93 3.18a2 2 0 0 1 1.112 1.11z" />

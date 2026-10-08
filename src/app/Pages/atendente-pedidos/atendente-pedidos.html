@@ -32,9 +32,7 @@
 
 <main class="pedidos-lista">
   @if (carregando()) {
-    <div class="empty-state">
-      <p>Carregando pedidos...</p>
-    </div>
+    <app-carregando texto="Carregando pedidos" />
   } @else {
     @for (pedido of pedidosFiltrados(); track pedido.id) {
       <button type="button" class="card-pedido" (click)="abrirAcao(pedido)">
