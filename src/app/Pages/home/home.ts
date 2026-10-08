@@ -62,16 +62,27 @@ export class HomePage implements OnInit {
     const user = await this.authService.usuarioAtual();
 
     // TODO: exigir sessão de verdade assim que o authGuard voltar (ver app.routes.ts).
-    const [nome, comandaAtiva, estabelecimentos] = await Promise.all([
+    const [nome, comandaAtiva, estabelecimentos, comandasAbertas] = await Promise.all([
       user ? this.authService.buscarNomeAtual() : Promise.resolve('Visitante'),
       user ? this.homeService.buscarComandaAtiva(user.id) : Promise.resolve(null),
-      this.carregarEstabelecimentosComLotacao(),
+      this.homeService.listarEstabelecimentos(),
+      // O selo "Quente" é um detalhe: se a contagem falhar, a Home abre com
+      // todos os bares em "Normal" em vez de não abrir.
+      this.homeService.contarComandasAbertasPorBar().catch(() => new Map<string, number>()),
     ]);
 
     this.logado.set(user !== null);
     this.nome.set(nome);
     this.comandaAtiva.set(comandaAtiva);
-    this.estabelecimentos.set(estabelecimentos);
+    this.estabelecimentos.set(
+      estabelecimentos.map((estabelecimento) => ({
+        ...estabelecimento,
+        lotacao: this.homeService.calcularLotacao(
+          comandasAbertas.get(estabelecimento.id) ?? 0,
+          estabelecimento.capacidade,
+        ),
+      })),
+    );
     this.carregando.set(false);
   }
 
@@ -82,19 +93,5 @@ export class HomePage implements OnInit {
 
   protected inicial(nome: string): string {
     return nome.charAt(0).toUpperCase();
-  }
-
-  private async carregarEstabelecimentosComLotacao(): Promise<EstabelecimentoComLotacao[]> {
-    const estabelecimentos = await this.homeService.listarEstabelecimentos();
-
-    return Promise.all(
-      estabelecimentos.map(async (estabelecimento) => {
-        const comandasAbertas = await this.homeService.contarComandasAbertas(estabelecimento.id);
-        return {
-          ...estabelecimento,
-          lotacao: this.homeService.calcularLotacao(comandasAbertas, estabelecimento.capacidade),
-        };
-      })
-    );
   }
 }

@@ -1,5 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { Comanda, Estabelecimento } from '../models';
+import { EstabelecimentosService } from './estabelecimentos.service';
 import { SupabaseService } from './supabase.service';
 
 const LIMIAR_LOTACAO = 0.5;
@@ -9,15 +10,16 @@ const LIMIAR_LOTACAO = 0.5;
 })
 export class HomeService {
   private supabase = inject(SupabaseService);
+  private estabelecimentosService = inject(EstabelecimentosService);
 
+  /**
+   * Da maior nota para a menor, reaproveitando a lista que o Discovery também
+   * usa. Bares sem nota vêm primeiro, como na ordenação que o banco fazia.
+   */
   async listarEstabelecimentos(): Promise<Estabelecimento[]> {
-    const { data, error } = await this.supabase.client
-      .from('estabelecimentos')
-      .select('*')
-      .order('avaliacao', { ascending: false });
-
-    if (error) throw error;
-    return (data ?? []) as Estabelecimento[];
+    const nota = (estabelecimento: Estabelecimento) => estabelecimento.avaliacao ?? Number.MAX_VALUE;
+    const lista = await this.estabelecimentosService.listar();
+    return [...lista].sort((a, b) => nota(b) - nota(a));
   }
 
   async buscarComandaAtiva(usuarioId: string): Promise<Comanda | null> {
@@ -34,15 +36,16 @@ export class HomeService {
     return data as Comanda | null;
   }
 
-  async contarComandasAbertas(estabelecimentoId: string): Promise<number> {
-    const { count, error } = await this.supabase.client
-      .from('comandas')
-      .select('id', { count: 'exact', head: true })
-      .eq('estabelecimento_id', estabelecimentoId)
-      .in('status', ['aguardando_liberacao', 'aberta']);
+  /**
+   * Comandas abertas de cada bar, numa consulta só (ver supabase/lotacao.sql).
+   * Bares sem comanda aberta não vêm na resposta.
+   */
+  async contarComandasAbertasPorBar(): Promise<Map<string, number>> {
+    const { data, error } = await this.supabase.client.rpc('lotacao_estabelecimentos');
 
     if (error) throw error;
-    return count ?? 0;
+    const linhas = (data ?? []) as { estabelecimento_id: string; comandas_abertas: number }[];
+    return new Map(linhas.map((linha) => [linha.estabelecimento_id, linha.comandas_abertas]));
   }
 
   /** Limiar simples (sem histerese) — ver nota no PR sobre a simplificação. */
