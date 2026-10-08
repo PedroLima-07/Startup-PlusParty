@@ -1,3 +1,5 @@
+@use '../../../styles/desktop' as d;
+
 :host {
   display: block;
   min-height: 100dvh;
@@ -208,4 +210,110 @@
   font-size: 12px;
   font-weight: 700;
   cursor: pointer;
+}
+
+// ---------------------------------------------------------------------
+// Desktop: menu lateral, foto grande à esquerda e informações à direita
+// ---------------------------------------------------------------------
+@include d.desktop {
+  :host {
+    padding-left: d.$largura-menu;
+  }
+
+  .app-header {
+    position: static;
+    background: transparent;
+  }
+
+  .header-content {
+    max-width: 1200px;
+    min-height: 0;
+    padding: 40px 40px 0;
+    gap: 16px;
+  }
+
+  .header-content h1 {
+    color: #0f1f4b;
+    font-size: 32px;
+    letter-spacing: -0.02em;
+  }
+
+  .back-button {
+    @include d.botao-voltar-claro;
+  }
+
+  .page-content {
+    max-width: 1200px;
+    padding: 28px 40px 56px;
+    display: grid;
+    grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
+    // A última linha (1fr) absorve a altura que sobra da foto, para as
+    // informações da direita não se espalharem.
+    grid-template-rows: repeat(10, auto) 1fr;
+    column-gap: 44px;
+    align-items: start;
+  }
+
+  .page-content > * {
+    grid-column: 2;
+  }
+
+  .page-content > .foto-capa {
+    grid-column: 1;
+    grid-row: 1 / -1;
+    position: sticky;
+    top: 32px;
+    aspect-ratio: 4 / 3;
+    margin-bottom: 0;
+    border-radius: 22px;
+    box-shadow: 0 18px 44px rgba(15, 31, 75, 0.16);
+  }
+
+  // Bar sem foto: uma coluna só, centralizada.
+  .page-content:not(:has(.foto-capa)) {
+    display: block;
+    max-width: 820px;
+  }
+
+  .indicado,
+  .status,
+  .tags li {
+    font-size: 13px;
+  }
+
+  .acoes {
+    margin-bottom: 32px;
+  }
+
+  .botao-primario,
+  .botao-secundario {
+    padding: 15px;
+    font-size: 15px;
+    transition: transform 120ms ease, box-shadow 120ms ease;
+
+    &:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 8px 20px rgba(15, 31, 75, 0.16);
+    }
+  }
+
+  .secao h2 {
+    font-size: 17px;
+  }
+
+  .sobre,
+  .linha-info {
+    font-size: 15px;
+  }
+}
+
+@include d.desktop-compacto {
+  .header-content {
+    padding: 36px 28px 0;
+  }
+
+  .page-content {
+    padding: 24px 28px 48px;
+    column-gap: 28px;
+  }
 }

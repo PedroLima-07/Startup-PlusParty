@@ -6,12 +6,13 @@ import { CardapioService } from '../../services/cardapio.service';
 import { ComandaService } from '../../services/comanda.service';
 import { EstabelecimentosService } from '../../services/estabelecimentos.service';
 import { PedidoService } from '../../services/pedido.service';
+import { NavCliente } from '../../components/nav-cliente/nav-cliente';
 
 type ModoCardapio = 'pedir' | 'visualizar';
 
 @Component({
   selector: 'app-cardapio',
-  imports: [CurrencyPipe],
+  imports: [CurrencyPipe, NavCliente],
   templateUrl: './cardapio.html',
   styleUrl: './cardapio.scss',
 })
@@ -43,6 +44,16 @@ export class CardapioPage implements OnInit {
 
   protected readonly totalItensCarrinho = computed(() =>
     Array.from(this.carrinho().values()).reduce((total, quantidade) => total + quantidade, 0),
+  );
+
+  /** Itens escolhidos com a quantidade: vai para o pedido e para o resumo lateral do desktop. */
+  protected readonly itensDoCarrinho = computed<ItemCarrinho[]>(() =>
+    Array.from(this.carrinho().entries())
+      .map(([itemId, quantidade]): ItemCarrinho | null => {
+        const item = this.itensPorId.get(itemId);
+        return item ? { item, quantidade } : null;
+      })
+      .filter((itemCarrinho): itemCarrinho is ItemCarrinho => itemCarrinho !== null),
   );
 
   protected readonly totalCarrinho = computed(() => {
@@ -104,15 +115,8 @@ export class CardapioPage implements OnInit {
     this.enviando.set(true);
     this.erro.set(null);
 
-    const itensCarrinho: ItemCarrinho[] = Array.from(this.carrinho().entries())
-      .map(([itemId, quantidade]): ItemCarrinho | null => {
-        const item = this.itensPorId.get(itemId);
-        return item ? { item, quantidade } : null;
-      })
-      .filter((itemCarrinho): itemCarrinho is ItemCarrinho => itemCarrinho !== null);
-
     try {
-      await this.pedidoService.criarPedido(this.comandaId, itensCarrinho);
+      await this.pedidoService.criarPedido(this.comandaId, this.itensDoCarrinho());
       void this.router.navigate(['/cliente/comanda', this.comandaId]);
     } catch {
       this.erro.set('Não foi possível confirmar o pedido agora. Tente novamente.');

@@ -1,3 +1,5 @@
+@use '../../../styles/desktop' as d;
+
 :host {
   --azul-marinho: #0f1f4b;
   --azul-acao: #2f6bff;
@@ -326,4 +328,179 @@
   padding: 40px;
   text-align: center;
   color: var(--cinza-texto);
+}
+
+// ---------------------------------------------------------------------
+// Desktop: menu lateral, itens pedidos à esquerda e resumo à direita
+// ---------------------------------------------------------------------
+@include d.desktop {
+  :host {
+    padding-left: d.$largura-menu;
+  }
+
+  .tela {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 40px 56px;
+  }
+
+  .cabecalho {
+    gap: 16px;
+    padding: 40px 0 28px;
+    background: transparent;
+    color: var(--azul-marinho);
+
+    h1 {
+      font-size: 32px;
+      letter-spacing: -0.02em;
+    }
+
+    .voltar {
+      @include d.botao-voltar-claro;
+      flex-shrink: 0;
+      font-size: 1.1rem;
+    }
+  }
+
+  // Comanda aberta: duas colunas. A última linha (1fr) absorve a altura que
+  // sobra da lista, para o resumo da direita ficar junto no topo.
+  .tela:not(.tela-fechamento) {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 380px;
+    grid-template-rows: repeat(5, auto) 1fr;
+    column-gap: 36px;
+    align-items: start;
+
+    .cabecalho {
+      grid-column: 1 / -1;
+    }
+
+    .cabecalho-itens {
+      grid-column: 1;
+      grid-row: 2;
+      padding: 0 0 14px;
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--azul-marinho);
+
+      .link {
+        font-size: 0.9rem;
+        font-weight: 600;
+      }
+    }
+
+    .lista-itens,
+    .vazio {
+      grid-column: 1;
+      grid-row: 3 / -1;
+      padding: 0;
+    }
+
+    .info-comanda {
+      grid-column: 2;
+      grid-row: 2;
+      padding: 0 0 14px;
+    }
+
+    .card-total {
+      grid-column: 2;
+      grid-row: 3;
+      margin: 0;
+      padding: 24px;
+      border-radius: 18px;
+
+      strong {
+        font-size: 1.9rem;
+      }
+    }
+
+    > .botao-primario {
+      grid-column: 2;
+      grid-row: 4;
+      margin: 16px 0 0;
+    }
+
+    .rodape {
+      grid-column: 2;
+      grid-row: 5;
+      margin-top: 0;
+      padding: 12px 0 0;
+    }
+  }
+
+  .vazio {
+    min-height: 280px;
+    padding: 48px 20px;
+    background: #fff;
+    border: 1px dashed #d2d7e2;
+    border-radius: 18px;
+  }
+
+  .lista-itens {
+    gap: 12px;
+
+    .item {
+      padding: 16px 18px;
+
+      .quantidade {
+        width: 30px;
+        height: 30px;
+        font-size: 0.9rem;
+      }
+
+      .detalhe .status {
+        font-size: 0.82rem;
+      }
+    }
+  }
+
+  .botao-primario,
+  .botao-fechar {
+    transition: transform 120ms ease, box-shadow 120ms ease;
+
+    &:hover:not(:disabled) {
+      transform: translateY(-1px);
+      box-shadow: 0 8px 20px rgba(15, 31, 75, 0.18);
+    }
+  }
+
+  // Aguardando liberação e comanda encerrada: cartão central
+  .tela-fechamento {
+    .cabecalho h1 {
+      text-align: left;
+    }
+
+    .conteudo-fechamento {
+      flex: none;
+      width: 100%;
+      max-width: 520px;
+      margin: 6vh auto auto;
+      padding: 52px 44px;
+      background: #fff;
+      border: 1px solid var(--cinza-borda);
+      border-radius: 24px;
+      box-shadow: 0 16px 44px rgba(15, 31, 75, 0.08);
+
+      .icone-sucesso {
+        width: 72px;
+        height: 72px;
+        font-size: 2rem;
+      }
+
+      .valor {
+        font-size: 2.6rem;
+      }
+    }
+  }
+}
+
+@include d.desktop-compacto {
+  .tela {
+    padding: 0 28px 48px;
+  }
+
+  .tela:not(.tela-fechamento) {
+    grid-template-columns: minmax(0, 1fr) 320px;
+    column-gap: 24px;
+  }
 }

@@ -1,3 +1,5 @@
+@use '../../../styles/desktop' as d;
+
 :host {
   --azul-marinho: #0f1f4b;
   --azul-acao: #2f6bff;
@@ -210,4 +212,179 @@
 .item-estabelecimento {
   text-decoration: none;
   color: inherit;
+}
+
+// ---------------------------------------------------------------------
+// Desktop: menu lateral e duas colunas (comanda e bares | favoritos)
+// ---------------------------------------------------------------------
+@include d.desktop {
+  :host {
+    --fundo: #f7f8fb;
+    padding-left: d.$largura-menu;
+  }
+
+  // O menu vira lateral e fixo: não deve ocupar uma célula da grade.
+  app-nav-cliente {
+    display: contents;
+  }
+
+  .tela {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 340px;
+    grid-template-rows: auto auto 1fr;
+    align-items: start;
+    gap: 28px 32px;
+    max-width: 1240px;
+    margin: 0 auto;
+    padding: 44px 40px 56px;
+  }
+
+  .cabecalho {
+    grid-column: 1 / -1;
+    align-items: center;
+
+    h1 {
+      font-size: 32px;
+      letter-spacing: -0.02em;
+    }
+
+    .subtitulo {
+      font-size: 1rem;
+    }
+
+    .botao-conta {
+      padding: 9px 20px;
+      font-size: 0.9rem;
+
+      &:hover {
+        border-color: var(--azul-acao);
+        color: var(--azul-acao);
+      }
+    }
+  }
+
+  .card-comanda {
+    grid-column: 1;
+    gap: 20px;
+    padding: 30px 32px;
+    border-radius: 20px;
+    box-shadow: 0 14px 34px rgba(15, 31, 75, 0.18);
+    transition: transform 120ms ease, box-shadow 120ms ease;
+
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 18px 40px rgba(15, 31, 75, 0.24);
+    }
+
+    .icone-comanda {
+      width: 60px;
+      height: 60px;
+      font-size: 1.7rem;
+    }
+
+    .texto-comanda {
+      gap: 4px;
+
+      strong {
+        font-size: 1.35rem;
+      }
+
+      span:last-child {
+        font-size: 0.95rem;
+      }
+    }
+  }
+
+  .secao h2 {
+    font-size: 1.15rem;
+  }
+
+  // Favoritos: coluna da direita, como um painel
+  .secao:has(.lista-horizontal) {
+    grid-column: 2;
+    grid-row: 2 / span 2;
+    padding: 22px;
+    background: #fff;
+    border: 1px solid var(--cinza-borda);
+    border-radius: 18px;
+  }
+
+  .lista-horizontal {
+    flex-direction: column;
+    overflow: visible;
+  }
+
+  .card-estabelecimento {
+    flex-direction: row;
+    gap: 12px;
+    min-width: 0;
+    padding: 12px 14px;
+    text-align: left;
+
+    .nome {
+      flex: 1;
+      font-size: 0.95rem;
+    }
+  }
+
+  // "Tá rolando": coluna principal, em duas colunas de cards
+  .secao:has(.lista-vertical) {
+    grid-column: 1;
+  }
+
+  .lista-vertical {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px;
+  }
+
+  .item-estabelecimento {
+    padding: 16px;
+
+    .detalhe .nome {
+      font-size: 1rem;
+    }
+
+    .detalhe .descricao {
+      font-size: 0.85rem;
+    }
+  }
+
+  .card-estabelecimento,
+  .item-estabelecimento {
+    transition: border-color 120ms ease, box-shadow 120ms ease;
+
+    &:hover {
+      border-color: var(--azul-acao);
+      box-shadow: 0 6px 18px rgba(47, 107, 255, 0.14);
+    }
+  }
+
+  // Sem favoritos, a coluna principal ocupa a largura toda.
+  .tela:not(:has(.lista-horizontal)) {
+    .card-comanda,
+    .secao {
+      grid-column: 1 / -1;
+    }
+
+    .lista-vertical {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+  }
+}
+
+@include d.desktop-compacto {
+  .tela {
+    grid-template-columns: minmax(0, 1fr) 280px;
+    gap: 24px;
+    padding: 36px 28px 48px;
+  }
+
+  .lista-vertical {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .tela:not(:has(.lista-horizontal)) .lista-vertical {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }

@@ -1,3 +1,5 @@
+@use '../../../styles/desktop' as d;
+
 :host {
   display: block;
   min-height: 100dvh;
@@ -201,4 +203,81 @@
 .empty-state small {
   color: #777f8f;
   font-size: 12px;
+}
+
+// ---------------------------------------------------------------------
+// Desktop: menu lateral, título claro e bares em grade
+// ---------------------------------------------------------------------
+@include d.desktop {
+  :host {
+    padding-left: d.$largura-menu;
+  }
+
+  .app-header {
+    position: static;
+    background: transparent;
+  }
+
+  .header-content {
+    max-width: 1240px;
+    min-height: 0;
+    padding: 44px 40px 0;
+  }
+
+  .header-content h1 {
+    color: #0f1f4b;
+    font-size: 32px;
+    letter-spacing: -0.02em;
+  }
+
+  .page-content {
+    max-width: 1240px;
+    padding: 24px 40px 56px;
+  }
+
+  .search-box {
+    max-width: 460px;
+    margin-bottom: 30px;
+  }
+
+  .search-box input {
+    font-size: 15px;
+  }
+
+  .bars-list {
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 24px;
+  }
+
+  .bar-card.com-foto .bar-info {
+    padding: 16px 18px 18px;
+  }
+
+  .bar-name {
+    font-size: 17px;
+  }
+
+  .bar-description {
+    font-size: 14px;
+  }
+
+  .empty-state {
+    grid-column: 1 / -1;
+    padding: 56px 18px;
+  }
+}
+
+@include d.desktop-compacto {
+  .header-content {
+    padding: 36px 28px 0;
+  }
+
+  .page-content {
+    padding: 20px 28px 48px;
+  }
+
+  .bars-list {
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 20px;
+  }
 }

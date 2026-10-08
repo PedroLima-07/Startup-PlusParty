@@ -5,11 +5,12 @@ import { FormsModule } from '@angular/forms';
 import { Estabelecimento } from '../../../models';
 import { ComandaEmOutroLugarError, ComandaService } from '../../../services/comanda.service';
 import { EstabelecimentosService } from '../../../services/estabelecimentos.service';
+import { NavCliente } from '../../../components/nav-cliente/nav-cliente';
 
 @Component({
   selector: 'app-abrir-comanda-local',
   standalone: true,
-  imports: [FormsModule],
+  imports: [FormsModule, NavCliente],
   templateUrl: './local.html',
   styleUrl: './local.scss',
 })

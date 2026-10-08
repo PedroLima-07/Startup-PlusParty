@@ -4,6 +4,7 @@ import { RouterLink } from '@angular/router';
 import { ComandaDetalhada, PedidoItemDetalhado, StatusPedidoItem } from '../../models';
 import { ComandaService } from '../../services/comanda.service';
 import { SupabaseService } from '../../services/supabase.service';
+import { NavCliente } from '../../components/nav-cliente/nav-cliente';
 
 const ROTULOS_STATUS_ITEM: Record<StatusPedidoItem, string> = {
   novo: 'Enviado',
@@ -13,7 +14,7 @@ const ROTULOS_STATUS_ITEM: Record<StatusPedidoItem, string> = {
 
 @Component({
   selector: 'app-comanda',
-  imports: [CurrencyPipe, RouterLink],
+  imports: [CurrencyPipe, NavCliente, RouterLink],
   templateUrl: './comanda.html',
   styleUrl: './comanda.scss',
 })

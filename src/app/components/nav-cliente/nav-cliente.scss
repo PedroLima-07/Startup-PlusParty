@@ -1,3 +1,5 @@
+@use '../../../styles/desktop' as d;
+
 .nav-inferior {
   position: fixed;
   bottom: 0;
@@ -61,5 +63,100 @@
 
   .rotulo {
     color: #0b1e4b;
+  }
+}
+
+// O logo só existe no menu lateral do desktop.
+.marca {
+  display: none;
+}
+
+// Nas telas que não têm barra inferior no mobile (perfil do bar, comanda…),
+// o componente entra só para dar o menu lateral no desktop.
+:host(.apenas-desktop) {
+  display: none;
+}
+
+@include d.desktop {
+  :host(.apenas-desktop) {
+    display: block;
+  }
+
+  .nav-inferior {
+    top: 0;
+    right: auto;
+    width: d.$largura-menu;
+    flex-direction: column;
+    gap: 4px;
+    padding: 28px 16px 24px;
+    background: #0f1f4b;
+    border-top: 0;
+  }
+
+  .marca {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 28px;
+    padding: 0 10px;
+    color: #fff;
+    font-size: 24px;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    text-decoration: none;
+  }
+
+  .marca-icone {
+    display: grid;
+    place-items: center;
+    width: 38px;
+    height: 38px;
+    border-radius: 11px;
+    background: #2f6bff;
+    font-size: 24px;
+    line-height: 1;
+  }
+
+  .item-nav {
+    flex: none;
+    flex-direction: row;
+    gap: 12px;
+    padding: 11px 12px;
+    border-radius: 12px;
+    color: rgba(255, 255, 255, 0.68);
+    font: inherit;
+    text-align: left;
+    transition: background 120ms ease, color 120ms ease;
+
+    &:hover,
+    &:focus-visible {
+      background: rgba(255, 255, 255, 0.08);
+      color: #fff;
+      outline: none;
+    }
+  }
+
+  .icone {
+    width: 24px;
+    height: 24px;
+    border-radius: 0;
+  }
+
+  .rotulo {
+    font-size: 15px;
+  }
+
+  .item-nav.ativo {
+    background: rgba(255, 255, 255, 0.14);
+    color: #fff;
+
+    .icone {
+      background: none;
+      color: #fff;
+    }
+
+    .rotulo {
+      color: #fff;
+    }
   }
 }
