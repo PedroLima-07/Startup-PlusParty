@@ -16,11 +16,6 @@
   </div>
 </header>
 
-<nav class="nav-staff" aria-label="Telas do atendente">
-  <a routerLink="/atendente/pedidos" routerLinkActive="ativo">Pedidos</a>
-  <a routerLink="/atendente/comandas" routerLinkActive="ativo">Comandas</a>
-</nav>
-
 <div class="tabs">
   <button class="tab-btn" type="button" [class.active]="abaAtiva() === 'bar'" (click)="abaAtiva.set('bar')">Bar</button>
   <button class="tab-btn" type="button" [class.active]="abaAtiva() === 'cozinha'" (click)="abaAtiva.set('cozinha')">Cozinha</button>
@@ -62,6 +57,8 @@
     }
   }
 </main>
+
+<app-nav-atendente />
 
 @if (pedidoSelecionado(); as pedido) {
   <div class="modal-overlay" (click)="fecharModal()">
