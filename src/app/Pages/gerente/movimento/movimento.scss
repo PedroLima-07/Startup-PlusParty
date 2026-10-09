@@ -466,3 +466,7 @@
     color: #15803d;
   }
 }
+
+.mensagem-erro {
+  @include g.mensagem-erro;
+}

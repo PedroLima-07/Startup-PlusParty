@@ -5,6 +5,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 import { AuthService } from '../../../services/auth.service';
 import { MovimentoService } from '../../../services/movimento.service';
+import { SupabaseService } from '../../../services/supabase.service';
 import { Movimento } from './movimento';
 
 registerLocaleData(localePt);
@@ -47,10 +48,14 @@ describe('Movimento (gerente)', () => {
           provide: AuthService,
           useValue: { buscarNomeEstabelecimentoAtual: () => Promise.resolve("Bar D'Zé") },
         },
+        { provide: SupabaseService, useValue: { escutarMudancas: () => () => undefined } },
       ],
     }).compileComponents();
 
     movimento = TestBed.inject(MovimentoService);
+    // Os números vêm do banco; aqui a tela usa os definidos abaixo.
+    vi.spyOn(movimento, 'atualizar').mockResolvedValue();
+    movimento.faturamento.set(4820);
     movimento.comandas.set([
       { numero: '01', cliente: 'Rafael Menezes', mesa: '02', horario: '22:40', valor: 109.6, status: 'aberta' },
       { numero: '04', cliente: 'Carlos Souza', mesa: 'Balcão', horario: '21:20', valor: 139.7, status: 'aberta' },

@@ -21,6 +21,10 @@
 </section>
 
 <div class="pagina">
+  @if (movimento.erro(); as mensagem) {
+    <p class="mensagem-erro" role="alert">{{ mensagem }}</p>
+  }
+
   <section class="atencao" aria-labelledby="titulo-atencao">
     <h2 id="titulo-atencao">
       Precisa de atenção
@@ -100,11 +104,11 @@
       </div>
     </dl>
 
-    @if (!valoresOcultos()) {
+    @if (!valoresOcultos() && movimento.metaFaturamento(); as meta) {
       <div class="meta">
         <span>
           <strong>{{ movimento.faturamento() | currency: 'BRL' : 'symbol' : '1.0-0' }}</strong>
-          de {{ movimento.metaFaturamento() | currency: 'BRL' : 'symbol' : '1.0-0' }}
+          de {{ meta | currency: 'BRL' : 'symbol' : '1.0-0' }}
         </span>
         <strong class="percentual">{{ movimento.percentualDaMeta() }}%</strong>
       </div>

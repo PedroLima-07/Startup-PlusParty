@@ -124,3 +124,13 @@ $mono: ui-monospace, 'SF Mono', 'Cascadia Mono', 'Roboto Mono', Consolas, monosp
     color: #9aa3b5;
   }
 }
+
+// Aviso de falha ao buscar os números (mesmo visual da aba Equipe).
+@mixin mensagem-erro {
+  margin: 0;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: #fde8e8;
+  color: #991b1b;
+  font-size: 13px;
+}
