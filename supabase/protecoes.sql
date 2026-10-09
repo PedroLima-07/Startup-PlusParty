@@ -21,8 +21,12 @@
 -- 1 e 2. comandas: só as transições de status permitidas
 -- ---------------------------------------------------------------------
 --   aguardando_liberacao → aberta                 (staff: libera)
+--   aguardando_liberacao → recusada               (staff: recusa)
 --   aberta               → aguardando_pagamento   (dono ou staff: fecha a conta)
 --   aguardando_pagamento → paga                   (staff: confirma o pagamento)
+--
+-- 'recusada' só existe depois de supabase/recusar_comanda.sql, que amplia a
+-- regra da coluna status e traz esta mesma função. Mantenha as duas iguais.
 
 create or replace function public.validar_comanda()
 returns trigger
@@ -53,7 +57,7 @@ begin
 
   staff_do_local := public.sou_staff() and old.estabelecimento_id = public.meu_estabelecimento_id();
 
-  if old.status = 'aguardando_liberacao' and new.status = 'aberta' and staff_do_local then
+  if old.status = 'aguardando_liberacao' and new.status in ('aberta', 'recusada') and staff_do_local then
     return new;
   end if;
 

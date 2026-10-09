@@ -18,7 +18,7 @@ export class ComandaService {
 
   /**
    * Abre a comanda no estabelecimento. Se o cliente já tem uma comanda ativa
-   * (ainda não paga) nesse mesmo lugar, devolve ela em vez de criar outra.
+   * (nem paga nem recusada) nesse mesmo lugar, devolve ela em vez de criar outra.
    * Se a comanda ativa for em outro lugar, recusa com ComandaEmOutroLugarError.
    */
   async abrirComanda(estabelecimentoId: string, mesa: string | null): Promise<Pick<Comanda, 'id'>> {
@@ -29,7 +29,7 @@ export class ComandaService {
       .from('comandas')
       .select('id, estabelecimento_id, estabelecimento:estabelecimentos(nome)')
       .eq('usuario_id', user.id)
-      .neq('status', 'paga')
+      .not('status', 'in', '(paga,recusada)')
       .order('criada_em', { ascending: false })
       .limit(1)
       .maybeSingle();

@@ -15,6 +15,31 @@
         <button class="botao-primario" type="button" routerLink="/cliente/home">Voltar ao início</button>
       </div>
     </div>
+  } @else if (recusada()) {
+    <div class="tela tela-fechamento">
+      <header class="cabecalho">
+        <h1>Comanda não liberada</h1>
+      </header>
+
+      <div class="conteudo-fechamento">
+        <div class="icone-sucesso icone-recusa">✕</div>
+        <p class="rotulo">Solicitação recusada em<br /><strong>{{ c.estabelecimento.nome }}</strong></p>
+        <p class="instrucao">
+          O atendente não confirmou sua presença. Se você está no local, fale com um atendente e
+          abra a comanda de novo.
+        </p>
+        <button
+          class="botao-primario"
+          type="button"
+          [routerLink]="['/cliente/abrir-comanda', c.estabelecimento_id]"
+        >
+          Abrir comanda de novo
+        </button>
+        <button class="botao-voltar-inicio" type="button" routerLink="/cliente/home">
+          Voltar ao início
+        </button>
+      </div>
+    </div>
   } @else if (aguardandoLiberacao()) {
     <div class="tela tela-fechamento">
       <header class="cabecalho">
