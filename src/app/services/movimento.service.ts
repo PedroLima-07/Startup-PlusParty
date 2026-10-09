@@ -128,6 +128,7 @@ export class MovimentoService {
   readonly atualizadoEm = signal<Date | null>(null);
   /** Mensagem para a tela quando a última busca falhou; os números anteriores continuam. */
   readonly erro = signal<string | null>(null);
+  readonly atualizando = signal(false);
 
   // ------------------------------------------------------------------
   // Derivados
@@ -166,11 +167,14 @@ export class MovimentoService {
    * números anteriores e deixa a mensagem em `erro`.
    */
   async atualizar(): Promise<void> {
+    this.atualizando.set(true);
     try {
       await this.carregar();
       this.erro.set(null);
     } catch {
       this.erro.set('Não foi possível atualizar os números da noite. Tente de novo em instantes.');
+    } finally {
+      this.atualizando.set(false);
     }
   }
 

@@ -11,6 +11,7 @@ import {
 } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { AlertaGerente, ComandaResumo, TipoAlertaGerente } from '../../../models';
+import { Carregando } from '../../../components/carregando/carregando';
 import { AuthService } from '../../../services/auth.service';
 import { MovimentoService } from '../../../services/movimento.service';
 import { SupabaseService } from '../../../services/supabase.service';
@@ -48,7 +49,7 @@ const APARENCIA_ALERTA: Record<TipoAlertaGerente, { icone: NomeIcone; acao: stri
 /** Painel principal do gerente: o que precisa de atenção, o faturamento e as comandas do dia. */
 @Component({
   selector: 'app-movimento',
-  imports: [CurrencyPipe, DatePipe, Icone, RouterLink],
+  imports: [Carregando, CurrencyPipe, DatePipe, Icone, RouterLink],
   templateUrl: './movimento.html',
   styleUrl: './movimento.scss',
 })
@@ -69,6 +70,11 @@ export class Movimento implements OnInit {
   protected readonly valoresOcultos = signal(false);
   /** Alertas de liberação em que o gerente já tocou em "Avisar atendente". */
   protected readonly avisados = signal<ReadonlySet<string>>(new Set());
+
+  /** Antes da primeira resposta do banco os números seriam zeros enganosos. */
+  protected readonly carregandoPrimeiraVez = computed(
+    () => this.movimento.atualizadoEm() === null && this.movimento.erro() === null,
+  );
 
   protected readonly comandasFiltradas = computed(() => {
     const filtro = this.filtro();
@@ -131,5 +137,10 @@ export class Movimento implements OnInit {
 
   protected alternarValores(): void {
     this.valoresOcultos.update((ocultos) => !ocultos);
+  }
+
+  protected atualizar(): void {
+    if (this.movimento.atualizando()) return;
+    void this.movimento.atualizar();
   }
 }

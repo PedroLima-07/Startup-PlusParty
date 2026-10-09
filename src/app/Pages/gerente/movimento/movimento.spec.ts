@@ -55,6 +55,7 @@ describe('Movimento (gerente)', () => {
     movimento = TestBed.inject(MovimentoService);
     // Os números vêm do banco; aqui a tela usa os definidos abaixo.
     vi.spyOn(movimento, 'atualizar').mockResolvedValue();
+    movimento.atualizadoEm.set(new Date(2026, 9, 9, 23, 47));
     movimento.faturamento.set(4820);
     movimento.comandas.set([
       { numero: '01', cliente: 'Rafael Menezes', mesa: '02', horario: '22:40', valor: 109.6, status: 'aberta' },
@@ -143,7 +144,40 @@ describe('Movimento (gerente)', () => {
   it('sem alertas, diz que está tudo em ordem', () => {
     movimento.alertas.set([]);
 
-    expect(tela().textContent).toContain('Tudo em ordem');
+    expect(tela().textContent).toContain('Tudo em ordem por aqui');
     expect(tela().querySelector('.atencao .contador')).toBeNull();
+  });
+
+  it('mostra de quando são os números e atualiza ao tocar no botão', () => {
+    expect(tela().textContent).toContain('Atualizado às 23:47');
+    const chamadasAntes = vi.mocked(movimento.atualizar).mock.calls.length;
+
+    botao('Atualizar').click();
+
+    expect(movimento.atualizar).toHaveBeenCalledTimes(chamadasAntes + 1);
+  });
+
+  it('antes da primeira resposta do banco mostra o carregamento, não números zerados', () => {
+    movimento.atualizadoEm.set(null);
+
+    expect(tela().querySelector('app-carregando')).not.toBeNull();
+    expect(tela().querySelector('.comandas')).toBeNull();
+    expect(tela().querySelector('.numeros dd')?.textContent).toContain('–');
+  });
+
+  it('sem nenhuma comanda na noite, explica quando elas aparecem', () => {
+    movimento.comandas.set([]);
+
+    expect(tela().textContent).toContain('Nenhuma comanda ainda hoje');
+  });
+
+  it('se a busca falhar, mostra o erro com um botão para tentar de novo', () => {
+    movimento.erro.set('Não foi possível atualizar os números da noite.');
+    const chamadasAntes = vi.mocked(movimento.atualizar).mock.calls.length;
+
+    botao('Tentar de novo').click();
+
+    expect(tela().querySelector('.mensagem-erro')?.textContent).toContain('Não foi possível');
+    expect(movimento.atualizar).toHaveBeenCalledTimes(chamadasAntes + 1);
   });
 });

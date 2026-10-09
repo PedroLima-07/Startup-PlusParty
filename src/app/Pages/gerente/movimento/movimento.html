@@ -1,20 +1,36 @@
 <section class="saudacao">
   <div class="saudacao-conteudo">
-    <h1>Olá, {{ nomeDoBar() || 'gerente' }}</h1>
-    <p class="data">{{ hoje | date: "EEEE, d 'de' MMMM" }}</p>
+    <div class="saudacao-topo">
+      <h1>Olá, {{ nomeDoBar() || 'gerente' }}</h1>
+      <button
+        type="button"
+        class="atualizar"
+        [disabled]="movimento.atualizando()"
+        (click)="atualizar()"
+      >
+        <app-icone nome="atualizar" [class.girando]="movimento.atualizando()" />
+        {{ movimento.atualizando() ? 'Atualizando...' : 'Atualizar' }}
+      </button>
+    </div>
+    <p class="data">
+      {{ hoje | date: "EEEE, d 'de' MMMM" }}
+      @if (movimento.atualizadoEm(); as quando) {
+        <span class="atualizado-em">· Atualizado às {{ quando | date: 'HH:mm' }}</span>
+      }
+    </p>
 
     <dl class="numeros">
       <div>
         <dt>comandas abertas</dt>
-        <dd>{{ movimento.comandasAbertas() }}</dd>
+        <dd>{{ carregandoPrimeiraVez() ? '–' : movimento.comandasAbertas() }}</dd>
       </div>
       <div>
         <dt>pagas hoje</dt>
-        <dd>{{ movimento.comandasPagas() }}</dd>
+        <dd>{{ carregandoPrimeiraVez() ? '–' : movimento.comandasPagas() }}</dd>
       </div>
       <div>
         <dt>aguardando pgto</dt>
-        <dd>{{ movimento.comandasAguardandoPagamento() }}</dd>
+        <dd>{{ carregandoPrimeiraVez() ? '–' : movimento.comandasAguardandoPagamento() }}</dd>
       </div>
     </dl>
   </div>
@@ -22,8 +38,17 @@
 
 <div class="pagina">
   @if (movimento.erro(); as mensagem) {
-    <p class="mensagem-erro" role="alert">{{ mensagem }}</p>
+    <div class="mensagem-erro" role="alert">
+      <span>{{ mensagem }}</span>
+      <button type="button" class="tentar-de-novo" [disabled]="movimento.atualizando()" (click)="atualizar()">
+        Tentar de novo
+      </button>
+    </div>
   }
+
+  @if (carregandoPrimeiraVez()) {
+    <app-carregando texto="Carregando o movimento da noite" />
+  } @else {
 
   <section class="atencao" aria-labelledby="titulo-atencao">
     <h2 id="titulo-atencao">
@@ -52,7 +77,10 @@
         }
       </article>
     } @empty {
-      <p class="vazio">Tudo em ordem: nada precisa de atenção agora.</p>
+      <p class="vazio tudo-certo">
+        <span class="check" aria-hidden="true"><app-icone nome="check" /></span>
+        Tudo em ordem por aqui
+      </p>
     }
   </section>
 
@@ -179,7 +207,15 @@
         </span>
       </article>
     } @empty {
-      <p class="vazio">Nenhuma comanda encontrada.</p>
+      @if (movimento.comandas().length === 0) {
+        <p class="vazio">
+          Nenhuma comanda ainda hoje — as comandas aparecem aqui assim que os clientes abrirem no seu
+          bar.
+        </p>
+      } @else {
+        <p class="vazio">Nenhuma comanda encontrada.</p>
+      }
     }
   </section>
+  }
 </div>
