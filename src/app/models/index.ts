@@ -165,6 +165,7 @@ export interface Postagem {
 }
 
 export interface ComandaResumo {
+  id: string;
   numero: string;
   cliente: string;
   /** Número da mesa, ou 'Balcão'. */

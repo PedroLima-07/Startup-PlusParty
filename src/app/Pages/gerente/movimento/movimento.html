@@ -167,7 +167,7 @@
     </a>
   </section>
 
-  <section #listaDeComandas class="comandas" aria-labelledby="titulo-comandas">
+  <section class="comandas" aria-labelledby="titulo-comandas">
     <h2 id="titulo-comandas" class="rotulo">Comandas do dia</h2>
 
     <label class="busca">
@@ -195,17 +195,17 @@
       }
     </div>
 
-    @for (comanda of comandasFiltradas(); track comanda.numero) {
-      <article class="comanda">
-        <div class="comanda-identificacao">
+    @for (comanda of comandasFiltradas(); track comanda.id) {
+      <button type="button" class="comanda" (click)="abrirDetalhe(comanda)">
+        <span class="comanda-identificacao">
           <strong class="comanda-numero">Comanda {{ comanda.numero }}</strong>
           <span class="selo-status" [class]="comanda.status">{{ rotuloStatus(comanda) }}</span>
-        </div>
+        </span>
         <strong class="comanda-valor">{{ comanda.valor | currency: 'BRL' }}</strong>
         <span class="comanda-detalhe">
           {{ comanda.cliente }} · {{ local(comanda) }} · {{ comanda.horario }}
         </span>
-      </article>
+      </button>
     } @empty {
       @if (movimento.comandas().length === 0) {
         <p class="vazio">
@@ -219,3 +219,54 @@
   </section>
   }
 </div>
+
+@if (detalhe(); as d) {
+  <div class="detalhe-fundo" (click)="fecharDetalhe()">
+    <section
+      class="detalhe"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="titulo-detalhe"
+      (click)="$event.stopPropagation()"
+    >
+      <header class="detalhe-topo">
+        <div>
+          <h2 id="titulo-detalhe">Comanda {{ d.numero }}</h2>
+          <p class="detalhe-sub">{{ d.cliente }} · {{ d.local }} · aberta às {{ d.aberturaEm }}</p>
+        </div>
+        <button type="button" class="fechar" aria-label="Fechar" (click)="fecharDetalhe()">
+          <app-icone nome="fechar" />
+        </button>
+      </header>
+
+      <span class="selo-status" [class]="d.status">{{ rotuloStatusDetalhe(d.status) }}</span>
+
+      <div class="detalhe-pedidos">
+        @for (pedido of d.pedidos; track pedido.id; let i = $index) {
+          <div class="pedido">
+            <div class="pedido-topo">
+              <strong>Pedido {{ i + 1 }}</strong>
+              <span>{{ pedido.horario }} · {{ pedido.total | currency: 'BRL' }}</span>
+            </div>
+            <ul>
+              @for (item of pedido.itens; track $index) {
+                <li>
+                  <span class="item-nome">{{ item.quantidade }}× {{ item.nome }}</span>
+                  <span class="item-status" [class]="item.status">{{ rotuloItem(item.status) }}</span>
+                  <span class="item-valor">{{ item.valor | currency: 'BRL' }}</span>
+                </li>
+              }
+            </ul>
+          </div>
+        } @empty {
+          <p class="vazio">Nenhum pedido nesta comanda ainda.</p>
+        }
+      </div>
+
+      <footer class="detalhe-total">
+        <span>Total da comanda</span>
+        <strong>{{ d.total | currency: 'BRL' }}</strong>
+      </footer>
+    </section>
+  </div>
+}
