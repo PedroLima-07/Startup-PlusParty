@@ -1,5 +1,10 @@
 @if (carregando()) {
   <app-carregando />
+} @else if (erroCarregar()) {
+  <app-erro-carregar
+    mensagem="Não foi possível carregar o início. Verifique sua conexão."
+    (tentarDeNovo)="carregar()"
+  />
 } @else {
   <div class="tela">
     <header class="cabecalho">

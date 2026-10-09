@@ -5,6 +5,7 @@ import { Comanda, Estabelecimento } from '../../models';
 import { AuthService } from '../../services/auth.service';
 import { HomeService } from '../../services/home.service';
 import { Carregando } from '../../components/carregando/carregando';
+import { ErroCarregar } from '../../components/erro-carregar/erro-carregar';
 
 interface EstabelecimentoComLotacao extends Estabelecimento {
   lotacao: 'normal' | 'quente';
@@ -12,7 +13,7 @@ interface EstabelecimentoComLotacao extends Estabelecimento {
 
 @Component({
   selector: 'app-home',
-  imports: [Carregando, RouterLink, NavCliente],
+  imports: [Carregando, ErroCarregar, RouterLink, NavCliente],
   templateUrl: './home.html',
   styleUrl: './home.scss',
 })
@@ -22,6 +23,7 @@ export class HomePage implements OnInit {
   private router = inject(Router);
 
   protected readonly carregando = signal(true);
+  protected readonly erroCarregar = signal(false);
   protected readonly logado = signal(false);
   protected readonly nome = signal('');
   protected readonly comandaAtiva = signal<Comanda | null>(null);
@@ -59,31 +61,42 @@ export class HomePage implements OnInit {
   });
 
   async ngOnInit(): Promise<void> {
-    const user = await this.authService.usuarioAtual();
+    await this.carregar();
+  }
 
-    // TODO: exigir sessão de verdade assim que o authGuard voltar (ver app.routes.ts).
-    const [nome, comandaAtiva, estabelecimentos, comandasAbertas] = await Promise.all([
-      user ? this.authService.buscarNomeAtual() : Promise.resolve('Visitante'),
-      user ? this.homeService.buscarComandaAtiva(user.id) : Promise.resolve(null),
-      this.homeService.listarEstabelecimentos(),
-      // O selo "Quente" é um detalhe: se a contagem falhar, a Home abre com
-      // todos os bares em "Normal" em vez de não abrir.
-      this.homeService.contarComandasAbertasPorBar().catch(() => new Map<string, number>()),
-    ]);
+  protected async carregar(): Promise<void> {
+    this.carregando.set(true);
+    this.erroCarregar.set(false);
 
-    this.logado.set(user !== null);
-    this.nome.set(nome);
-    this.comandaAtiva.set(comandaAtiva);
-    this.estabelecimentos.set(
-      estabelecimentos.map((estabelecimento) => ({
-        ...estabelecimento,
-        lotacao: this.homeService.calcularLotacao(
-          comandasAbertas.get(estabelecimento.id) ?? 0,
-          estabelecimento.capacidade,
-        ),
-      })),
-    );
-    this.carregando.set(false);
+    try {
+      const user = await this.authService.usuarioAtual();
+
+      const [nome, comandaAtiva, estabelecimentos, comandasAbertas] = await Promise.all([
+        user ? this.authService.buscarNomeAtual() : Promise.resolve('Visitante'),
+        user ? this.homeService.buscarComandaAtiva(user.id) : Promise.resolve(null),
+        this.homeService.listarEstabelecimentos(),
+        // O selo "Quente" é um detalhe: se a contagem falhar, a Home abre com
+        // todos os bares em "Normal" em vez de não abrir.
+        this.homeService.contarComandasAbertasPorBar().catch(() => new Map<string, number>()),
+      ]);
+
+      this.logado.set(user !== null);
+      this.nome.set(nome);
+      this.comandaAtiva.set(comandaAtiva);
+      this.estabelecimentos.set(
+        estabelecimentos.map((estabelecimento) => ({
+          ...estabelecimento,
+          lotacao: this.homeService.calcularLotacao(
+            comandasAbertas.get(estabelecimento.id) ?? 0,
+            estabelecimento.capacidade,
+          ),
+        })),
+      );
+    } catch {
+      this.erroCarregar.set(true);
+    } finally {
+      this.carregando.set(false);
+    }
   }
 
   protected async sair(): Promise<void> {

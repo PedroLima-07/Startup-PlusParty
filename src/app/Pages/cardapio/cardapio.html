@@ -1,5 +1,10 @@
 @if (carregando()) {
   <app-carregando texto="Carregando cardápio" />
+} @else if (erroCarregar()) {
+  <app-erro-carregar
+    mensagem="Não foi possível carregar o cardápio. Verifique sua conexão."
+    (tentarDeNovo)="carregar()"
+  />
 } @else {
   <div class="tela">
     <header class="cabecalho">
