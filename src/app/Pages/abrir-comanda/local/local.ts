@@ -7,11 +7,12 @@ import { ComandaEmOutroLugarError, ComandaService } from '../../../services/coma
 import { EstabelecimentosService } from '../../../services/estabelecimentos.service';
 import { NavCliente } from '../../../components/nav-cliente/nav-cliente';
 import { Carregando } from '../../../components/carregando/carregando';
+import { ErroCarregar } from '../../../components/erro-carregar/erro-carregar';
 
 @Component({
   selector: 'app-abrir-comanda-local',
   standalone: true,
-  imports: [Carregando, FormsModule, NavCliente],
+  imports: [Carregando, ErroCarregar, FormsModule, NavCliente],
   templateUrl: './local.html',
   styleUrl: './local.scss',
 })
@@ -24,6 +25,7 @@ export class AbrirComandaLocalComponent implements OnInit {
   id = input.required<string>();
 
   protected readonly carregando = signal(true);
+  protected readonly erroCarregar = signal(false);
   protected readonly estabelecimento = signal<Estabelecimento | null>(null);
 
   localSelecionado: 'mesa' | 'balcao' | null = null;
@@ -32,8 +34,20 @@ export class AbrirComandaLocalComponent implements OnInit {
   protected readonly salvando = signal(false);
 
   async ngOnInit(): Promise<void> {
-    this.estabelecimento.set(await this.estabelecimentosService.buscarPorId(this.id()));
-    this.carregando.set(false);
+    await this.carregar();
+  }
+
+  protected async carregar(): Promise<void> {
+    this.carregando.set(true);
+    this.erroCarregar.set(false);
+
+    try {
+      this.estabelecimento.set(await this.estabelecimentosService.buscarPorId(this.id()));
+    } catch {
+      this.erroCarregar.set(true);
+    } finally {
+      this.carregando.set(false);
+    }
   }
 
   selecionarLocal(local: 'mesa' | 'balcao'): void {
