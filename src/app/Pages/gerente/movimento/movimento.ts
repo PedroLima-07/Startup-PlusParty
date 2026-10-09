@@ -1,12 +1,28 @@
 import { CurrencyPipe, DatePipe } from '@angular/common';
-import { Component, ElementRef, OnInit, computed, inject, signal, viewChild } from '@angular/core';
+import {
+  Component,
+  DestroyRef,
+  ElementRef,
+  OnInit,
+  computed,
+  inject,
+  signal,
+  viewChild,
+} from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { AlertaGerente, ComandaResumo, TipoAlertaGerente } from '../../../models';
 import { AuthService } from '../../../services/auth.service';
 import { MovimentoService } from '../../../services/movimento.service';
+import { SupabaseService } from '../../../services/supabase.service';
 import { Icone, NomeIcone } from '../componentes/icone';
 
 type Filtro = 'todas' | ComandaResumo['status'];
+
+/**
+ * Os alertas dependem de quanto tempo passou (pedido parado há 15 min etc.),
+ * então o painel também se atualiza sozinho de tempos em tempos.
+ */
+const INTERVALO_ATUALIZACAO_MS = 60_000;
 
 const FILTROS: { valor: Filtro; rotulo: string }[] = [
   { valor: 'todas', rotulo: 'Todas' },
@@ -39,6 +55,8 @@ const APARENCIA_ALERTA: Record<TipoAlertaGerente, { icone: NomeIcone; acao: stri
 export class Movimento implements OnInit {
   protected readonly movimento = inject(MovimentoService);
   private authService = inject(AuthService);
+  private supabase = inject(SupabaseService);
+  private destroyRef = inject(DestroyRef);
 
   private readonly listaDeComandas = viewChild<ElementRef<HTMLElement>>('listaDeComandas');
 
@@ -67,6 +85,19 @@ export class Movimento implements OnInit {
   });
 
   async ngOnInit(): Promise<void> {
+    // Comanda aberta, paga ou pedido novo mudam os números sem recarregar a página.
+    const atualizar = () => void this.movimento.atualizar();
+    const pararDeEscutar = this.supabase.escutarMudancas(
+      [{ tabela: 'comandas' }, { tabela: 'pedido_itens' }],
+      atualizar,
+    );
+    const relogio = setInterval(atualizar, INTERVALO_ATUALIZACAO_MS);
+    this.destroyRef.onDestroy(() => {
+      pararDeEscutar();
+      clearInterval(relogio);
+    });
+    atualizar();
+
     const nome = await this.authService.buscarNomeEstabelecimentoAtual().catch(() => null);
     this.nomeDoBar.set(nome ?? '');
   }

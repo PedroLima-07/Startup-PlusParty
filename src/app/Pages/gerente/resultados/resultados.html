@@ -4,6 +4,10 @@
     <p>Como foi a noite de hoje até agora</p>
   </header>
 
+  @if (movimento.erro(); as mensagem) {
+    <p class="mensagem-erro" role="alert">{{ mensagem }}</p>
+  }
+
   <section class="cartao">
     <h2>
       Lotação por hora
