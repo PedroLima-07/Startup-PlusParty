@@ -6,13 +6,14 @@ import { Estabelecimento } from '../../models';
 import { EstabelecimentosService } from '../../services/estabelecimentos.service';
 import { NavCliente } from '../../components/nav-cliente/nav-cliente';
 import { Carregando } from '../../components/carregando/carregando';
+import { ErroCarregar } from '../../components/erro-carregar/erro-carregar';
 
 const NOTA_BEM_AVALIADO = 4.5;
 
 @Component({
   selector: 'app-estabelecimento',
   standalone: true,
-  imports: [Carregando, NavCliente, NotaBar],
+  imports: [Carregando, ErroCarregar, NavCliente, NotaBar],
   templateUrl: './estabelecimento.html',
   styleUrl: './estabelecimento.scss',
 })
@@ -23,6 +24,7 @@ export class EstabelecimentoPage implements OnInit {
   id = input.required<string>();
 
   protected readonly carregando = signal(true);
+  protected readonly erroCarregar = signal(false);
   protected readonly estabelecimento = signal<Estabelecimento | null>(null);
   protected readonly enderecoCopiado = signal(false);
 
@@ -42,8 +44,20 @@ export class EstabelecimentoPage implements OnInit {
   );
 
   async ngOnInit(): Promise<void> {
-    this.estabelecimento.set(await this.estabelecimentosService.buscarPorId(this.id()));
-    this.carregando.set(false);
+    await this.carregar();
+  }
+
+  protected async carregar(): Promise<void> {
+    this.carregando.set(true);
+    this.erroCarregar.set(false);
+
+    try {
+      this.estabelecimento.set(await this.estabelecimentosService.buscarPorId(this.id()));
+    } catch {
+      this.erroCarregar.set(true);
+    } finally {
+      this.carregando.set(false);
+    }
   }
 
   protected voltar(): void {
