@@ -21,10 +21,10 @@ const TOP_MAIS_VENDIDOS = 5;
 
 /** A partir de quantos minutos cada situação vira alerta para o gerente. */
 const MINUTOS_ALERTA = {
-  pagamento: 10,
+  pagamento: 20,
   pedido_parado: 15,
   liberacao: 5,
-  sem_pedido: 120,
+  sem_pedido: 180,
 } as const;
 
 /** Formato de cada linha que a consulta de comandas da noite devolve. */
