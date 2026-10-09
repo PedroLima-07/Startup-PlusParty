@@ -41,12 +41,15 @@ export class ComandaPage implements OnInit {
     return status === 'aguardando_pagamento' || status === 'paga';
   });
 
+  /** O atendente não confirmou a presença: esta comanda acabou, mas dá para abrir outra. */
+  protected readonly recusada = computed(() => this.comanda()?.status === 'recusada');
+
   protected readonly aguardandoLiberacao = computed(
     () => this.comanda()?.status === 'aguardando_liberacao'
   );
 
   async ngOnInit(): Promise<void> {
-    // Atualiza sozinha quando o atendente libera, avança um item ou confirma o pagamento.
+    // Atualiza sozinha quando o atendente libera ou recusa, avança um item ou confirma o pagamento.
     const pararDeEscutar = this.supabase.escutarMudancas(
       [{ tabela: 'comandas', filtro: `id=eq.${this.id()}` }, { tabela: 'pedido_itens' }],
       () => {
