@@ -21,10 +21,10 @@ const TOP_MAIS_VENDIDOS = 5;
 
 /** A partir de quantos minutos cada situação vira alerta para o gerente. */
 const MINUTOS_ALERTA = {
-  pagamento: 10,
+  pagamento: 20,
   pedido_parado: 15,
   liberacao: 5,
-  sem_pedido: 120,
+  sem_pedido: 180,
 } as const;
 
 /** Formato de cada linha que a consulta de comandas da noite devolve. */
@@ -67,6 +67,23 @@ export interface NumerosMovimento {
   maisVendidos: ItemVendido[];
   alertas: AlertaGerente[];
   comandas: ComandaResumo[];
+}
+
+/** O que o gerente vê ao abrir uma comanda: os itens agrupados por pedido. */
+export interface DetalheComanda {
+  id: string;
+  numero: string;
+  cliente: string;
+  local: string;
+  status: StatusComanda;
+  aberturaEm: string;
+  total: number;
+  pedidos: {
+    id: string;
+    horario: string;
+    total: number;
+    itens: { nome: string; quantidade: number; valor: number; status: StatusPedidoItem }[];
+  }[];
 }
 
 /**
@@ -123,11 +140,14 @@ export class MovimentoService {
   readonly maisVendidos = signal<ItemVendido[]>([]);
   readonly alertas = signal<AlertaGerente[]>([]);
   readonly comandas = signal<ComandaResumo[]>([]);
+  /** As comandas como vieram do banco, para montar o detalhe sem nova consulta. */
+  readonly linhas = signal<LinhaComandaMovimento[]>([]);
 
   /** Quando os números foram buscados pela última vez. */
   readonly atualizadoEm = signal<Date | null>(null);
   /** Mensagem para a tela quando a última busca falhou; os números anteriores continuam. */
   readonly erro = signal<string | null>(null);
+  readonly atualizando = signal(false);
 
   // ------------------------------------------------------------------
   // Derivados
@@ -166,11 +186,14 @@ export class MovimentoService {
    * números anteriores e deixa a mensagem em `erro`.
    */
   async atualizar(): Promise<void> {
+    this.atualizando.set(true);
     try {
       await this.carregar();
       this.erro.set(null);
     } catch {
       this.erro.set('Não foi possível atualizar os números da noite. Tente de novo em instantes.');
+    } finally {
+      this.atualizando.set(false);
     }
   }
 
@@ -188,6 +211,7 @@ export class MovimentoService {
 
     const numeros = calcularMovimento(comandas, agora);
     this.aplicar(numeros);
+    this.linhas.set(comandas);
     this.chamadosDeGarcom.set(chamados);
     // Mesma conta do selo da Home: entra quem já está aberto ou esperando liberação.
     const ocupando = comandas.filter(
@@ -195,6 +219,13 @@ export class MovimentoService {
     ).length;
     this.statusMovimento.set(this.homeService.calcularLotacao(ocupando, capacidade));
     this.atualizadoEm.set(agora);
+  }
+
+  /** Detalhe de uma comanda da lista do dia; null se ela não está mais na lista. */
+  detalhe(id: string): DetalheComanda | null {
+    const linha = this.linhas().find((l) => l.id === id);
+    const numero = this.comandas().find((c) => c.id === id)?.numero;
+    return linha && numero ? montarDetalhe(linha, numero) : null;
   }
 
   private async buscarComandas(inicio: string): Promise<LinhaComandaMovimento[]> {
@@ -309,6 +340,7 @@ export function calcularMovimento(linhas: LinhaComandaMovimento[], agora: Date):
       .filter((linha) => linha.status !== 'aguardando_liberacao')
       .reverse()
       .map((linha) => ({
+        id: linha.id,
         numero: numeros.get(linha.id)!,
         cliente: nomeDoCliente(linha),
         mesa: linha.mesa ?? 'Balcão',
@@ -456,6 +488,38 @@ function fimDaComanda(linha: LinhaComandaMovimento, agora: Date): number {
     tempo(linha.criada_em),
     ...linha.pedidos.map((pedido) => tempo(pedido.criado_em)),
   );
+}
+
+/** Itens da comanda agrupados por pedido, do mais antigo para o mais novo. */
+export function montarDetalhe(linha: LinhaComandaMovimento, numero: string): DetalheComanda {
+  const pedidos = [...linha.pedidos]
+    .sort((a, b) => tempo(a.criado_em) - tempo(b.criado_em))
+    .filter((pedido) => pedido.pedido_itens.length > 0)
+    .map((pedido) => {
+      const itens = pedido.pedido_itens.map((item) => ({
+        nome: item.item?.nome ?? 'Item removido',
+        quantidade: item.quantidade,
+        valor: item.quantidade * item.preco_unitario,
+        status: item.status,
+      }));
+      return {
+        id: pedido.id,
+        horario: horaMinuto(new Date(pedido.criado_em)),
+        total: soma(itens.map((item) => item.valor)),
+        itens,
+      };
+    });
+
+  return {
+    id: linha.id,
+    numero,
+    cliente: nomeDoCliente(linha),
+    local: linha.mesa ? `Mesa ${linha.mesa}` : 'Balcão',
+    status: linha.status,
+    aberturaEm: horaMinuto(new Date(linha.criada_em)),
+    total: totalDaComanda(linha),
+    pedidos,
+  };
 }
 
 function totalDaComanda(linha: LinhaComandaMovimento): number {

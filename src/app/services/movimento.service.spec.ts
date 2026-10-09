@@ -236,16 +236,29 @@ describe('calcularMovimento', () => {
     expect(numeros.alertas[2]).toMatchObject({ detalhe: 'Mesa 4 · Ana Lima', comanda: null });
   });
 
-  it('avisa da comanda aberta há muito tempo sem pedido novo', () => {
+  it('avisa da comanda aberta há mais de 3h sem pedido novo', () => {
     const parada = comanda({
       id: 'x',
-      criada_em: em(20),
-      pedidos: [{ id: 'p', criado_em: em(20, 10), pedido_itens: [item('Chope', 'bar', 1, 12)] }],
+      criada_em: em(19, 40),
+      pedidos: [{ id: 'p', criado_em: em(19, 50), pedido_itens: [item('Chope', 'bar', 1, 12)] }],
     });
 
     expect(calcularMovimento([parada], AGORA).alertas[0].titulo).toBe(
-      'Comanda aberta há 2h50 sem novo pedido',
+      'Comanda aberta há 3h10 sem novo pedido',
     );
+  });
+
+  it('não avisa antes de 3h sem pedido nem antes de 20 min sem pagamento', () => {
+    const recentes = [
+      comanda({
+        id: 'a',
+        criada_em: em(20),
+        pedidos: [{ id: 'p', criado_em: em(20, 10), pedido_itens: [item('Chope', 'bar', 1, 12)] }],
+      }),
+      comanda({ id: 'b', status: 'aguardando_pagamento', fechada_em: em(22, 45) }),
+    ];
+
+    expect(calcularMovimento(recentes, AGORA).alertas).toEqual([]);
   });
 
   it('noite sem comandas fica toda zerada, sem barras de lotação', () => {
