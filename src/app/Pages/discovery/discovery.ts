@@ -6,11 +6,12 @@ import { NotaBar } from '../../components/nota-bar/nota-bar';
 import { Estabelecimento } from '../../models';
 import { EstabelecimentosService } from '../../services/estabelecimentos.service';
 import { Carregando } from '../../components/carregando/carregando';
+import { ErroCarregar } from '../../components/erro-carregar/erro-carregar';
 
 @Component({
   selector: 'app-discovery',
   standalone: true,
-  imports: [Carregando, FormsModule, NavCliente, NotaBar],
+  imports: [Carregando, ErroCarregar, FormsModule, NavCliente, NotaBar],
   templateUrl: './discovery.html',
   styleUrl: './discovery.scss',
 })
@@ -19,12 +20,25 @@ export class DiscoveryPage implements OnInit {
   private readonly estabelecimentosService = inject(EstabelecimentosService);
 
   protected readonly carregando = signal(true);
+  protected readonly erroCarregar = signal(false);
   protected readonly estabelecimentos = signal<Estabelecimento[]>([]);
   busca = '';
 
   async ngOnInit(): Promise<void> {
-    this.estabelecimentos.set(await this.estabelecimentosService.listar());
-    this.carregando.set(false);
+    await this.carregar();
+  }
+
+  protected async carregar(): Promise<void> {
+    this.carregando.set(true);
+    this.erroCarregar.set(false);
+
+    try {
+      this.estabelecimentos.set(await this.estabelecimentosService.listar());
+    } catch {
+      this.erroCarregar.set(true);
+    } finally {
+      this.carregando.set(false);
+    }
   }
 
   get estabelecimentosFiltrados(): Estabelecimento[] {

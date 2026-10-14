@@ -6,6 +6,7 @@ import { ComandaService } from '../../services/comanda.service';
 import { SupabaseService } from '../../services/supabase.service';
 import { NavCliente } from '../../components/nav-cliente/nav-cliente';
 import { Carregando } from '../../components/carregando/carregando';
+import { ErroCarregar } from '../../components/erro-carregar/erro-carregar';
 
 const ROTULOS_STATUS_ITEM: Record<StatusPedidoItem, string> = {
   novo: 'Enviado',
@@ -15,7 +16,7 @@ const ROTULOS_STATUS_ITEM: Record<StatusPedidoItem, string> = {
 
 @Component({
   selector: 'app-comanda',
-  imports: [Carregando, CurrencyPipe, NavCliente, RouterLink],
+  imports: [Carregando, CurrencyPipe, ErroCarregar, NavCliente, RouterLink],
   templateUrl: './comanda.html',
   styleUrl: './comanda.scss',
 })
@@ -33,6 +34,12 @@ export class ComandaPage implements OnInit {
   protected readonly confirmandoRecebimento = signal(false);
   protected readonly cancelando = signal(false);
   protected readonly erroCancelamento = signal<string | null>(null);
+  protected readonly erroCarregar = signal(false);
+  /** Falha ao atualizar com a comanda já na tela: avisa sem esconder o que já está lá. */
+  protected readonly avisoAtualizacao = signal<string | null>(null);
+  protected readonly atualizando = signal(false);
+  protected readonly fechando = signal(false);
+  protected readonly erroFechamento = signal<string | null>(null);
 
   protected readonly total = computed(() => this.comandaService.calcularTotal(this.itens()));
 
@@ -68,10 +75,14 @@ export class ComandaPage implements OnInit {
   }
 
   protected async atualizarStatus(): Promise<void> {
-    this.itens.set(await this.comandaService.buscarItensPedidos(this.id()));
+    await this.carregarDados(true);
   }
 
   protected async verificarLiberacao(): Promise<void> {
+    await this.carregarDados(true);
+  }
+
+  protected async tentarDeNovo(): Promise<void> {
     await this.carregarDados();
   }
 
@@ -102,23 +113,52 @@ export class ComandaPage implements OnInit {
 
   protected cancelarFechamento(): void {
     this.confirmandoRecebimento.set(false);
+    this.erroFechamento.set(null);
   }
 
   protected async confirmarFechamento(): Promise<void> {
-    await this.comandaService.fecharConta(this.id());
-    this.confirmandoRecebimento.set(false);
-    await this.carregarDados();
+    if (this.fechando()) return;
+
+    this.fechando.set(true);
+    this.erroFechamento.set(null);
+
+    try {
+      await this.comandaService.fecharConta(this.id());
+      this.confirmandoRecebimento.set(false);
+      await this.carregarDados(true);
+    } catch {
+      this.erroFechamento.set('Não foi possível fechar a conta agora. Tente de novo.');
+    } finally {
+      this.fechando.set(false);
+    }
   }
 
-  /** `silencioso` recarrega sem trocar a tela por "Carregando...". */
+  /**
+   * `silencioso` recarrega sem trocar a tela pela ampulheta. Se a comanda já
+   * está na tela, uma falha vira um aviso; sem comanda, vira a tela de erro.
+   */
   private async carregarDados(silencioso = false): Promise<void> {
-    if (!silencioso) this.carregando.set(true);
-    const [comanda, itens] = await Promise.all([
-      this.comandaService.buscarComanda(this.id()),
-      this.comandaService.buscarItensPedidos(this.id()),
-    ]);
-    this.comanda.set(comanda);
-    this.itens.set(itens);
-    this.carregando.set(false);
+    if (silencioso) this.atualizando.set(true);
+    else this.carregando.set(true);
+    this.erroCarregar.set(false);
+    this.avisoAtualizacao.set(null);
+
+    try {
+      const [comanda, itens] = await Promise.all([
+        this.comandaService.buscarComanda(this.id()),
+        this.comandaService.buscarItensPedidos(this.id()),
+      ]);
+      this.comanda.set(comanda);
+      this.itens.set(itens);
+    } catch {
+      if (this.comanda()) {
+        this.avisoAtualizacao.set('Não foi possível atualizar a comanda agora. Tente de novo.');
+      } else {
+        this.erroCarregar.set(true);
+      }
+    } finally {
+      this.carregando.set(false);
+      this.atualizando.set(false);
+    }
   }
 }

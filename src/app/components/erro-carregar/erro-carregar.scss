@@ -1,0 +1,50 @@
+:host {
+  display: grid;
+  place-items: center;
+  min-height: 50dvh;
+  padding: 40px 20px;
+  font-family: system-ui, sans-serif;
+}
+
+.erro {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  max-width: 320px;
+  text-align: center;
+}
+
+.icone {
+  width: 40px;
+  height: 40px;
+  fill: none;
+  stroke: #dc2626;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.mensagem {
+  margin: 0;
+  color: #4d5565;
+  font-size: 14px;
+  line-height: 1.45;
+}
+
+.botao {
+  margin-top: 4px;
+  padding: 11px 22px;
+  border: none;
+  border-radius: 999px;
+  background: #0f1f4b;
+  color: #fff;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+
+  &:hover {
+    background: #1a2f6b;
+  }
+}

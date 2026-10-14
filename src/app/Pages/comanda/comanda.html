@@ -1,5 +1,10 @@
 @if (carregando()) {
   <app-carregando texto="Carregando comanda" />
+} @else if (erroCarregar()) {
+  <app-erro-carregar
+    mensagem="Não foi possível carregar sua comanda. Verifique sua conexão."
+    (tentarDeNovo)="tentarDeNovo()"
+  />
 } @else if (comanda(); as c) {
   @if (comandaEncerrada()) {
     <div class="tela tela-fechamento">
@@ -28,9 +33,17 @@
         <p class="instrucao">
           Aguardando liberação. Chame um atendente para confirmar sua presença.
         </p>
-        <button class="botao-primario" type="button" (click)="verificarLiberacao()">
-          Já fui liberado, atualizar
+        <button
+          class="botao-primario"
+          type="button"
+          [disabled]="atualizando()"
+          (click)="verificarLiberacao()"
+        >
+          {{ atualizando() ? 'Atualizando...' : 'Já fui liberado, atualizar' }}
         </button>
+        @if (avisoAtualizacao(); as aviso) {
+          <p class="erro-cancelamento" role="alert">{{ aviso }}</p>
+        }
         <button
           class="botao-cancelar"
           type="button"
@@ -68,9 +81,15 @@
       <div class="cabecalho-itens">
         <span>Itens pedidos</span>
         @if (itens().length > 0) {
-          <button class="link" type="button" (click)="atualizarStatus()">Atualizar status</button>
+          <button class="link" type="button" [disabled]="atualizando()" (click)="atualizarStatus()">
+            {{ atualizando() ? 'Atualizando...' : 'Atualizar status' }}
+          </button>
         }
       </div>
+
+      @if (avisoAtualizacao(); as aviso) {
+        <p class="aviso-erro" role="alert">{{ aviso }}</p>
+      }
 
       @if (itens().length === 0) {
         <div class="vazio">
@@ -110,12 +129,25 @@
           <div class="modal">
             <span class="icone-modal">📋</span>
             <p class="pergunta">Você recebeu tudo o que você pediu?</p>
+            @if (erroFechamento(); as mensagem) {
+              <p class="aviso-erro" role="alert">{{ mensagem }}</p>
+            }
             <div class="acoes-modal">
-              <button class="botao-secundario" type="button" (click)="cancelarFechamento()">
+              <button
+                class="botao-secundario"
+                type="button"
+                [disabled]="fechando()"
+                (click)="cancelarFechamento()"
+              >
                 Não
               </button>
-              <button class="botao-primario" type="button" (click)="confirmarFechamento()">
-                Sim
+              <button
+                class="botao-primario"
+                type="button"
+                [disabled]="fechando()"
+                (click)="confirmarFechamento()"
+              >
+                {{ fechando() ? 'Fechando...' : 'Sim' }}
               </button>
             </div>
           </div>
