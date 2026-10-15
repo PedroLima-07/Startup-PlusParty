@@ -1,78 +1,100 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, inject, input, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { Carregando } from '../../components/carregando/carregando';
+import { mensagemDoBanco } from '../../erros-banco';
 import { traduzirErroAuth } from '../../erros-auth';
-import { Estabelecimento } from '../../models';
+import { prepararFotoDePerfil } from '../../foto';
+import { ConviteInfo } from '../../models';
 import { AuthService } from '../../services/auth.service';
 import {
   EquipeService,
   ROTA_AGUARDANDO_GERENTE,
-  ROTA_CADASTRO_ATENDENTE,
+  ROTA_CONVITE,
 } from '../../services/equipe.service';
-import { EstabelecimentosService } from '../../services/estabelecimentos.service';
 
 /**
- * Pedido para trabalhar como atendente num bar. Quem ainda não tem conta cria
- * uma aqui mesmo; quem já está logado como cliente só informa o telefone e o
- * bar. Em nenhum dos casos a pessoa vira atendente nesta tela: ela cria uma
- * solicitação, e o gerente do bar decide na aba Equipe.
+ * Página do link de convite (/convite/<código>). É a única porta de entrada
+ * para a equipe de um bar: quem não tem conta cria uma aqui, quem já é cliente
+ * só completa o telefone. Em nenhum dos casos a pessoa vira atendente nesta
+ * tela: o convite cria um pedido, e o gerente aprova na aba Equipe.
  */
 @Component({
-  selector: 'app-atendente-cadastro',
+  selector: 'app-convite',
   imports: [Carregando, ReactiveFormsModule, RouterLink],
-  templateUrl: './atendente-cadastro.html',
-  styleUrls: ['../login/login.scss', './atendente-cadastro.scss'],
+  templateUrl: './convite.html',
+  styleUrls: ['../login/login.scss', './convite.scss'],
 })
-export class AtendenteCadastroPage implements OnInit {
+export class ConvitePage implements OnInit {
   private fb = inject(FormBuilder);
   private authService = inject(AuthService);
   private equipeService = inject(EquipeService);
-  private estabelecimentosService = inject(EstabelecimentosService);
   private router = inject(Router);
 
+  /** Código do link, vindo da rota. */
+  readonly codigo = input.required<string>();
+
   protected readonly carregando = signal(true);
+  protected readonly convite = signal<ConviteInfo | null>(null);
   protected readonly enviando = signal(false);
   protected readonly erro = signal<string | null>(null);
   protected readonly aviso = signal<string | null>(null);
-  protected readonly estabelecimentos = signal<Estabelecimento[]>([]);
   /** Nome de quem já tem conta e está logado; null enquanto a conta ainda vai ser criada. */
   protected readonly contaLogada = signal<string | null>(null);
-  protected readonly rotaDestaTela = ROTA_CADASTRO_ATENDENTE;
+  /** A foto escolhida, para mostrar antes de enviar. */
+  protected readonly fotoPrevia = signal<string | null>(null);
+
+  private fotoEscolhida: File | null = null;
 
   protected readonly form = this.fb.nonNullable.group({
     nome: ['', [Validators.required]],
     email: ['', [Validators.required, Validators.email]],
     senha: ['', [Validators.required, Validators.minLength(6)]],
     telefone: ['', [Validators.required, Validators.pattern(/^[\d\s()+-]{8,20}$/)]],
-    estabelecimentoId: ['', [Validators.required]],
   });
 
   async ngOnInit(): Promise<void> {
     try {
-      const [perfil, solicitacao, estabelecimentos] = await Promise.all([
+      const [convite, perfil] = await Promise.all([
+        this.equipeService.verConvite(this.codigo()),
         this.authService.perfilAtual(),
-        this.equipeService.buscarMinhaSolicitacao(),
-        this.estabelecimentosService.listar(),
       ]);
 
-      // Quem já trabalha num bar não pede de novo; quem já pediu acompanha o pedido.
+      // Quem já trabalha num bar não usa convite: vai para a própria tela.
       if (perfil && perfil.tipo !== 'cliente') {
         await this.router.navigateByUrl(this.authService.telaInicial(perfil.tipo), { replaceUrl: true });
         return;
       }
-      if (solicitacao) {
-        await this.router.navigateByUrl(ROTA_AGUARDANDO_GERENTE, { replaceUrl: true });
-        return;
-      }
 
       if (perfil) this.usarContaLogada(perfil.nome);
-      this.estabelecimentos.set(estabelecimentos);
+      this.convite.set(convite);
     } catch {
-      this.erro.set('Não foi possível carregar o cadastro. Atualize a página para tentar de novo.');
+      this.erro.set('Não foi possível abrir o convite. Atualize a página para tentar de novo.');
     } finally {
       this.carregando.set(false);
     }
+  }
+
+  /** Endereço de volta para cá depois de entrar com uma conta que já existe. */
+  protected enderecoDesteConvite(): string {
+    return ROTA_CONVITE + this.codigo();
+  }
+
+  protected escolherFoto(evento: Event): void {
+    const campo = evento.target as HTMLInputElement;
+    const arquivo = campo.files?.[0];
+    campo.value = '';
+    if (!arquivo) return;
+
+    this.fotoEscolhida = arquivo;
+    const leitor = new FileReader();
+    leitor.onload = () => this.fotoPrevia.set(leitor.result as string);
+    leitor.readAsDataURL(arquivo);
+  }
+
+  protected removerFoto(): void {
+    this.fotoEscolhida = null;
+    this.fotoPrevia.set(null);
   }
 
   protected async enviar(): Promise<void> {
@@ -84,8 +106,7 @@ export class AtendenteCadastroPage implements OnInit {
     this.erro.set(null);
     this.aviso.set(null);
     this.enviando.set(true);
-    const { nome, email, senha, telefone, estabelecimentoId } = this.form.getRawValue();
-    let contaCriadaAgora = false;
+    const { nome, email, senha, telefone } = this.form.getRawValue();
 
     try {
       if (this.contaLogada() === null) {
@@ -99,24 +120,30 @@ export class AtendenteCadastroPage implements OnInit {
         // Com confirmação de e-mail ligada no Supabase, o cadastro não abre sessão.
         if (!(await this.authService.usuarioAtual())) {
           this.aviso.set(
-            'Conta criada. Confirme o e-mail que enviamos, entre com a sua conta e volte em ' +
-              '"Cadastre-se como atendente" para escolher o bar.',
+            'Conta criada. Confirme o e-mail que enviamos e depois abra este link de convite de novo.',
           );
           return;
         }
 
-        // A conta já existe: se o pedido falhar, tentar de novo não cadastra outra vez.
-        contaCriadaAgora = true;
+        // A conta já existe: se algo falhar daqui em diante, tentar de novo não cadastra outra vez.
         this.usarContaLogada(nome.trim());
       }
 
-      await this.equipeService.solicitar(estabelecimentoId, telefone.trim());
+      if (this.fotoEscolhida) {
+        try {
+          await this.authService.atualizarFoto(await prepararFotoDePerfil(this.fotoEscolhida));
+          this.fotoEscolhida = null;
+        } catch {
+          this.erro.set('Não foi possível enviar a foto. Escolha outra imagem ou continue sem foto.');
+          return;
+        }
+      }
+
+      await this.equipeService.aceitarConvite(this.codigo(), telefone.trim());
       await this.router.navigateByUrl(ROTA_AGUARDANDO_GERENTE, { replaceUrl: true });
-    } catch {
+    } catch (erro) {
       this.erro.set(
-        contaCriadaAgora
-          ? 'Sua conta foi criada, mas não foi possível enviar o pedido. Tente novamente.'
-          : 'Não foi possível enviar o pedido agora. Tente novamente.',
+        mensagemDoBanco(erro) ?? 'Não foi possível enviar o pedido agora. Tente novamente.',
       );
     } finally {
       this.enviando.set(false);

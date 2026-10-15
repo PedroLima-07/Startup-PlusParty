@@ -33,6 +33,14 @@ function criarBanco() {
         chamada.filtros.push([coluna, valor]);
         return consulta;
       },
+      is: (coluna: string, valor: unknown) => {
+        chamada.filtros.push([`${coluna} is`, valor]);
+        return consulta;
+      },
+      gt: (coluna: string) => {
+        chamada.filtros.push([`${coluna} >`, 'agora']);
+        return consulta;
+      },
       maybeSingle: () => Promise.resolve(resposta),
       then: (resolver: (valor: typeof resposta) => unknown) => Promise.resolve(resposta).then(resolver),
     };
@@ -119,23 +127,83 @@ describe('EquipeService', () => {
     });
   });
 
-  it('pede para entrar no bar em nome de quem está logado', async () => {
-    await service.solicitar('b1', '15999990000');
+  describe('convites', () => {
+    it('confere o convite pelo código e devolve o bar e a situação', async () => {
+      banco.rpc.mockResolvedValueOnce({
+        data: [{ estabelecimento_nome: "Bar D'Zé", situacao: 'valido' }],
+        error: null,
+      });
 
-    expect(banco.chamadas[0]).toMatchObject({
-      tabela: 'solicitacoes_equipe',
-      inserido: { usuario_id: 'u1', estabelecimento_id: 'b1', telefone: '15999990000' },
+      expect(await service.verConvite('A3F9-C17B-2D40')).toEqual({
+        estabelecimento_nome: "Bar D'Zé",
+        situacao: 'valido',
+      });
+      expect(banco.rpc).toHaveBeenCalledWith('ver_convite', { p_codigo: 'A3F9-C17B-2D40' });
     });
-  });
 
-  it('não envia tipo nem status no pedido: quem decide é o banco', async () => {
-    await service.solicitar('b1', '15999990000');
+    it('código que não existe vira null', async () => {
+      banco.rpc.mockResolvedValueOnce({ data: [], error: null });
 
-    expect(Object.keys(banco.chamadas[0].inserido as object).sort()).toEqual([
-      'estabelecimento_id',
-      'telefone',
-      'usuario_id',
-    ]);
+      expect(await service.verConvite('NAO-EXISTE')).toBeNull();
+    });
+
+    it('pedir para entrar só existe através do convite, e o banco confere tudo', async () => {
+      await service.aceitarConvite('A3F9-C17B-2D40', '15999990000');
+
+      expect(banco.rpc).toHaveBeenCalledWith('aceitar_convite', {
+        p_codigo: 'A3F9-C17B-2D40',
+        p_telefone: '15999990000',
+      });
+      expect(banco.chamadas).toEqual([]);
+    });
+
+    it('o gerente gera o convite pelo banco, sem escolher código nem validade', async () => {
+      banco.rpc.mockResolvedValueOnce({
+        data: {
+          id: 'c1',
+          codigo: 'A3F9-C17B-2D40',
+          criado_em: '2026-10-15T21:00:00Z',
+          expira_em: '2026-10-17T21:00:00Z',
+          estabelecimento_id: 'b1',
+          usado_em: null,
+        },
+        error: null,
+      });
+
+      expect(await service.criarConvite()).toEqual({
+        id: 'c1',
+        codigo: 'A3F9-C17B-2D40',
+        criado_em: '2026-10-15T21:00:00Z',
+        expira_em: '2026-10-17T21:00:00Z',
+      });
+      expect(banco.rpc).toHaveBeenCalledWith('criar_convite');
+    });
+
+    it('lista só os convites do bar ainda não usados e na validade', async () => {
+      tipo = 'gerente';
+      banco.responderCom([]);
+
+      await service.listarConvitesAbertos();
+
+      expect(banco.chamadas[0]).toMatchObject({
+        tabela: 'convites_equipe',
+        filtros: [
+          ['estabelecimento_id', 'b1'],
+          ['usado_em is', null],
+          ['expira_em >', 'agora'],
+        ],
+      });
+    });
+
+    it('cancelar apaga o convite', async () => {
+      await service.cancelarConvite('c1');
+
+      expect(banco.chamadas[0]).toMatchObject({
+        tabela: 'convites_equipe',
+        apagou: true,
+        filtros: [['id', 'c1']],
+      });
+    });
   });
 
   it('desistir apaga o pedido', async () => {
@@ -147,8 +215,14 @@ describe('EquipeService', () => {
   it('lista para o gerente só os pedidos pendentes do bar dele', async () => {
     tipo = 'gerente';
     banco.responderCom([
-      { id: 's1', telefone: '159', criada_em: '2026-10-08T20:00:00Z', candidato: { nome: ' Ana ', email: 'ana@x.com' } },
-      { id: 's2', telefone: '158', criada_em: '2026-10-08T21:00:00Z', candidato: null },
+      {
+        id: 's1',
+        telefone: '159',
+        criada_em: '2026-10-08T20:00:00Z',
+        convite_id: 'c1',
+        candidato: { nome: ' Ana ', email: 'ana@x.com', foto_url: 'https://fotos/ana.jpg' },
+      },
+      { id: 's2', telefone: '158', criada_em: '2026-10-08T21:00:00Z', convite_id: null, candidato: null },
     ]);
 
     await service.carregarPendentes();
@@ -158,8 +232,24 @@ describe('EquipeService', () => {
       ['status', 'pendente'],
     ]);
     expect(service.pendentes()).toEqual([
-      { id: 's1', nome: 'Ana', email: 'ana@x.com', telefone: '159', criada_em: '2026-10-08T20:00:00Z' },
-      { id: 's2', nome: 'Sem nome', email: '', telefone: '158', criada_em: '2026-10-08T21:00:00Z' },
+      {
+        id: 's1',
+        nome: 'Ana',
+        email: 'ana@x.com',
+        telefone: '159',
+        foto_url: 'https://fotos/ana.jpg',
+        criada_em: '2026-10-08T20:00:00Z',
+        peloConvite: true,
+      },
+      {
+        id: 's2',
+        nome: 'Sem nome',
+        email: '',
+        telefone: '158',
+        foto_url: null,
+        criada_em: '2026-10-08T21:00:00Z',
+        peloConvite: false,
+      },
     ]);
   });
 

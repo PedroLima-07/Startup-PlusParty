@@ -3,7 +3,7 @@ import { Router } from '@angular/router';
 import { Carregando } from '../../components/carregando/carregando';
 import { MinhaSolicitacaoEquipe } from '../../models';
 import { AuthService } from '../../services/auth.service';
-import { EquipeService, ROTA_CADASTRO_ATENDENTE } from '../../services/equipe.service';
+import { EquipeService } from '../../services/equipe.service';
 import { SupabaseService } from '../../services/supabase.service';
 
 /**
@@ -57,12 +57,9 @@ export class AtendenteAguardandoPage implements OnInit {
     await this.router.navigateByUrl('/cliente/home');
   }
 
+  /** Cancela o pedido pendente ou dispensa o recusado e segue como cliente. */
   protected async cancelarPedido(): Promise<void> {
     await this.desistirEIrPara('/cliente/home');
-  }
-
-  protected async pedirDeNovo(): Promise<void> {
-    await this.desistirEIrPara(ROTA_CADASTRO_ATENDENTE);
   }
 
   protected async sair(): Promise<void> {
@@ -78,8 +75,9 @@ export class AtendenteAguardandoPage implements OnInit {
       const solicitacao = await this.equipeService.buscarMinhaSolicitacao();
       if (this.saindo) return;
 
+      // Sem pedido, não há o que acompanhar: entrar na equipe só por convite.
       if (!solicitacao) {
-        await this.router.navigateByUrl(ROTA_CADASTRO_ATENDENTE, { replaceUrl: true });
+        await this.router.navigateByUrl('/cliente/home', { replaceUrl: true });
         return;
       }
 
@@ -92,7 +90,7 @@ export class AtendenteAguardandoPage implements OnInit {
     }
   }
 
-  /** Apaga o pedido (pendente ou recusado), o que libera fazer outro. */
+  /** Apaga o pedido (pendente ou recusado). Um convite novo pode criar outro. */
   private async desistirEIrPara(destino: string): Promise<void> {
     const solicitacao = this.solicitacao();
     if (!solicitacao || this.processando()) return;

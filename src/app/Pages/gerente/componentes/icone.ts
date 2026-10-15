@@ -19,7 +19,13 @@ export type NomeIcone =
   | 'bar'
   | 'cozinha'
   | 'check'
-  | 'fechar';
+  | 'fechar'
+  | 'convidar'
+  | 'link'
+  | 'copiar'
+  | 'escudo'
+  | 'pessoa'
+  | 'avancar';
 
 /**
  * Ícones de traço da área do gerente. O tamanho segue o `font-size` e a cor
@@ -118,6 +124,30 @@ export type NomeIcone =
         @case ('fechar') {
           <line x1="18" y1="6" x2="6" y2="18" />
           <line x1="6" y1="6" x2="18" y2="18" />
+        }
+        @case ('convidar') {
+          <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+          <circle cx="9" cy="7" r="4" />
+          <line x1="19" y1="8" x2="19" y2="14" />
+          <line x1="22" y1="11" x2="16" y2="11" />
+        }
+        @case ('link') {
+          <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
+          <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
+        }
+        @case ('copiar') {
+          <rect x="9" y="9" width="13" height="13" rx="2" />
+          <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+        }
+        @case ('escudo') {
+          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+        }
+        @case ('pessoa') {
+          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+          <circle cx="12" cy="7" r="4" />
+        }
+        @case ('avancar') {
+          <polyline points="9 18 15 12 9 6" />
         }
       }
     </svg>

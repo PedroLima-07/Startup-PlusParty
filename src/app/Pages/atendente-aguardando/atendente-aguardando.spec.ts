@@ -105,15 +105,16 @@ describe('AtendenteAguardandoPage', () => {
     expect(router.navigateByUrl).toHaveBeenCalledWith('/cliente/home', { replaceUrl: true });
   });
 
-  it('recusado: pedir de novo dispensa a recusa e volta ao cadastro', async () => {
+  it('recusado: orienta a pedir um novo convite e deixa seguir como cliente', async () => {
     await abrir(pedido('recusada'));
     expect(tela().textContent).toContain('Pedido não aprovado');
+    expect(tela().textContent).toContain('novo link de convite');
 
-    botao('Pedir de novo').click();
+    botao('Continuar como cliente').click();
     await fixture.whenStable();
 
     expect(desistir).toHaveBeenCalledWith('s1');
-    expect(router.navigateByUrl).toHaveBeenCalledWith('/atendente/cadastro', { replaceUrl: true });
+    expect(router.navigateByUrl).toHaveBeenCalledWith('/cliente/home', { replaceUrl: true });
   });
 
   it('se cancelar falhar, avisa e continua na tela', async () => {
@@ -127,9 +128,9 @@ describe('AtendenteAguardandoPage', () => {
     expect(tela().textContent).toContain('Não foi possível concluir agora');
   });
 
-  it('sem pedido nenhum, manda para o cadastro de atendente', async () => {
+  it('sem pedido nenhum, segue para a home: entrar na equipe só por convite', async () => {
     await abrir(null);
 
-    expect(router.navigateByUrl).toHaveBeenCalledWith('/atendente/cadastro', { replaceUrl: true });
+    expect(router.navigateByUrl).toHaveBeenCalledWith('/cliente/home', { replaceUrl: true });
   });
 });

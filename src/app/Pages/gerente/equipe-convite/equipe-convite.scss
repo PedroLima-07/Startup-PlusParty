@@ -1,0 +1,184 @@
+@use '../gerente' as g;
+
+.pagina {
+  @include g.pagina;
+}
+
+.cartao {
+  @include g.cartao;
+}
+
+.rotulo {
+  @include g.rotulo;
+}
+
+.mensagem-erro {
+  @include g.mensagem-erro;
+}
+
+// --------------------------------------------------------------- link
+.link-convite {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 20px 16px;
+}
+
+.explicacao {
+  margin: 6px 0 0;
+  font-size: 13px;
+  line-height: 1.5;
+  color: g.$texto-suave;
+}
+
+.endereco {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 14px;
+  border: 1.5px dashed #b9c6e8;
+  border-radius: 12px;
+  background: #f5f8ff;
+  color: g.$azul;
+  font-size: 18px;
+
+  span {
+    flex: 1;
+    min-width: 0;
+    color: g.$marinho;
+    font-family: g.$mono;
+    font-size: 13px;
+    font-weight: 700;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    // Segurar o dedo sobre o link seleciona tudo, para copiar à mão.
+    user-select: all;
+  }
+}
+
+.botao-azul {
+  @include g.botao-azul;
+  min-height: 48px;
+  font-size: 15px;
+
+  app-icone {
+    font-size: 18px;
+  }
+
+  &.copiado {
+    background: #15803d;
+  }
+}
+
+.botao-contorno {
+  @include g.botao-contorno;
+  min-height: 48px;
+  font-size: 15px;
+}
+
+.link-acao {
+  align-self: center;
+  min-height: 44px;
+  padding: 0 12px;
+  border: 0;
+  background: none;
+  color: g.$azul;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+
+  &:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+  }
+}
+
+// --------------------------------------------------------------- regras
+.regras {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+
+  h2 {
+    margin: 0;
+    font-size: 15px;
+  }
+
+  p {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    margin: 0;
+    font-size: 13px;
+    line-height: 1.5;
+    color: #3d4556;
+  }
+
+  app-icone {
+    margin-top: 1px;
+    font-size: 18px;
+    color: g.$azul;
+  }
+}
+
+// ----------------------------------------------------- convites abertos
+.abertos {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.lista {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  overflow: hidden;
+
+  li {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+  }
+
+  li + li {
+    border-top: 1px solid #eef1f6;
+  }
+}
+
+.convite-texto {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+
+  strong {
+    font-family: g.$mono;
+    font-size: 13px;
+  }
+
+  span {
+    font-size: 12px;
+    color: g.$texto-suave;
+  }
+}
+
+.cancelar {
+  min-height: 44px;
+  padding: 0 12px;
+  border: 0;
+  background: none;
+  color: #b91c1c;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+
+  &:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+  }
+}

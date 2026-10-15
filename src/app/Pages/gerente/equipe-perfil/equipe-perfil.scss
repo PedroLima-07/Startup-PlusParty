@@ -1,0 +1,264 @@
+@use '../gerente' as g;
+
+// ------------------------------------------------------------ destaque
+// Continua o azul-marinho do topo, de ponta a ponta.
+.destaque {
+  background: g.$marinho;
+  color: #fff;
+}
+
+.destaque-conteudo {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 6px 16px 22px;
+
+  app-avatar {
+    border: 3px solid #fff;
+    background: g.$azul;
+  }
+}
+
+.destaque-texto {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.78);
+
+  h1 {
+    margin: 0;
+    color: #fff;
+    font-size: 21px;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+  }
+}
+
+.selo-ativo {
+  align-self: flex-start;
+  margin-top: 2px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: rgba(34, 197, 94, 0.18);
+  color: #86efac;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+// --------------------------------------------------------------- página
+.pagina {
+  @include g.pagina;
+}
+
+.cartao {
+  @include g.cartao;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+
+  h2 {
+    margin: 0;
+    font-size: 16px;
+  }
+}
+
+.cartao-topo {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.periodos {
+  display: flex;
+  padding: 3px;
+  border-radius: 10px;
+  background: #eef1f6;
+
+  button {
+    min-height: 34px;
+    padding: 0 12px;
+    border: 0;
+    border-radius: 8px;
+    background: transparent;
+    color: g.$marinho;
+    font: inherit;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+
+    &.ativo {
+      background: #fff;
+      box-shadow: 0 1px 2px rgba(15, 31, 75, 0.12);
+    }
+  }
+}
+
+.quadros {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin: 0;
+
+  div {
+    display: flex;
+    // No HTML o rótulo vem antes do número; na tela o número fica em cima.
+    flex-direction: column-reverse;
+    justify-content: flex-end;
+    gap: 4px;
+    padding: 14px;
+    border-radius: 12px;
+    background: #f5f7fc;
+  }
+
+  dt {
+    font-size: 12px;
+    color: g.$texto-suave;
+  }
+
+  dd {
+    @include g.numero;
+    margin: 0;
+    font-size: 28px;
+    line-height: 1.1;
+  }
+}
+
+.subtitulo {
+  margin: 0 0 -4px;
+  font-size: 13px;
+  color: g.$texto-suave;
+}
+
+.leitura {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.5;
+  color: g.$texto-suave;
+}
+
+.trio {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  margin: 0;
+  padding-top: 14px;
+  border-top: 1px solid #eef1f6;
+
+  dt {
+    font-size: 11px;
+    color: g.$texto-suave;
+  }
+
+  dd {
+    @include g.numero;
+    margin: 3px 0 0;
+    font-size: 16px;
+  }
+}
+
+.dados {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin: 0;
+
+  dt {
+    @include g.rotulo;
+  }
+
+  dd {
+    margin: 3px 0 0;
+    font-size: 15px;
+    overflow-wrap: anywhere;
+  }
+
+  a {
+    color: g.$azul;
+    text-decoration: none;
+  }
+}
+
+.remover {
+  @include g.botao;
+  min-height: 48px;
+  border-color: g.$perigo;
+  background: #fff;
+  color: #b91c1c;
+  font-size: 14px;
+}
+
+.vazio {
+  margin: 0;
+  padding: 18px 16px;
+  border: 1px dashed g.$borda;
+  border-radius: 14px;
+  background: #fff;
+  color: g.$texto-suave;
+  font-size: 13px;
+  text-align: center;
+}
+
+.voltar {
+  @include g.botao-contorno;
+  align-self: center;
+}
+
+.mensagem-erro {
+  @include g.mensagem-erro;
+}
+
+// ------------------------------------------------------------- remoção
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: rgba(15, 31, 75, 0.45);
+}
+
+.modal {
+  width: 100%;
+  max-width: 360px;
+  padding: 20px;
+  border-radius: 16px;
+  background: #fff;
+
+  h3 {
+    margin: 0 0 8px;
+    font-size: 17px;
+  }
+
+  p {
+    margin: 0 0 18px;
+    color: g.$texto-suave;
+    font-size: 14px;
+    line-height: 1.5;
+  }
+}
+
+.acoes {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.botao {
+  @include g.botao;
+  min-height: 44px;
+  background: #fff;
+  border-color: g.$borda;
+  color: g.$marinho;
+
+  &.perigo {
+    border-color: g.$perigo;
+    color: #b91c1c;
+  }
+}
