@@ -319,3 +319,7 @@
   color: g.$rotulo;
   text-align: center;
 }
+
+.mensagem-erro {
+  @include g.mensagem-erro;
+}

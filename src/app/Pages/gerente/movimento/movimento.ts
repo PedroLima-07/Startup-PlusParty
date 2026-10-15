@@ -1,12 +1,26 @@
 import { CurrencyPipe, DatePipe } from '@angular/common';
-import { Component, ElementRef, OnInit, computed, inject, signal, viewChild } from '@angular/core';
+import { Component, DestroyRef, OnInit, computed, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { AlertaGerente, ComandaResumo, TipoAlertaGerente } from '../../../models';
+import {
+  AlertaGerente,
+  ComandaResumo,
+  StatusComanda,
+  StatusPedidoItem,
+  TipoAlertaGerente,
+} from '../../../models';
+import { Carregando } from '../../../components/carregando/carregando';
 import { AuthService } from '../../../services/auth.service';
 import { MovimentoService } from '../../../services/movimento.service';
+import { SupabaseService } from '../../../services/supabase.service';
 import { Icone, NomeIcone } from '../componentes/icone';
 
 type Filtro = 'todas' | ComandaResumo['status'];
+
+/**
+ * Os alertas dependem de quanto tempo passou (pedido parado há 15 min etc.),
+ * então o painel também se atualiza sozinho de tempos em tempos.
+ */
+const INTERVALO_ATUALIZACAO_MS = 60_000;
 
 const FILTROS: { valor: Filtro; rotulo: string }[] = [
   { valor: 'todas', rotulo: 'Todas' },
@@ -21,6 +35,12 @@ const ROTULOS_STATUS: Record<ComandaResumo['status'], string> = {
   paga: 'Paga',
 };
 
+const ROTULOS_ITEM: Record<StatusPedidoItem, string> = {
+  novo: 'Novo',
+  em_andamento: 'Em preparo',
+  pronto: 'Pronto',
+};
+
 /** Como cada tipo de alerta aparece: o ícone e o texto do botão. */
 const APARENCIA_ALERTA: Record<TipoAlertaGerente, { icone: NomeIcone; acao: string }> = {
   pagamento: { icone: 'alerta', acao: 'Ver detalhes' },
@@ -32,15 +52,16 @@ const APARENCIA_ALERTA: Record<TipoAlertaGerente, { icone: NomeIcone; acao: stri
 /** Painel principal do gerente: o que precisa de atenção, o faturamento e as comandas do dia. */
 @Component({
   selector: 'app-movimento',
-  imports: [CurrencyPipe, DatePipe, Icone, RouterLink],
+  imports: [Carregando, CurrencyPipe, DatePipe, Icone, RouterLink],
   templateUrl: './movimento.html',
   styleUrl: './movimento.scss',
+  host: { '(document:keydown.escape)': 'fecharDetalhe()' },
 })
 export class Movimento implements OnInit {
   protected readonly movimento = inject(MovimentoService);
   private authService = inject(AuthService);
-
-  private readonly listaDeComandas = viewChild<ElementRef<HTMLElement>>('listaDeComandas');
+  private supabase = inject(SupabaseService);
+  private destroyRef = inject(DestroyRef);
 
   protected readonly filtros = FILTROS;
   protected readonly hoje = new Date();
@@ -51,6 +72,19 @@ export class Movimento implements OnInit {
   protected readonly valoresOcultos = signal(false);
   /** Alertas de liberação em que o gerente já tocou em "Avisar atendente". */
   protected readonly avisados = signal<ReadonlySet<string>>(new Set());
+
+  /** Id da comanda com o detalhe aberto. */
+  protected readonly comandaAberta = signal<string | null>(null);
+  /** Recalcula a cada atualização, então o detalhe aberto acompanha o banco. */
+  protected readonly detalhe = computed(() => {
+    const id = this.comandaAberta();
+    return id ? this.movimento.detalhe(id) : null;
+  });
+
+  /** Antes da primeira resposta do banco os números seriam zeros enganosos. */
+  protected readonly carregandoPrimeiraVez = computed(
+    () => this.movimento.atualizadoEm() === null && this.movimento.erro() === null,
+  );
 
   protected readonly comandasFiltradas = computed(() => {
     const filtro = this.filtro();
@@ -67,6 +101,19 @@ export class Movimento implements OnInit {
   });
 
   async ngOnInit(): Promise<void> {
+    // Comanda aberta, paga ou pedido novo mudam os números sem recarregar a página.
+    const atualizar = () => void this.movimento.atualizar();
+    const pararDeEscutar = this.supabase.escutarMudancas(
+      [{ tabela: 'comandas' }, { tabela: 'pedido_itens' }],
+      atualizar,
+    );
+    const relogio = setInterval(atualizar, INTERVALO_ATUALIZACAO_MS);
+    this.destroyRef.onDestroy(() => {
+      pararDeEscutar();
+      clearInterval(relogio);
+    });
+    atualizar();
+
     const nome = await this.authService.buscarNomeEstabelecimentoAtual().catch(() => null);
     this.nomeDoBar.set(nome ?? '');
   }
@@ -84,21 +131,41 @@ export class Movimento implements OnInit {
   }
 
   /**
-   * Botão do alerta. Os que apontam para uma comanda levam até ela na lista
-   * de comandas do dia; o de liberação marca que o atendente foi avisado.
+   * Botão do alerta. Os que apontam para uma comanda abrem o detalhe dela; o de
+   * liberação marca que o atendente foi avisado. Nenhum tira o alerta da lista.
    */
   protected agir(alerta: AlertaGerente): void {
     if (alerta.comanda) {
-      this.filtro.set('todas');
-      this.busca.set(alerta.comanda);
-      this.listaDeComandas()?.nativeElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      const comanda = this.movimento.comandas().find((c) => c.numero === alerta.comanda);
+      if (comanda) this.comandaAberta.set(comanda.id);
       return;
     }
 
     this.avisados.update((avisados) => new Set(avisados).add(alerta.id));
   }
 
+  protected abrirDetalhe(comanda: ComandaResumo): void {
+    this.comandaAberta.set(comanda.id);
+  }
+
+  protected fecharDetalhe(): void {
+    this.comandaAberta.set(null);
+  }
+
+  protected rotuloStatusDetalhe(status: StatusComanda): string {
+    return ROTULOS_STATUS[status as ComandaResumo['status']] ?? 'Aguardando liberação';
+  }
+
+  protected rotuloItem(status: StatusPedidoItem): string {
+    return ROTULOS_ITEM[status];
+  }
+
   protected alternarValores(): void {
     this.valoresOcultos.update((ocultos) => !ocultos);
+  }
+
+  protected atualizar(): void {
+    if (this.movimento.atualizando()) return;
+    void this.movimento.atualizar();
   }
 }

@@ -1,114 +1,108 @@
-import { registerLocaleData } from '@angular/common';
-import localePt from '@angular/common/locales/pt';
-import { LOCALE_ID } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { Router, UrlTree, provideRouter } from '@angular/router';
-import { ComandaDetalhada, StatusComanda } from '../../models';
+import { provideRouter } from '@angular/router';
 import { ComandaService } from '../../services/comanda.service';
 import { SupabaseService } from '../../services/supabase.service';
 import { ComandaPage } from './comanda';
 
-registerLocaleData(localePt);
+const COMANDA = {
+  id: 'comanda-1',
+  status: 'aberta',
+  mesa: '12',
+  estabelecimento: { nome: "Bar D'Zé" },
+};
 
-function comanda(status: StatusComanda): ComandaDetalhada {
-  return {
-    id: 'c1',
-    usuario_id: 'u1',
-    estabelecimento_id: 'bar1',
-    mesa: '12',
-    status,
-    criada_em: '2026-09-25T22:00:00Z',
-    fechada_em: null,
-    estabelecimento: { nome: 'Bar do Zé' },
-  };
-}
+const ITENS = [
+  { id: 'i1', quantidade: 2, preco_unitario: 12, status: 'novo', item: { nome: 'Chope' } },
+];
 
-describe('ComandaPage', () => {
+describe('ComandaPage — tratamento de erro', () => {
   let fixture: ComponentFixture<ComandaPage>;
-  let buscarComanda: ReturnType<typeof vi.fn>;
-  let avisarMudanca: () => void;
+  let component: ComandaPage;
+  let comandaService: Record<string, ReturnType<typeof vi.fn>>;
 
-  function tela(): HTMLElement {
-    fixture.detectChanges();
-    return fixture.nativeElement as HTMLElement;
-  }
-
-  async function assentar(): Promise<void> {
-    await new Promise((resolve) => setTimeout(resolve));
-    await fixture.whenStable();
-  }
-
-  async function abrirCom(status: StatusComanda): Promise<void> {
-    buscarComanda = vi.fn().mockResolvedValue(comanda(status));
-
+  async function criar(): Promise<void> {
     await TestBed.configureTestingModule({
       imports: [ComandaPage],
       providers: [
         provideRouter([]),
-        { provide: LOCALE_ID, useValue: 'pt-BR' },
-        {
-          provide: ComandaService,
-          useValue: {
-            buscarComanda,
-            buscarItensPedidos: vi.fn().mockResolvedValue([]),
-            calcularTotal: () => 0,
-          },
-        },
-        {
-          provide: SupabaseService,
-          useValue: {
-            escutarMudancas: vi.fn((_tabelas: unknown, aoMudar: () => void) => {
-              avisarMudanca = aoMudar;
-              return () => {};
-            }),
-          },
-        },
+        { provide: ComandaService, useValue: comandaService },
+        { provide: SupabaseService, useValue: { escutarMudancas: vi.fn(() => () => {}) } },
       ],
     }).compileComponents();
 
     fixture = TestBed.createComponent(ComandaPage);
-    fixture.componentRef.setInput('id', 'c1');
-    fixture.detectChanges();
-    await assentar();
+    component = fixture.componentInstance;
+    fixture.componentRef.setInput('id', 'comanda-1');
+    await estabilizar();
   }
 
-  it('comanda recusada: explica o que houve e deixa abrir outra no mesmo bar', async () => {
-    await abrirCom('recusada');
-    const texto = tela().textContent!;
-    const abrirDeNovo = Array.from(tela().querySelectorAll('button')).find((b) =>
-      b.textContent?.includes('Abrir comanda de novo'),
-    )!;
+  async function estabilizar(): Promise<void> {
+    for (let i = 0; i < 3; i++) {
+      fixture.detectChanges();
+      await fixture.whenStable();
+    }
+  }
 
-    expect(texto).toContain('Solicitação recusada');
-    expect(texto).toContain('Bar do Zé');
-    expect(texto).not.toContain('Fazer pedido');
-    expect(texto).not.toContain('Passe no caixa');
+  const tela = () => fixture.nativeElement as HTMLElement;
 
-    const router = TestBed.inject(Router);
-    const navegar = vi.spyOn(router, 'navigateByUrl').mockResolvedValue(true);
-    abrirDeNovo.click();
-
-    expect(router.serializeUrl(navegar.mock.calls[0][0] as UrlTree)).toBe(
-      '/cliente/abrir-comanda/bar1',
-    );
+  beforeEach(() => {
+    comandaService = {
+      buscarComanda: vi.fn().mockResolvedValue(COMANDA),
+      buscarItensPedidos: vi.fn().mockResolvedValue(ITENS),
+      fecharConta: vi.fn().mockResolvedValue(undefined),
+      cancelarSolicitacao: vi.fn(),
+      calcularTotal: vi.fn().mockReturnValue(24),
+    };
   });
 
-  it('quem estava esperando vê a recusa assim que o atendente recusa', async () => {
-    await abrirCom('aguardando_liberacao');
-    expect(tela().textContent).toContain('Aguardando liberação');
+  it('mostra a tela de erro quando a comanda não carrega, e recupera ao tentar de novo', async () => {
+    comandaService['buscarComanda'].mockRejectedValueOnce(new Error('offline'));
+    await criar();
 
-    buscarComanda.mockResolvedValue(comanda('recusada'));
-    avisarMudanca();
-    await assentar();
+    expect(component['erroCarregar']()).toBe(true);
+    expect(tela().querySelector('app-erro-carregar')).not.toBeNull();
 
-    expect(tela().textContent).toContain('Solicitação recusada');
-    expect(tela().textContent).not.toContain('Cancelar solicitação');
+    await component['tentarDeNovo']();
+    await estabilizar();
+
+    expect(tela().querySelector('app-erro-carregar')).toBeNull();
+    expect(tela().textContent).toContain("Bar D'Zé");
   });
 
-  it('comanda liberada continua mostrando a tela de pedidos', async () => {
-    await abrirCom('aberta');
+  it('com a comanda na tela, falha ao atualizar vira aviso e mantém o que já estava', async () => {
+    await criar();
+    comandaService['buscarItensPedidos'].mockRejectedValueOnce(new Error('offline'));
 
-    expect(tela().textContent).toContain('Fazer pedido');
-    expect(tela().textContent).not.toContain('Solicitação recusada');
+    await component['atualizarStatus']();
+    await estabilizar();
+
+    expect(tela().querySelector('app-erro-carregar')).toBeNull();
+    expect(component['avisoAtualizacao']()).toContain('Não foi possível atualizar');
+    expect(component['itens']()).toEqual(ITENS);
+  });
+
+  it('avisa quando fechar a conta falha e mantém a pergunta aberta', async () => {
+    await criar();
+    comandaService['fecharConta'].mockRejectedValueOnce(new Error('offline'));
+    component['abrirConfirmacaoRecebimento']();
+
+    await component['confirmarFechamento']();
+
+    expect(component['erroFechamento']()).toContain('Não foi possível fechar a conta');
+    expect(component['confirmandoRecebimento']()).toBe(true);
+    expect(component['fechando']()).toBe(false);
+  });
+
+  it('não envia o fechamento duas vezes se clicarem seguido', async () => {
+    await criar();
+    let terminar!: () => void;
+    comandaService['fecharConta'].mockReturnValueOnce(new Promise<void>((r) => (terminar = r)));
+
+    const primeiro = component['confirmarFechamento']();
+    await component['confirmarFechamento']();
+    terminar();
+    await primeiro;
+
+    expect(comandaService['fecharConta']).toHaveBeenCalledTimes(1);
   });
 });

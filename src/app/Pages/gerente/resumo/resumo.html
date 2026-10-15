@@ -1,8 +1,12 @@
 <div class="pagina">
+  @if (movimento.erro(); as mensagem) {
+    <p class="mensagem-erro" role="alert">{{ mensagem }}</p>
+  }
+
   <div class="momento">
-    <span class="data">{{ atualizadoEm() | date: "EEEE, d 'de' MMMM" }}</span>
+    <span class="data">{{ hoje | date: "EEEE, d 'de' MMMM" }}</span>
     <button type="button" class="atualizar" (click)="atualizar()">
-      Atualizado às {{ atualizadoEm() | date: 'HH:mm' }} <app-icone nome="atualizar" />
+      Atualizado às {{ movimento.atualizadoEm() ?? hoje | date: 'HH:mm' }} <app-icone nome="atualizar" />
     </button>
   </div>
 
@@ -28,20 +32,22 @@
       </div>
     </dl>
 
-    <div
-      class="progresso"
-      role="progressbar"
-      aria-label="Meta de faturamento"
-      aria-valuemin="0"
-      aria-valuemax="100"
-      [attr.aria-valuenow]="movimento.percentualDaMeta()"
-    >
-      <span [style.width.%]="movimento.percentualDaMeta()"></span>
-    </div>
-    <p class="meta">
-      <strong>{{ movimento.percentualDaMeta() }}%</strong> da meta de
-      {{ movimento.metaFaturamento() | currency: 'BRL' : 'symbol' : '1.0-0' }}
-    </p>
+    @if (movimento.metaFaturamento(); as meta) {
+      <div
+        class="progresso"
+        role="progressbar"
+        aria-label="Meta de faturamento"
+        aria-valuemin="0"
+        aria-valuemax="100"
+        [attr.aria-valuenow]="movimento.percentualDaMeta()"
+      >
+        <span [style.width.%]="movimento.percentualDaMeta()"></span>
+      </div>
+      <p class="meta">
+        <strong>{{ movimento.percentualDaMeta() }}%</strong> da meta de
+        {{ meta | currency: 'BRL' : 'symbol' : '1.0-0' }}
+      </p>
+    }
   </section>
 
   <section class="cartao">

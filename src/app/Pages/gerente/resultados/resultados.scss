@@ -40,3 +40,7 @@
 .ajuda {
   @include g.ajuda;
 }
+
+.mensagem-erro {
+  @include g.mensagem-erro;
+}

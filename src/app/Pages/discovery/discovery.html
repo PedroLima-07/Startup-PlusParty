@@ -19,6 +19,11 @@
 
   @if (carregando()) {
     <app-carregando texto="Carregando bares" />
+  } @else if (erroCarregar()) {
+    <app-erro-carregar
+      mensagem="Não foi possível carregar os bares. Verifique sua conexão."
+      (tentarDeNovo)="carregar()"
+    />
   } @else {
     <div class="bars-list">
       @for (estabelecimento of estabelecimentosFiltrados; track estabelecimento.id) {

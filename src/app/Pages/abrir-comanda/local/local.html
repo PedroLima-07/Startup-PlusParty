@@ -1,5 +1,10 @@
 @if (carregando()) {
   <app-carregando />
+} @else if (erroCarregar()) {
+  <app-erro-carregar
+    mensagem="Não foi possível carregar o bar para abrir a comanda. Verifique sua conexão."
+    (tentarDeNovo)="carregar()"
+  />
 } @else if (estabelecimento(); as e) {
   <header class="app-header">
     <div class="header-content">

@@ -124,6 +124,20 @@ describe('AbrirComandaLocalComponent', () => {
     );
   });
 
+  it('mostra erro com "Tentar de novo" se o bar não carrega, e recupera', async () => {
+    estabelecimentosService.buscarPorId.mockRejectedValueOnce(new Error('offline'));
+    await component['carregar']();
+    fixture.detectChanges();
+
+    const tela = fixture.nativeElement as HTMLElement;
+    expect(tela.querySelector('app-erro-carregar')).not.toBeNull();
+
+    await component['carregar']();
+    fixture.detectChanges();
+    expect(tela.querySelector('app-erro-carregar')).toBeNull();
+    expect(tela.querySelector('h1')?.textContent).toContain("Bar D'Zé");
+  });
+
   it('a seta de voltar leva ao perfil do estabelecimento', () => {
     component.voltar();
     expect(router.navigate).toHaveBeenCalledWith(['/cliente/estabelecimento', 'bar-1']);

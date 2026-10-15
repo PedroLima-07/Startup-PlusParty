@@ -7,12 +7,13 @@ import { EstabelecimentosService } from '../../services/estabelecimentos.service
 import { PedidoService } from '../../services/pedido.service';
 import { NavCliente } from '../../components/nav-cliente/nav-cliente';
 import { Carregando } from '../../components/carregando/carregando';
+import { ErroCarregar } from '../../components/erro-carregar/erro-carregar';
 
 type ModoCardapio = 'pedir' | 'visualizar';
 
 @Component({
   selector: 'app-cardapio',
-  imports: [Carregando, CurrencyPipe, NavCliente],
+  imports: [Carregando, CurrencyPipe, ErroCarregar, NavCliente],
   templateUrl: './cardapio.html',
   styleUrl: './cardapio.scss',
 })
@@ -34,6 +35,7 @@ export class CardapioPage implements OnInit {
   protected readonly carregando = signal(true);
   protected readonly enviando = signal(false);
   protected readonly erro = signal<string | null>(null);
+  protected readonly erroCarregar = signal(false);
   protected readonly nomeEstabelecimento = signal('');
   protected readonly categorias = signal<[string, Item[]][]>([]);
   protected readonly carrinho = signal<Map<string, number>>(new Map());
@@ -65,26 +67,37 @@ export class CardapioPage implements OnInit {
   });
 
   async ngOnInit(): Promise<void> {
-    let itens: Item[];
+    await this.carregar();
+  }
 
-    if (this.modo === 'visualizar') {
-      const [estabelecimento, cardapio] = await Promise.all([
-        this.estabelecimentosService.buscarPorId(this.id()),
-        this.cardapioService.buscarCardapio(this.id()),
-      ]);
-      this.nomeEstabelecimento.set(estabelecimento?.nome ?? '');
-      itens = cardapio;
-    } else {
-      this.comandaId = this.id();
-      const cardapio = await this.cardapioService.buscarCardapioDaComanda(this.comandaId);
-      this.nomeEstabelecimento.set(cardapio.nomeEstabelecimento);
-      itens = cardapio.itens;
+  protected async carregar(): Promise<void> {
+    this.carregando.set(true);
+    this.erroCarregar.set(false);
+
+    try {
+      let itens: Item[];
+
+      if (this.modo === 'visualizar') {
+        const [estabelecimento, cardapio] = await Promise.all([
+          this.estabelecimentosService.buscarPorId(this.id()),
+          this.cardapioService.buscarCardapio(this.id()),
+        ]);
+        this.nomeEstabelecimento.set(estabelecimento?.nome ?? '');
+        itens = cardapio;
+      } else {
+        this.comandaId = this.id();
+        const cardapio = await this.cardapioService.buscarCardapioDaComanda(this.comandaId);
+        this.nomeEstabelecimento.set(cardapio.nomeEstabelecimento);
+        itens = cardapio.itens;
+      }
+
+      this.itensPorId = new Map(itens.map((item) => [item.id, item]));
+      this.categorias.set(Object.entries(this.cardapioService.agruparPorCategoria(itens)));
+    } catch {
+      this.erroCarregar.set(true);
+    } finally {
+      this.carregando.set(false);
     }
-
-    this.itensPorId = new Map(itens.map((item) => [item.id, item]));
-    this.categorias.set(Object.entries(this.cardapioService.agruparPorCategoria(itens)));
-
-    this.carregando.set(false);
   }
 
   protected quantidadeDe(itemId: string): number {

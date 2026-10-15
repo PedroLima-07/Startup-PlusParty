@@ -8,7 +8,7 @@ function texto(elemento: HTMLElement): string {
 }
 
 describe('TempoPreparo', () => {
-  function criar(bar: number, cozinha: number): HTMLElement {
+  function criar(bar: number | null, cozinha: number | null): HTMLElement {
     const fixture = TestBed.createComponent(TempoPreparo);
     fixture.componentRef.setInput('bar', bar);
     fixture.componentRef.setInput('cozinha', cozinha);
@@ -39,6 +39,13 @@ describe('TempoPreparo', () => {
 
   it('sem medição de um dos setores, não compara', () => {
     expect(criar(0, 10).querySelector('.lento')).toBeNull();
+  });
+
+  it('enquanto o sistema não mede o preparo, avisa em vez de mostrar zero', () => {
+    const tela = criar(null, null);
+
+    expect(tela.querySelector('.setores')).toBeNull();
+    expect(texto(tela)).toContain('ainda não é registrado');
   });
 });
 

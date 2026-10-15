@@ -1,5 +1,5 @@
 import { CurrencyPipe, DatePipe } from '@angular/common';
-import { Component, inject, signal } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { MovimentoService } from '../../../services/movimento.service';
 import { GraficoHoras } from '../componentes/grafico-horas';
@@ -14,13 +14,16 @@ import { TempoPreparo } from '../componentes/tempo-preparo';
   templateUrl: './resumo.html',
   styleUrl: './resumo.scss',
 })
-export class Resumo {
+export class Resumo implements OnInit {
   protected readonly movimento = inject(MovimentoService);
 
-  protected readonly atualizadoEm = signal(new Date());
+  protected readonly hoje = new Date();
 
-  // TODO: quando os números vierem do Supabase, buscar de novo aqui.
+  ngOnInit(): void {
+    void this.movimento.atualizar();
+  }
+
   protected atualizar(): void {
-    this.atualizadoEm.set(new Date());
+    void this.movimento.atualizar();
   }
 }

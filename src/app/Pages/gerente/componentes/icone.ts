@@ -17,7 +17,9 @@ export type NomeIcone =
   | 'camera'
   | 'atualizar'
   | 'bar'
-  | 'cozinha';
+  | 'cozinha'
+  | 'check'
+  | 'fechar';
 
 /**
  * Ícones de traço da área do gerente. O tamanho segue o `font-size` e a cor
@@ -109,6 +111,13 @@ export type NomeIcone =
           <path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2" />
           <path d="M7 2v20" />
           <path d="M21 15V2a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3Zm0 0v7" />
+        }
+        @case ('check') {
+          <polyline points="20 6 9 17 4 12" />
+        }
+        @case ('fechar') {
+          <line x1="18" y1="6" x2="6" y2="18" />
+          <line x1="6" y1="6" x2="18" y2="18" />
         }
       }
     </svg>
