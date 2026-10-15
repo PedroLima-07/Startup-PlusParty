@@ -197,12 +197,57 @@ export interface Alerta {
   criado_em: string;
 }
 
+/** Bebida e comida são promoções do cardápio; evento e novidade, avisos do bar. */
+export type TipoPostagem = 'bebida' | 'comida' | 'evento' | 'novidade';
+
 export interface Postagem {
   id: string;
   estabelecimento_id: string;
+  tipo: TipoPostagem;
+  titulo: string | null;
   texto: string | null;
   imagem_url: string | null;
+  /** Preço da promoção (ou do produto novo). */
+  preco: number | null;
+  /** Preço normal, riscado ao lado do preço da promoção. */
+  preco_antigo: number | null;
+  /** Depois disso a postagem sai do Feed; null = sem prazo. */
+  valida_ate: string | null;
   criada_em: string;
+}
+
+/** Postagem como o Feed mostra: com o bar que publicou. */
+export interface PostagemFeed extends Postagem {
+  estabelecimento: Pick<Estabelecimento, 'id' | 'nome' | 'foto_url'>;
+}
+
+/** O que o gerente preenche para publicar. */
+export interface NovaPostagem {
+  tipo: TipoPostagem;
+  titulo: string;
+  texto: string | null;
+  preco: number | null;
+  preco_antigo: number | null;
+  valida_ate: string | null;
+}
+
+export type TipoNotificacao =
+  | 'comanda_liberada'
+  | 'comanda_recusada'
+  | 'pedido_pronto'
+  | 'pagamento_confirmado'
+  | 'postagem';
+
+/** Aviso para o cliente. Quem cria é o banco (supabase/feed_notificacoes.sql). */
+export interface Notificacao {
+  id: string;
+  tipo: TipoNotificacao;
+  titulo: string;
+  texto: string | null;
+  /** Tela do app que o aviso abre. */
+  link: string | null;
+  criada_em: string;
+  lida_em: string | null;
 }
 
 export interface ComandaResumo {
@@ -237,13 +282,6 @@ export interface LotacaoPorHora {
 export interface ItemVendido {
   nome: string;
   quantidade: number;
-}
-
-export interface PostagemGerente {
-  id: string;
-  texto: string;
-  fotoUrl?: string;
-  criadoEm: Date;
 }
 
 export interface PerfilBar {

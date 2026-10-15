@@ -1,0 +1,265 @@
+@use '../../../styles/desktop' as d;
+
+:host {
+  display: block;
+  min-height: 100dvh;
+  background: #f7f8fb;
+  color: #0f1f4b;
+  font-family: system-ui, sans-serif;
+}
+
+.app-header {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  background: #0f1f4b;
+}
+
+.header-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 58px;
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 0 16px;
+
+  h1 {
+    margin: 0;
+    color: #fff;
+    font-size: 19px;
+    font-weight: 800;
+  }
+}
+
+.marcar {
+  padding: 6px 12px;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  border-radius: 999px;
+  background: none;
+  color: #fff;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+
+  &:disabled {
+    opacity: 0.6;
+  }
+}
+
+.page-content {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 16px 16px 116px;
+}
+
+.erro {
+  margin: 0;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: #fde8e8;
+  color: #991b1b;
+  font-size: 13px;
+}
+
+.grupo h2 {
+  margin: 0 0 10px;
+  color: #8a93a6;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.lista {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.notificacao {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  width: 100%;
+  padding: 14px;
+  border: 1px solid #e1e5ee;
+  border-radius: 14px;
+  background: #fff;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 120ms ease, box-shadow 120ms ease;
+
+  &:hover,
+  &:focus-visible {
+    border-color: #2f6bff;
+    outline: none;
+  }
+
+  &.nova {
+    border-color: #cddafd;
+    background: #f3f6ff;
+  }
+}
+
+.icone {
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  flex-shrink: 0;
+  border-radius: 12px;
+  background: #eef2ff;
+  font-size: 20px;
+}
+
+[data-tipo='comanda_recusada'] .icone {
+  background: #fde8e8;
+  color: #dc2626;
+  font-weight: 800;
+}
+
+[data-tipo='pagamento_confirmado'] .icone {
+  background: #e6f7ee;
+}
+
+[data-tipo='postagem'] .icone {
+  background: #fff1e6;
+}
+
+.texto {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+
+  strong {
+    font-size: 15px;
+  }
+
+  span {
+    color: #4b5366;
+    font-size: 13px;
+    line-height: 1.4;
+  }
+
+  time {
+    margin-top: 2px;
+    color: #8a93a6;
+    font-size: 12px;
+  }
+}
+
+.ponto {
+  width: 10px;
+  height: 10px;
+  flex-shrink: 0;
+  margin-top: 6px;
+  border-radius: 50%;
+  background: #2f6bff;
+}
+
+.visualmente-oculto {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.vazio {
+  padding: 34px 18px;
+  border: 1px dashed #d2d7e2;
+  border-radius: 12px;
+  background: #fff;
+  text-align: center;
+
+  span {
+    font-size: 30px;
+  }
+
+  p {
+    margin: 10px 0 4px;
+    font-size: 14px;
+    font-weight: 800;
+  }
+
+  small {
+    color: #777f8f;
+    font-size: 12px;
+  }
+}
+
+// ---------------------------------------------------------------------
+// Desktop: menu lateral e título claro
+// ---------------------------------------------------------------------
+@include d.desktop {
+  :host {
+    padding-left: d.$largura-menu;
+  }
+
+  .app-header {
+    position: static;
+    background: transparent;
+  }
+
+  .header-content {
+    max-width: 840px;
+    min-height: 0;
+    padding: 44px 40px 0;
+
+    h1 {
+      color: #0f1f4b;
+      font-size: 32px;
+      letter-spacing: -0.02em;
+    }
+  }
+
+  .marcar {
+    padding: 9px 18px;
+    border-color: #dfe3eb;
+    background: #fff;
+    color: #0f1f4b;
+    font-size: 13px;
+
+    &:hover {
+      border-color: #2f6bff;
+      color: #2f6bff;
+    }
+  }
+
+  .page-content {
+    max-width: 840px;
+    padding: 24px 40px 56px;
+  }
+
+  .notificacao {
+    padding: 16px 18px;
+
+    &:hover {
+      box-shadow: 0 6px 18px rgba(47, 107, 255, 0.12);
+    }
+  }
+}
+
+@include d.desktop-compacto {
+  .header-content {
+    padding: 36px 28px 0;
+  }
+
+  .page-content {
+    padding: 20px 28px 48px;
+  }
+}

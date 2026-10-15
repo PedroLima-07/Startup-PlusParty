@@ -1,45 +1,145 @@
 <div class="pagina">
-  <h1>Postagens</h1>
+  <header>
+    <h1>Postagens</h1>
+    <p class="explicacao">
+      O que você publicar aparece no Feed de todos os clientes. Quem já abriu comanda no bar
+      recebe um aviso.
+    </p>
+  </header>
 
-  <section class="cartao nova">
-    <textarea
-      rows="4"
-      placeholder="Escreva sua postagem..."
-      aria-label="Texto da postagem"
-      [value]="texto()"
-      (input)="texto.set($any($event.target).value)"
-    ></textarea>
+  <div class="editor">
+    <section class="cartao nova" aria-labelledby="titulo-nova">
+      <h2 id="titulo-nova" class="rotulo">Nova postagem</h2>
 
-    @if (fotoPrevia(); as foto) {
-      <div class="previa">
-        <img [src]="foto" alt="Foto escolhida para a postagem" />
-        <button type="button" (click)="fotoPrevia.set(null)">Remover foto</button>
+      <div class="tipos" role="radiogroup" aria-label="Tipo da postagem">
+        @for (t of tipos; track t.valor) {
+          <button
+            type="button"
+            role="radio"
+            class="tipo"
+            [class.ativo]="tipo() === t.valor"
+            [attr.aria-checked]="tipo() === t.valor"
+            (click)="tipo.set(t.valor)"
+          >
+            {{ t.rotulo }}
+          </button>
+        }
       </div>
-    }
 
-    <label class="adicionar-foto">
-      <app-icone nome="camera" /> + Adicionar foto
-      <input type="file" accept="image/*" hidden (change)="escolherFoto($event)" />
-    </label>
+      <label class="campo">
+        <span>Título</span>
+        <input
+          type="text"
+          maxlength="80"
+          placeholder="Ex.: Happy hour: chope a R$ 9"
+          [value]="titulo()"
+          (input)="titulo.set(campo($event))"
+        />
+      </label>
 
-    <button type="button" class="botao-marinho" [disabled]="!podePublicar()" (click)="publicar()">
-      Publicar
-    </button>
-  </section>
+      <label class="campo">
+        <span>Descrição <small>(opcional)</small></span>
+        <textarea
+          rows="3"
+          maxlength="500"
+          placeholder="Conte os detalhes: horário, o que vem, condições."
+          [value]="texto()"
+          (input)="texto.set(campo($event))"
+        ></textarea>
+      </label>
 
-  <h2 class="rotulo">Últimas postagens</h2>
-
-  @for (postagem of postagemService.postagens(); track postagem.id) {
-    <article class="cartao postagem">
-      @if (postagem.fotoUrl; as foto) {
-        <img [src]="foto" alt="" loading="lazy" />
+      @if (temPreco()) {
+        <div class="linha">
+          <label class="campo">
+            <span>{{ temPrecoAntigo() ? 'Preço na promoção' : 'Preço' }} <small>(opcional)</small></span>
+            <input
+              type="text"
+              inputmode="decimal"
+              placeholder="9,00"
+              [value]="preco()"
+              (input)="preco.set(campo($event))"
+            />
+          </label>
+          @if (temPrecoAntigo()) {
+            <label class="campo">
+              <span>Preço normal <small>(opcional)</small></span>
+              <input
+                type="text"
+                inputmode="decimal"
+                placeholder="12,00"
+                [value]="precoAntigo()"
+                (input)="precoAntigo.set(campo($event))"
+              />
+            </label>
+          }
+        </div>
       }
-      <p>{{ postagem.texto }}</p>
-      <time [attr.datetime]="postagem.criadoEm.toISOString()">
-        {{ postagem.criadoEm | date: "dd 'de' MMM 'de' yyyy" }}
-      </time>
-    </article>
-  } @empty {
-    <p class="vazio">Nenhuma postagem ainda. A primeira aparece aqui.</p>
+
+      <label class="campo">
+        <span>Válida até <small>(opcional)</small></span>
+        <input type="date" [min]="hoje" [value]="validaAte()" (input)="validaAte.set(campo($event))" />
+      </label>
+
+      @if (fotoPrevia()) {
+        <button type="button" class="remover-foto" (click)="removerFoto()">Remover foto</button>
+      } @else {
+        <label class="adicionar-foto">
+          <app-icone nome="camera" /> Adicionar foto <small>(opcional)</small>
+          <input type="file" accept="image/*" hidden (change)="escolherFoto($event)" />
+        </label>
+      }
+
+      @if (erro(); as mensagem) {
+        <p class="mensagem-erro" role="alert">{{ mensagem }}</p>
+      }
+      @if (publicada()) {
+        <p class="sucesso" role="status">
+          Publicada! Já está no Feed, e os clientes que já vieram ao bar foram avisados.
+        </p>
+      }
+
+      <button type="button" class="publicar" [disabled]="publicando()" (click)="publicar()">
+        {{ publicando() ? 'Publicando...' : 'Publicar no Feed' }}
+      </button>
+    </section>
+
+    <section class="previa" aria-label="Prévia no Feed">
+      <h2 class="rotulo">Prévia no Feed</h2>
+      <app-cartao-postagem [postagem]="previa()" />
+    </section>
+  </div>
+
+  <h2 class="rotulo">Suas postagens</h2>
+
+  @if (carregando()) {
+    <p class="vazio">Carregando postagens...</p>
+  } @else if (erroCarregar()) {
+    <p class="mensagem-erro">
+      Não foi possível carregar suas postagens.
+      <button type="button" class="tentar" (click)="carregar()">Tentar de novo</button>
+    </p>
+  } @else {
+    <div class="lista">
+      @for (postagem of postagens(); track postagem.id) {
+        <div class="item">
+          <app-cartao-postagem [postagem]="postagem" />
+          <div class="acoes">
+            @if (confirmarApagar() === postagem.id) {
+              <span>Apagar do Feed?</span>
+              <button type="button" class="apagar" [disabled]="apagando()" (click)="apagar(postagem)">
+                Apagar
+              </button>
+              <button type="button" class="cancelar" (click)="confirmarApagar.set(null)">Cancelar</button>
+            } @else {
+              <button type="button" class="cancelar" (click)="confirmarApagar.set(postagem.id)">
+                Apagar postagem
+              </button>
+            }
+          </div>
+        </div>
+      } @empty {
+        <p class="vazio">Nenhuma postagem ainda. A primeira aparece aqui e no Feed.</p>
+      }
+    </div>
   }
 </div>

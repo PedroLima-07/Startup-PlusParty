@@ -35,6 +35,17 @@ export const routes: Routes = [
     path: 'cliente/home',
     loadComponent: () => import('./Pages/home/home').then((m) => m.HomePage),
   },
+  // Promoções e eventos dos bares: aberto sem login, como o Discovery.
+  {
+    path: 'cliente/feed',
+    loadComponent: () => import('./Pages/feed/feed').then((m) => m.FeedPage),
+  },
+  {
+    path: 'cliente/notificacoes',
+    loadComponent: () =>
+      import('./Pages/notificacoes/notificacoes').then((m) => m.NotificacoesPage),
+    canActivate: [authGuard],
+  },
   {
     path: 'cliente/abrir-comanda/:id',
     loadComponent: () =>

@@ -129,6 +129,36 @@ $recorte: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' view
   }
 }
 
+// Notificações não lidas, no canto do sino.
+.icone {
+  position: relative;
+}
+
+.contador {
+  position: absolute;
+  top: -7px;
+  right: -10px;
+  display: grid;
+  place-items: center;
+  min-width: 19px;
+  height: 19px;
+  padding: 0 4px;
+  border: 2px solid #0f1f4b;
+  border-radius: 999px;
+  background: #ef4444;
+  color: #fff;
+  font-size: 10px;
+  font-weight: 800;
+  line-height: 1;
+  animation: pulsar 400ms cubic-bezier(0.34, 1.6, 0.5, 1);
+}
+
+@keyframes pulsar {
+  from {
+    transform: scale(0.3);
+  }
+}
+
 .rotulo {
   font-size: 10px;
   font-weight: 600;

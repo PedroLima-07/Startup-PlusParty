@@ -30,7 +30,7 @@
     </span>
     <span class="rotulo">Discovery</span>
   </a>
-  <button class="item-nav" type="button">
+  <a class="item-nav" routerLink="/cliente/feed" [class.ativo]="posicao() === 2">
     <span class="icone">
       <svg viewBox="0 0 24 24" aria-hidden="true">
         <path d="M15 18h-5" />
@@ -40,14 +40,22 @@
       </svg>
     </span>
     <span class="rotulo">Feed</span>
-  </button>
-  <button class="item-nav" type="button">
+  </a>
+  <a
+    class="item-nav"
+    routerLink="/cliente/notificacoes"
+    [class.ativo]="posicao() === 3"
+    [attr.aria-label]="naoLidas() > 0 ? 'Notificações, ' + naoLidas() + ' não lidas' : null"
+  >
     <span class="icone">
       <svg viewBox="0 0 24 24" aria-hidden="true">
         <path d="M10.268 21a2 2 0 0 0 3.464 0" />
         <path d="M3.262 15.326A1 1 0 0 0 4 17h16a1 1 0 0 0 .74-1.673C19.41 13.956 18 12.499 18 8A6 6 0 0 0 6 8c0 4.499-1.411 5.956-2.738 7.326" />
       </svg>
+      @if (naoLidas() > 0) {
+        <span class="contador" aria-hidden="true">{{ naoLidas() > 9 ? '9+' : naoLidas() }}</span>
+      }
     </span>
     <span class="rotulo">Notificações</span>
-  </button>
+  </a>
 </nav>

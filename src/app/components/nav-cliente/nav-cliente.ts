@@ -1,8 +1,9 @@
 import { Component, ElementRef, afterNextRender, inject, signal } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
+import { NotificacoesService } from '../../services/notificacoes.service';
 
 /** Rotas que têm item no menu, na ordem em que aparecem. */
-const ROTAS_DO_MENU = ['/cliente/home', '/cliente/discovery'];
+const ROTAS_DO_MENU = ['/cliente/home', '/cliente/discovery', '/cliente/feed', '/cliente/notificacoes'];
 
 // Cada tela cria o seu próprio menu. Guardar onde o destaque estava na tela
 // anterior permite que ele deslize até o item novo em vez de só aparecer lá.
@@ -20,6 +21,7 @@ export class NavCliente {
 
   /** Índice do item em destaque; `null` nas telas que não têm item no menu. */
   protected readonly posicao = signal<number | null>(null);
+  protected readonly naoLidas = inject(NotificacoesService).naoLidas;
 
   constructor() {
     const atual = this.posicaoDaRota();

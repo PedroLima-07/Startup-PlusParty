@@ -106,6 +106,8 @@ O fluxo completo funciona de ponta a ponta, com dados reais:
 - **Telas do atendente**: Pedidos, separados em Bar e Cozinha, e Comandas, para liberar ou recusar a entrada, acompanhar as abertas e conferir os itens antes de confirmar o pagamento, com um contador de pendências na navegação
 - **Área do gerente** com movimento, resumo da noite, resultados, postagens, equipe e perfil do bar
 - **Equipe por convite**: o gerente gera um link (válido por 48 horas e para uma pessoa só), o atendente cria a conta por ele, com foto, e o gerente aprova. No perfil de cada atendente, o gerente vê os pedidos entregues por hora e por noite
+- **Feed de promoções**: o gerente publica promoções de bebida e comida, eventos e novidades, vendo a prévia do cartão; o cliente vê tudo no Feed, com filtro por tipo, desconto e validade
+- **Notificações do cliente**: comanda liberada ou recusada, pedido pronto (bar e cozinha), pagamento confirmado e promoção nova de um bar que ele já visitou. Chegam na hora, com aviso no topo da tela e, se a pessoa permitir, aviso do navegador quando o +party está em outra aba
 - **Atualização em tempo real** entre a tela do cliente e a do atendente (requer o script `realtime.sql` aplicado no banco)
 - **Segurança no banco**: as regras valem mesmo para quem chama a API diretamente
 
@@ -141,6 +143,7 @@ Os scripts ficam versionados na pasta [`supabase/`](supabase/) e são aplicados 
 | `equipe.sql` | Atendente pede para entrar na equipe de um bar e o gerente aprova, recusa ou remove |
 | `equipe_convites.sql` | Entrada na equipe só por convite, foto de perfil (Storage) e registro de quem entregou cada pedido |
 | `recusar_comanda.sql` | Status `recusada`: o atendente recusa a comanda de quem não está no bar |
+| `feed_notificacoes.sql` | Postagens com tipo, preço e validade (com promoções de exemplo), fotos no Storage e notificações criadas pelo próprio banco |
 
 ### Segurança
 

@@ -2,6 +2,7 @@
 
 .pagina {
   @include g.pagina;
+  max-width: 1080px;
 }
 
 h1 {
@@ -9,6 +10,12 @@ h1 {
   font-size: 24px;
   font-weight: 800;
   letter-spacing: -0.02em;
+}
+
+.explicacao {
+  margin: 4px 0 0;
+  color: g.$texto-suave;
+  font-size: 14px;
 }
 
 .rotulo {
@@ -20,97 +27,206 @@ h1 {
   @include g.cartao;
 }
 
-// ------------------------------------------------------- nova postagem
-.nova {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
+// Formulário e prévia lado a lado quando cabe.
+.editor {
+  display: grid;
+  gap: 16px;
 
-  textarea {
-    @include g.campo;
-    resize: vertical;
-    min-height: 96px;
-    line-height: 1.5;
-  }
-
-  .botao-marinho {
-    @include g.botao-marinho;
-    align-self: flex-end;
-    min-width: 110px;
-    border-radius: 999px;
-  }
-}
-
-.adicionar-foto {
-  display: inline-flex;
-  align-items: center;
-  align-self: flex-start;
-  gap: 8px;
-  color: g.$azul;
-  font-size: 13px;
-  font-weight: 600;
-  cursor: pointer;
-
-  app-icone {
-    font-size: 17px;
+  @media (min-width: 860px) {
+    grid-template-columns: minmax(0, 1fr) 340px;
+    align-items: start;
   }
 }
 
 .previa {
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
-  gap: 8px;
+  gap: 10px;
 
-  img {
-    width: 100%;
-    max-height: 220px;
-    border-radius: 12px;
-    object-fit: cover;
+  @media (min-width: 860px) {
+    position: sticky;
+    top: 16px;
+  }
+}
+
+// ------------------------------------------------------- nova postagem
+.nova {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+
+  .rotulo {
+    margin: 0;
+  }
+}
+
+.tipos {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.tipo {
+  padding: 8px 14px;
+  border: 1.5px solid g.$borda;
+  border-radius: 999px;
+  background: #fff;
+  color: g.$marinho;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+
+  &.ativo {
+    border-color: g.$marinho;
+    background: g.$marinho;
+    color: #fff;
+  }
+}
+
+.campo {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+
+  > span {
+    font-size: 13px;
+    font-weight: 700;
   }
 
+  small {
+    color: g.$rotulo;
+    font-weight: 500;
+  }
+
+  input,
+  textarea {
+    @include g.campo;
+  }
+
+  textarea {
+    resize: vertical;
+    line-height: 1.5;
+  }
+}
+
+.linha {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 12px;
+}
+
+.adicionar-foto,
+.remover-foto {
+  display: inline-flex;
+  align-items: center;
+  align-self: flex-start;
+  gap: 8px;
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.adicionar-foto {
+  color: g.$azul;
+
+  app-icone {
+    font-size: 17px;
+  }
+
+  small {
+    color: g.$rotulo;
+    font-weight: 500;
+  }
+}
+
+.remover-foto {
+  color: g.$perigo;
+}
+
+.mensagem-erro {
+  @include g.mensagem-erro;
+}
+
+.sucesso {
+  margin: 0;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: #e6f7ee;
+  color: #146c43;
+  font-size: 13px;
+}
+
+.publicar {
+  @include g.botao-azul;
+  align-self: stretch;
+  min-height: 46px;
+  font-size: 14px;
+}
+
+.tentar {
+  margin-left: 6px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  font-weight: 700;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+// ------------------------------------------------------------ postagens
+.lista {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 16px;
+}
+
+.item {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+
+  app-cartao-postagem {
+    flex: 1;
+  }
+}
+
+.acoes {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  font-size: 13px;
+
   button {
-    padding: 0;
+    padding: 6px 10px;
     border: 0;
+    border-radius: 8px;
     background: none;
-    color: g.$perigo;
     font: inherit;
-    font-size: 13px;
-    font-weight: 600;
+    font-weight: 700;
     cursor: pointer;
   }
 }
 
-// ------------------------------------------------------------ postagens
-.postagem {
-  padding: 0;
-  overflow: hidden;
+.cancelar {
+  color: g.$texto-suave;
+}
 
-  img {
-    display: block;
-    width: 100%;
-    aspect-ratio: 16 / 9;
-    object-fit: cover;
-    background: linear-gradient(135deg, #1746c9, g.$azul);
-  }
-
-  p {
-    margin: 0;
-    padding: 16px 16px 8px;
-    font-size: 14px;
-    line-height: 1.55;
-    white-space: pre-line;
-  }
-
-  time {
-    display: block;
-    padding: 0 16px 16px;
-    font-size: 12px;
-    color: g.$rotulo;
-  }
+.apagar {
+  background: g.$perigo !important;
+  color: #fff;
 }
 
 .vazio {
+  grid-column: 1 / -1;
   margin: 0;
   padding: 18px 16px;
   border: 1px dashed g.$borda;

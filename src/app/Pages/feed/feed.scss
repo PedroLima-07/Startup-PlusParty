@@ -1,0 +1,182 @@
+@use '../../../styles/desktop' as d;
+
+:host {
+  display: block;
+  min-height: 100dvh;
+  background: #f7f8fb;
+  color: #0f1f4b;
+  font-family: system-ui, sans-serif;
+}
+
+.app-header {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  background: #0f1f4b;
+}
+
+.header-content {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-height: 58px;
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 10px 16px;
+
+  h1 {
+    margin: 0;
+    color: #fff;
+    font-size: 19px;
+    font-weight: 800;
+    line-height: 1.2;
+  }
+
+  p {
+    margin: 2px 0 0;
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 13px;
+  }
+}
+
+.page-content {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 16px 16px 116px;
+}
+
+// Os filtros rolam de lado no celular, sem quebrar a página.
+.filtros {
+  display: flex;
+  gap: 8px;
+  margin: 0 -16px 16px;
+  padding: 0 16px 2px;
+  overflow-x: auto;
+  scrollbar-width: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+.filtro {
+  flex-shrink: 0;
+  min-height: 36px;
+  padding: 7px 14px;
+  border: 1px solid #dfe3eb;
+  border-radius: 999px;
+  background: #fff;
+  color: #0f1f4b;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 120ms ease, color 120ms ease, border-color 120ms ease;
+
+  &.ativo {
+    border-color: #0f1f4b;
+    background: #0f1f4b;
+    color: #fff;
+  }
+}
+
+.lista {
+  display: grid;
+  gap: 16px;
+}
+
+.vazio {
+  padding: 34px 18px;
+  border: 1px dashed #d2d7e2;
+  border-radius: 12px;
+  background: #fff;
+  text-align: center;
+
+  span {
+    font-size: 30px;
+  }
+
+  p {
+    margin: 10px 0 4px;
+    font-size: 14px;
+    font-weight: 800;
+  }
+
+  small {
+    color: #777f8f;
+    font-size: 12px;
+  }
+}
+
+// ---------------------------------------------------------------------
+// Desktop: menu lateral, título claro e postagens em grade
+// ---------------------------------------------------------------------
+@include d.desktop {
+  :host {
+    padding-left: d.$largura-menu;
+  }
+
+  .app-header {
+    position: static;
+    background: transparent;
+  }
+
+  .header-content {
+    max-width: 1240px;
+    min-height: 0;
+    padding: 44px 40px 0;
+
+    h1 {
+      color: #0f1f4b;
+      font-size: 32px;
+      letter-spacing: -0.02em;
+    }
+
+    p {
+      margin-top: 4px;
+      color: #6e7482;
+      font-size: 16px;
+    }
+  }
+
+  .page-content {
+    max-width: 1240px;
+    padding: 24px 40px 56px;
+  }
+
+  .filtros {
+    flex-wrap: wrap;
+    margin: 0 0 26px;
+    padding: 0;
+
+    .filtro:not(.ativo):hover {
+      border-color: #2f6bff;
+      color: #2f6bff;
+    }
+  }
+
+  .lista {
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 24px;
+  }
+
+  .vazio {
+    grid-column: 1 / -1;
+    padding: 56px 18px;
+  }
+}
+
+@include d.desktop-compacto {
+  .header-content {
+    padding: 36px 28px 0;
+  }
+
+  .page-content {
+    padding: 20px 28px 48px;
+  }
+
+  .lista {
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 20px;
+  }
+}
