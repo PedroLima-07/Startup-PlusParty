@@ -4,7 +4,9 @@ export type StatusComanda =
   | 'aguardando_liberacao'
   | 'aberta'
   | 'aguardando_pagamento'
-  | 'paga';
+  | 'paga'
+  /** O atendente não confirmou a presença do cliente. Final, como 'paga'. */
+  | 'recusada';
 
 export type StatusPedidoItem = 'novo' | 'em_andamento' | 'pronto';
 
@@ -112,14 +114,26 @@ export interface PedidoSetor {
   itens: { nome: string; quantidade: number }[];
 }
 
-/** Comanda que precisa de ação do atendente: liberar a entrada ou confirmar o pagamento. */
-export interface ComandaPendente {
+/** Um item do consumo da comanda, já somado entre os pedidos em que apareceu. */
+export interface ItemConsumido {
+  nome: string;
+  quantidade: number;
+  preco_unitario: number;
+}
+
+/**
+ * Comanda como o atendente a vê na aba Comandas. Pagas e recusadas não
+ * entram: já saíram da mão dele.
+ */
+export interface ComandaAtendente {
   id: string;
-  status: Extract<StatusComanda, 'aguardando_liberacao' | 'aguardando_pagamento'>;
+  status: Extract<StatusComanda, 'aguardando_liberacao' | 'aguardando_pagamento' | 'aberta'>;
   mesa: string | null;
   cliente: string;
   criada_em: string;
+  /** Soma de quantidade × preço de tudo o que foi pedido até agora. */
   total: number;
+  itens: ItemConsumido[];
 }
 
 export type StatusSolicitacaoEquipe = 'pendente' | 'aprovada' | 'recusada';

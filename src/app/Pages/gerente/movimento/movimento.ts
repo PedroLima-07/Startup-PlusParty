@@ -153,7 +153,9 @@ export class Movimento implements OnInit {
   }
 
   protected rotuloStatusDetalhe(status: StatusComanda): string {
-    return ROTULOS_STATUS[status as ComandaResumo['status']] ?? 'Aguardando liberação';
+    if (status === 'aguardando_liberacao') return 'Aguardando liberação';
+    if (status === 'recusada') return 'Recusada';
+    return ROTULOS_STATUS[status];
   }
 
   protected rotuloItem(status: StatusPedidoItem): string {

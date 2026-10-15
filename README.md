@@ -80,7 +80,7 @@ O fluxo completo funciona de ponta a ponta, com dados reais:
 | 1 | Cliente | Escolhe o bar no Discovery e vê o perfil do estabelecimento |
 | 2 | Cliente | Informa se está em uma mesa ou no balcão |
 | 3 | Sistema | A comanda nasce como *aguardando liberação* |
-| 4 | Atendente | Confirma a presença do cliente e libera a comanda |
+| 4 | Atendente | Confirma a presença do cliente e libera a comanda (ou recusa, se ele não estiver no bar) |
 | 5 | Cliente | Monta o carrinho no cardápio e confirma o pedido |
 | 6 | Bar e cozinha | Cada setor vê os seus itens e avança: *novo → em andamento → pronto* |
 | 7 | Cliente | Fecha a conta, confirmando que recebeu tudo |
@@ -103,7 +103,7 @@ O fluxo completo funciona de ponta a ponta, com dados reais:
 - **Discovery de bares** com fotos, busca e perfil completo do estabelecimento
 - **Comanda digital** em mesa ou balcão, sem comandas duplicadas
 - **Cardápio por categoria** com carrinho; o pedido é gravado numa única transação no banco
-- **Telas do atendente** separadas em Bar e Cozinha, e uma tela para liberar e cobrar comandas
+- **Telas do atendente**: Pedidos, separados em Bar e Cozinha, e Comandas, para liberar ou recusar a entrada, acompanhar as abertas e conferir os itens antes de confirmar o pagamento, com um contador de pendências na navegação
 - **Área do gerente** com movimento, resumo da noite, resultados, postagens, equipe e perfil do bar
 - **Atualização em tempo real** entre a tela do cliente e a do atendente (requer o script `realtime.sql` aplicado no banco)
 - **Segurança no banco**: as regras valem mesmo para quem chama a API diretamente
@@ -138,6 +138,7 @@ Os scripts ficam versionados na pasta [`supabase/`](supabase/) e são aplicados 
 | `estabelecimentos_detalhes.sql` | Foto, descrição, tags e horário de funcionamento do bar |
 | `seed_novo_bar.sql` | Modelo para cadastrar um bar novo, o seu cardápio e o gerente |
 | `equipe.sql` | Atendente pede para entrar na equipe de um bar e o gerente aprova, recusa ou remove |
+| `recusar_comanda.sql` | Status `recusada`: o atendente recusa a comanda de quem não está no bar |
 
 ### Segurança
 

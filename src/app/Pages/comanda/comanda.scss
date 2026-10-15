@@ -300,6 +300,11 @@
       margin-bottom: 8px;
     }
 
+    .icone-recusa {
+      background: #fef2f2;
+      color: #dc2626;
+    }
+
     .rotulo {
       color: var(--cinza-texto);
       margin: 0;
@@ -322,7 +327,8 @@
       max-width: 280px;
     }
 
-    .botao-cancelar {
+    .botao-cancelar,
+    .botao-voltar-inicio {
       width: 100%;
       max-width: 280px;
       margin-top: 4px;
@@ -338,6 +344,10 @@
         opacity: 0.5;
         cursor: not-allowed;
       }
+    }
+
+    .botao-voltar-inicio {
+      color: var(--cinza-texto);
     }
 
     .erro-cancelamento {

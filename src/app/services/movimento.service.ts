@@ -336,8 +336,10 @@ export function calcularMovimento(linhas: LinhaComandaMovimento[], agora: Date):
     lotacaoPorHora: calcularLotacaoPorHora(ordenadas, agora),
     maisVendidos: calcularMaisVendidos(itens),
     alertas: calcularAlertas(ordenadas, numeros, agora),
+    // Só as comandas que chegaram a abrir: aguardando liberação ainda não
+    // começou, e recusada nunca começou (o atendente não confirmou a presença).
     comandas: ordenadas
-      .filter((linha) => linha.status !== 'aguardando_liberacao')
+      .filter((linha) => linha.status !== 'aguardando_liberacao' && linha.status !== 'recusada')
       .reverse()
       .map((linha) => ({
         id: linha.id,

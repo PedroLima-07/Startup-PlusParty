@@ -1,0 +1,36 @@
+<nav class="nav-atendente" aria-label="Telas do atendente">
+  <a class="item-nav" routerLink="/atendente/pedidos" routerLinkActive="ativo">
+    <span class="icone">
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <rect width="8" height="4" x="8" y="2" rx="1" ry="1" />
+        <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2" />
+        <path d="M12 11h4" />
+        <path d="M12 16h4" />
+        <path d="M8 11h.01" />
+        <path d="M8 16h.01" />
+      </svg>
+    </span>
+    <span class="rotulo">Pedidos</span>
+  </a>
+  <a class="item-nav" routerLink="/atendente/comandas" routerLinkActive="ativo">
+    <span class="icone">
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1Z" />
+        <path d="M14 8H8" />
+        <path d="M16 12H8" />
+        <path d="M13 16H8" />
+      </svg>
+      @if (pendencias() > 0) {
+        <span class="contador" aria-hidden="true">{{
+          pendencias() > 99 ? '99+' : pendencias()
+        }}</span>
+      }
+    </span>
+    <span class="rotulo">Comandas</span>
+    @if (pendencias() > 0) {
+      <span class="so-leitor"
+        >, {{ pendencias() }} {{ pendencias() === 1 ? 'pendência' : 'pendências' }}</span
+      >
+    }
+  </a>
+</nav>

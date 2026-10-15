@@ -1,8 +1,10 @@
+import { WritableSignal, signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 import { PedidoSetor } from '../../models';
 import { AuthService } from '../../services/auth.service';
 import { SupabaseService } from '../../services/supabase.service';
+import { ComandasAtendenteService } from '../../services/comandas-atendente.service';
 import { PedidosAtendenteService } from '../../services/pedidos-atendente.service';
 import { AtendentePedidos } from './atendente-pedidos';
 
@@ -47,13 +49,20 @@ describe('AtendentePedidos', () => {
 
   let supabase: { escutarMudancas: ReturnType<typeof vi.fn> };
   let avisarMudanca: () => void;
+  let comandasService: { pendencias: WritableSignal<number>; atualizarPendencias: ReturnType<typeof vi.fn> };
 
   beforeEach(async () => {
     supabase = {
-      escutarMudancas: vi.fn((_tabelas: unknown, aoMudar: () => void) => {
-        avisarMudanca = aoMudar;
+      // A navegação também escuta (a tabela de comandas, para o contador);
+      // aqui interessa o aviso que a própria tela de pedidos pediu.
+      escutarMudancas: vi.fn((tabelas: { tabela: string }[], aoMudar: () => void) => {
+        if (tabelas.some(({ tabela }) => tabela === 'pedido_itens')) avisarMudanca = aoMudar;
         return () => {};
       }),
+    };
+    comandasService = {
+      pendencias: signal(0),
+      atualizarPendencias: vi.fn().mockResolvedValue(undefined),
     };
     service = {
       listarPendentes: vi.fn().mockResolvedValue([
@@ -69,7 +78,14 @@ describe('AtendentePedidos', () => {
       providers: [
         provideRouter([]),
         { provide: PedidosAtendenteService, useValue: service },
-        { provide: AuthService, useValue: { sair: vi.fn() } },
+        { provide: ComandasAtendenteService, useValue: comandasService },
+        {
+          provide: AuthService,
+          useValue: {
+            sair: vi.fn(),
+            perfilAtual: vi.fn().mockResolvedValue({ estabelecimento: { id: 'bar1', nome: 'Bar' } }),
+          },
+        },
         { provide: SupabaseService, useValue: supabase },
       ],
     }).compileComponents();
@@ -131,6 +147,19 @@ describe('AtendentePedidos', () => {
     await fixture.whenStable();
 
     expect(textoDaTela()).toContain('Não foi possível carregar os pedidos');
+  });
+
+  it('mostra o contador de comandas pendentes na navegação, só quando há pendências', () => {
+    const contador = () => {
+      fixture.detectChanges();
+      return (fixture.nativeElement as HTMLElement).querySelector('app-nav-atendente .contador');
+    };
+
+    expect(comandasService.atualizarPendencias).toHaveBeenCalledWith('bar1');
+    expect(contador()).toBeNull();
+
+    comandasService.pendencias.set(3);
+    expect(contador()!.textContent).toContain('3');
   });
 
   it('mostra pedido novo sozinho quando o banco avisa uma mudança', async () => {

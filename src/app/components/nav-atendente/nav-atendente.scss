@@ -1,0 +1,87 @@
+$cor-primaria: #0f1f4b;
+
+// Gruda no pé da tela sem cobrir o fim da lista: ocupa o próprio espaço
+// no final da página e só "flutua" enquanto há conteúdo para rolar.
+:host {
+  position: sticky;
+  bottom: 0;
+  z-index: 30;
+  display: block;
+  margin-top: auto;
+}
+
+.nav-atendente {
+  display: flex;
+  background: $cor-primaria;
+  padding-bottom: env(safe-area-inset-bottom);
+  box-shadow: 0 -4px 12px rgba(15, 31, 75, 0.18);
+}
+
+.item-nav {
+  position: relative;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  min-height: 64px;
+  padding: 10px 0 8px;
+  color: rgba(255, 255, 255, 0.62);
+  text-decoration: none;
+  border-top: 3px solid transparent;
+  -webkit-tap-highlight-color: transparent;
+
+  &.ativo {
+    color: #fff;
+    border-top-color: #fff;
+  }
+}
+
+.icone {
+  position: relative;
+  display: flex;
+  width: 26px;
+  height: 26px;
+
+  svg {
+    width: 100%;
+    height: 100%;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+}
+
+.contador {
+  position: absolute;
+  top: -8px;
+  left: 14px;
+  min-width: 22px;
+  height: 22px;
+  padding: 0 6px;
+  border: 2px solid $cor-primaria;
+  border-radius: 999px;
+  background: #dc2626;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 18px;
+  text-align: center;
+}
+
+.rotulo {
+  font-size: 12px;
+  font-weight: 600;
+}
+
+// Lido por leitores de tela; o número visível fica só no selo.
+.so-leitor {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}

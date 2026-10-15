@@ -216,6 +216,16 @@ describe('calcularMovimento', () => {
     });
   });
 
+  it('comanda recusada não entra na lista nem nas contas da noite', () => {
+    const recusada = comanda({ id: 'r1', status: 'recusada', criada_em: em(22), mesa: '9' });
+    const resultado = calcularMovimento([comanda({ id: 'a1' }), recusada], AGORA);
+
+    expect(resultado.comandas.map((c) => c.id)).toEqual(['a1']);
+    expect(resultado.comandasAbertas).toBe(1);
+    expect(resultado.comandasPagas).toBe(0);
+    expect(resultado.comandasAguardandoPagamento).toBe(0);
+  });
+
   it('conta uma comanda em cada hora em que ela esteve aberta', () => {
     expect(numeros.lotacaoPorHora).toEqual([
       { hora: '19h', comandas: 1 },

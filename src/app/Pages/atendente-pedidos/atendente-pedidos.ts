@@ -1,17 +1,18 @@
 import { DatePipe, NgClass } from '@angular/common';
 import { Component, DestroyRef, OnInit, computed, inject, signal } from '@angular/core';
-import { Router, RouterLink, RouterLinkActive } from '@angular/router';
+import { Router } from '@angular/router';
 import { PedidoSetor, SetorItem } from '../../models';
 import { AuthService } from '../../services/auth.service';
 import { SupabaseService } from '../../services/supabase.service';
 import { PedidosAtendenteService } from '../../services/pedidos-atendente.service';
 import { Carregando } from '../../components/carregando/carregando';
+import { NavAtendente } from '../../components/nav-atendente/nav-atendente';
 
 type AcaoModal = 'comecar' | 'pronto';
 
 @Component({
   selector: 'app-atendente-pedidos',
-  imports: [Carregando, DatePipe, NgClass, RouterLink, RouterLinkActive],
+  imports: [Carregando, DatePipe, NavAtendente, NgClass],
   templateUrl: './atendente-pedidos.html',
   styleUrls: ['./atendente-pedidos.scss'],
 })

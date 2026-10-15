@@ -22,12 +22,13 @@ export class HomeService {
     return [...lista].sort((a, b) => nota(b) - nota(a));
   }
 
+  /** Paga e recusada são finais: nenhuma das duas prende o cliente à comanda. */
   async buscarComandaAtiva(usuarioId: string): Promise<Comanda | null> {
     const { data, error } = await this.supabase.client
       .from('comandas')
       .select('*')
       .eq('usuario_id', usuarioId)
-      .neq('status', 'paga')
+      .not('status', 'in', '(paga,recusada)')
       .order('criada_em', { ascending: false })
       .limit(1)
       .maybeSingle();
