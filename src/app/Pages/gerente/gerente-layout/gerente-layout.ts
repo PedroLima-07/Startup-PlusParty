@@ -13,6 +13,9 @@ import { Icone } from '../componentes/icone';
 const SUBPAGINAS = [
   { rota: '/gerente/movimento/resumo', titulo: 'Resumo da noite', voltar: '/gerente/movimento' },
   { rota: '/gerente/configuracoes', titulo: 'Configurações', voltar: '/gerente/movimento' },
+  { rota: '/gerente/equipe/convite', titulo: 'Convidar atendente', voltar: '/gerente/equipe' },
+  // Perfil de um atendente (/gerente/equipe/<id>). Vem depois do convite, que também começa assim.
+  { rota: '/gerente/equipe/', titulo: 'Atendente', voltar: '/gerente/equipe' },
 ];
 
 @Component({

@@ -1,0 +1,151 @@
+<div class="tela">
+  <div class="card-login">
+    <div class="logo">
+      <span class="logo-icone">+</span>
+      <span>party</span>
+    </div>
+    <p class="tagline">Convite para a equipe</p>
+
+    @if (carregando()) {
+      <app-carregando texto="Abrindo o convite" />
+    } @else if (convite(); as c) {
+      @switch (c.situacao) {
+        @case ('valido') {
+          <div class="bar">
+            <span class="bar-icone" aria-hidden="true">{{ c.estabelecimento_nome.charAt(0) }}</span>
+            <span class="bar-texto">
+              <strong>{{ c.estabelecimento_nome }}</strong>
+              <span>Você foi convidado para trabalhar como atendente</span>
+            </span>
+          </div>
+
+          <form [formGroup]="form" (ngSubmit)="enviar()">
+            <div class="foto">
+              <label class="foto-escolher">
+                <span class="foto-circulo">
+                  @if (fotoPrevia(); as previa) {
+                    <img [src]="previa" alt="Foto escolhida" />
+                  } @else {
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                      <circle cx="12" cy="7" r="4" />
+                    </svg>
+                  }
+                  <span class="foto-camera" aria-hidden="true">
+                    <svg viewBox="0 0 24 24">
+                      <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" />
+                      <circle cx="12" cy="13" r="4" />
+                    </svg>
+                  </span>
+                </span>
+                <span class="foto-texto">
+                  <strong>{{ fotoPrevia() ? 'Trocar foto' : 'Adicionar foto' }}</strong>
+                  <span>Opcional. Ajuda o gerente e a equipe a reconhecer você.</span>
+                </span>
+                <input type="file" accept="image/*" hidden (change)="escolherFoto($event)" />
+              </label>
+              @if (fotoPrevia()) {
+                <button type="button" class="link remover-foto" (click)="removerFoto()">Remover foto</button>
+              }
+            </div>
+
+            @if (contaLogada() !== null) {
+              <p class="conta-atual">Pedido em nome de <strong>{{ contaLogada() || 'sua conta' }}</strong></p>
+            } @else {
+              <label class="campo">
+                Nome
+                <input type="text" formControlName="nome" autocomplete="name" />
+                @if (form.controls.nome.invalid && form.controls.nome.touched) {
+                  <span class="erro-campo">Informe seu nome.</span>
+                }
+              </label>
+
+              <label class="campo">
+                E-mail
+                <input
+                  type="email"
+                  formControlName="email"
+                  placeholder="seuemail@party.app"
+                  autocomplete="email"
+                />
+                @if (form.controls.email.invalid && form.controls.email.touched) {
+                  <span class="erro-campo">Informe um e-mail válido.</span>
+                }
+              </label>
+
+              <label class="campo">
+                Senha
+                <input type="password" formControlName="senha" autocomplete="new-password" />
+                @if (form.controls.senha.invalid && form.controls.senha.touched) {
+                  <span class="erro-campo">Mínimo de 6 caracteres.</span>
+                }
+              </label>
+            }
+
+            <label class="campo">
+              Telefone
+              <input
+                type="tel"
+                formControlName="telefone"
+                placeholder="(15) 99999-0000"
+                autocomplete="tel"
+              />
+              @if (form.controls.telefone.invalid && form.controls.telefone.touched) {
+                <span class="erro-campo">Informe um telefone com DDD.</span>
+              }
+            </label>
+
+            @if (erro(); as mensagem) {
+              <p class="erro-geral" role="alert">{{ mensagem }}</p>
+            }
+            @if (aviso(); as mensagem) {
+              <p class="aviso-geral" role="status">{{ mensagem }}</p>
+            }
+
+            <button class="botao-primario" type="submit" [disabled]="enviando()">
+              {{ enviando() ? 'Enviando...' : 'PEDIR PARA ENTRAR' }}
+            </button>
+          </form>
+
+          <p class="instrucao rodape-convite">
+            O gerente do {{ c.estabelecimento_nome }} confirma o seu acesso antes de você começar.
+          </p>
+          @if (contaLogada() === null) {
+            <p class="rodape-link">
+              Já tem conta no +party?
+              <a class="link" routerLink="/login" [queryParams]="{ voltar: enderecoDesteConvite() }"
+                >Entrar e aceitar</a
+              >
+            </p>
+          }
+        }
+
+        @case ('usado') {
+          <p class="titulo-estado">Este convite já foi usado</p>
+          <p class="instrucao">
+            Cada link serve para uma pessoa só. Peça um novo convite ao gerente do
+            {{ c.estabelecimento_nome }}.
+          </p>
+          <a class="link" routerLink="/login">Ir para o login</a>
+        }
+
+        @case ('expirado') {
+          <p class="titulo-estado">Este convite expirou</p>
+          <p class="instrucao">
+            O link vale por 48 horas. Peça um novo convite ao gerente do
+            {{ c.estabelecimento_nome }}.
+          </p>
+          <a class="link" routerLink="/login">Ir para o login</a>
+        }
+      }
+    } @else if (erro(); as mensagem) {
+      <p class="erro-geral" role="alert">{{ mensagem }}</p>
+    } @else {
+      <p class="titulo-estado">Convite não encontrado</p>
+      <p class="instrucao">Confira o link com o gerente do bar. Ele pode gerar um novo na aba Equipe.</p>
+      <a class="link" routerLink="/login">Ir para o login</a>
+    }
+  </div>
+
+  <p class="rodape">+party 2026 · São Paulo</p>
+</div>

@@ -5,8 +5,9 @@
 -- SQL no painel. Como atendente entra e sai o tempo todo, isso passa a
 -- ser resolvido entre o atendente e o gerente do bar, pelo app:
 --
---   1. a pessoa se cadastra (nasce cliente, como todo mundo) e cria uma
---      solicitação escolhendo o bar;
+--   1. a pessoa recebe um link de convite do gerente, se cadastra (nasce
+--      cliente, como todo mundo) e o convite cria a solicitação para o bar
+--      (convites: supabase/equipe_convites.sql);
 --   2. o gerente daquele bar vê a solicitação na aba Equipe e aprova ou
 --      recusa;
 --   3. aprovada, o perfil vira funcionário do bar. O gerente também pode
@@ -80,16 +81,8 @@ create policy "solicitacoes_equipe: gerente vê as do seu bar"
     and estabelecimento_id = public.meu_estabelecimento_id()
   );
 
--- Só cliente pede (quem já é funcionário ou gerente não), sempre para si e
--- sempre como pendente.
-create policy "solicitacoes_equipe: cliente pede"
-  on solicitacoes_equipe for insert
-  with check (
-    usuario_id = auth.uid()
-    and status = 'pendente'
-    and respondida_em is null
-    and public.meu_tipo() = 'cliente'
-  );
+-- Não há policy de INSERT: o pedido só nasce de um convite do gerente,
+-- pela função aceitar_convite (supabase/equipe_convites.sql).
 
 -- Desistir de uma pendente ou dispensar uma recusada. A aprovada fica como
 -- registro de quem o gerente contratou.
@@ -228,7 +221,7 @@ end $$;
 notify pgrst, 'reload schema';
 
 -- ---------------------------------------------------------------------
--- Conferência: deve mostrar  politicas = 4 | tempo_real = true | protecao_atualizada = true
+-- Conferência: deve mostrar  politicas = 3 | tempo_real = true | protecao_atualizada = true
 -- (protecao_atualizada = false quer dizer que faltou rodar supabase/protecoes.sql)
 -- ---------------------------------------------------------------------
 select

@@ -151,7 +151,10 @@ export interface SolicitacaoPendente {
   nome: string;
   email: string;
   telefone: string;
+  foto_url: string | null;
   criada_em: string;
+  /** Veio de um link de convite do gerente (pedidos antigos podem não ter). */
+  peloConvite: boolean;
 }
 
 /** Atendente que já trabalha no bar do gerente. */
@@ -160,6 +163,30 @@ export interface Funcionario {
   nome: string;
   email: string;
   telefone: string | null;
+  foto_url: string | null;
+}
+
+/** O atendente como o perfil dele aparece para o gerente. */
+export interface FuncionarioDetalhe extends Funcionario {
+  /** Quando o gerente aprovou a entrada; null para quem entrou antes dos pedidos. */
+  naEquipeDesde: string | null;
+  peloConvite: boolean;
+}
+
+/** Link de convite para a equipe, como o gerente o vê. */
+export interface ConviteEquipe {
+  id: string;
+  codigo: string;
+  criado_em: string;
+  expira_em: string;
+}
+
+export type SituacaoConvite = 'valido' | 'usado' | 'expirado';
+
+/** O que a página do convite mostra antes de a pessoa aceitar. */
+export interface ConviteInfo {
+  estabelecimento_nome: string;
+  situacao: SituacaoConvite;
 }
 
 export interface Alerta {

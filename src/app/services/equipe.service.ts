@@ -1,22 +1,32 @@
 import { Injectable, inject, signal } from '@angular/core';
-import { Funcionario, MinhaSolicitacaoEquipe, SolicitacaoPendente } from '../models';
+import {
+  ConviteEquipe,
+  ConviteInfo,
+  Funcionario,
+  FuncionarioDetalhe,
+  MinhaSolicitacaoEquipe,
+  SolicitacaoPendente,
+} from '../models';
 import { AuthService } from './auth.service';
 import { SupabaseService } from './supabase.service';
 
-export const ROTA_CADASTRO_ATENDENTE = '/atendente/cadastro';
 export const ROTA_AGUARDANDO_GERENTE = '/atendente/aguardando';
+/** Início do endereço do link de convite: /convite/<código>. */
+export const ROTA_CONVITE = '/convite/';
 
 /** Formato de cada linha que a consulta de solicitações pendentes devolve. */
 interface LinhaSolicitacaoPendente {
   id: string;
   telefone: string;
   criada_em: string;
-  candidato: { nome: string; email: string } | null;
+  convite_id: string | null;
+  candidato: { nome: string; email: string; foto_url: string | null } | null;
 }
 
 /**
- * Entrada e saída de atendentes de um bar (ver supabase/equipe.sql): a pessoa
- * pede para entrar, o gerente do bar aprova, recusa ou remove.
+ * Entrada e saída de atendentes de um bar (ver supabase/equipe.sql e
+ * supabase/equipe_convites.sql): o gerente gera um link de convite, a pessoa
+ * aceita, o gerente aprova, recusa ou remove.
  */
 @Injectable({
   providedIn: 'root',
@@ -32,18 +42,25 @@ export class EquipeService {
   readonly pendentes = signal<SolicitacaoPendente[]>([]);
 
   // ------------------------------------------------------------------
-  // Quem pede para entrar
+  // Quem recebeu o convite
   // ------------------------------------------------------------------
 
-  /** Pede para trabalhar no bar. O perfil só muda quando o gerente aprovar. */
-  async solicitar(estabelecimentoId: string, telefone: string): Promise<void> {
-    const usuario = await this.authService.usuarioAtual();
-    if (!usuario) throw new Error('Usuário não autenticado.');
+  /** Bar e situação do convite; null se o código não existe. Funciona sem login. */
+  async verConvite(codigo: string): Promise<ConviteInfo | null> {
+    const { data, error } = await this.supabase.client.rpc('ver_convite', { p_codigo: codigo });
 
-    const { error } = await this.supabase.client.from('solicitacoes_equipe').insert({
-      usuario_id: usuario.id,
-      estabelecimento_id: estabelecimentoId,
-      telefone,
+    if (error) throw error;
+    return ((data ?? []) as ConviteInfo[])[0] ?? null;
+  }
+
+  /**
+   * Usa o convite e cria o pedido para entrar na equipe do bar dele. O perfil
+   * só muda quando o gerente aprovar.
+   */
+  async aceitarConvite(codigo: string, telefone: string): Promise<void> {
+    const { error } = await this.supabase.client.rpc('aceitar_convite', {
+      p_codigo: codigo,
+      p_telefone: telefone,
     });
 
     if (error) throw error;
@@ -66,7 +83,7 @@ export class EquipeService {
     return data as unknown as MinhaSolicitacaoEquipe | null;
   }
 
-  /** Cancela um pedido pendente ou dispensa um recusado, liberando um novo. */
+  /** Cancela um pedido pendente ou dispensa um recusado. */
   async desistir(solicitacaoId: string): Promise<void> {
     const { error } = await this.supabase.client
       .from('solicitacoes_equipe')
@@ -94,14 +111,51 @@ export class EquipeService {
   }
 
   // ------------------------------------------------------------------
-  // Gerente
+  // Gerente: convites
+  // ------------------------------------------------------------------
+
+  /** Gera um link novo, válido por 48 horas e para uma pessoa só. */
+  async criarConvite(): Promise<ConviteEquipe> {
+    const { data, error } = await this.supabase.client.rpc('criar_convite');
+
+    if (error) throw error;
+    const { id, codigo, criado_em, expira_em } = data as ConviteEquipe;
+    return { id, codigo, criado_em, expira_em };
+  }
+
+  /** Convites do bar ainda não usados e dentro da validade, do mais novo ao mais antigo. */
+  async listarConvitesAbertos(): Promise<ConviteEquipe[]> {
+    const { data, error } = await this.supabase.client
+      .from('convites_equipe')
+      .select('id, codigo, criado_em, expira_em')
+      .eq('estabelecimento_id', await this.barDoGerente())
+      .is('usado_em', null)
+      .gt('expira_em', new Date().toISOString())
+      .order('criado_em', { ascending: false });
+
+    if (error) throw error;
+    return (data ?? []) as ConviteEquipe[];
+  }
+
+  /** O link para de funcionar na hora. */
+  async cancelarConvite(conviteId: string): Promise<void> {
+    const { error } = await this.supabase.client
+      .from('convites_equipe')
+      .delete()
+      .eq('id', conviteId);
+
+    if (error) throw error;
+  }
+
+  // ------------------------------------------------------------------
+  // Gerente: equipe
   // ------------------------------------------------------------------
 
   /** Atualiza `pendentes` com os pedidos esperando resposta, do mais antigo ao mais novo. */
   async carregarPendentes(): Promise<void> {
     const { data, error } = await this.supabase.client
       .from('solicitacoes_equipe')
-      .select('id, telefone, criada_em, candidato:perfis(nome, email)')
+      .select('id, telefone, criada_em, convite_id, candidato:perfis(nome, email, foto_url)')
       .eq('estabelecimento_id', await this.barDoGerente())
       .eq('status', 'pendente')
       .order('criada_em');
@@ -113,7 +167,9 @@ export class EquipeService {
         nome: linha.candidato?.nome.trim() || 'Sem nome',
         email: linha.candidato?.email ?? '',
         telefone: linha.telefone,
+        foto_url: linha.candidato?.foto_url ?? null,
         criada_em: linha.criada_em,
+        peloConvite: linha.convite_id !== null,
       })),
     );
   }
@@ -126,13 +182,48 @@ export class EquipeService {
   async listarFuncionarios(): Promise<Funcionario[]> {
     const { data, error } = await this.supabase.client
       .from('perfis')
-      .select('id, nome, email, telefone')
+      .select('id, nome, email, telefone, foto_url')
       .eq('tipo', 'funcionario')
       .eq('estabelecimento_id', await this.barDoGerente())
       .order('nome');
 
     if (error) throw error;
     return (data ?? []) as Funcionario[];
+  }
+
+  /** Um atendente do bar do gerente, com a data em que entrou; null se não é da equipe. */
+  async buscarFuncionario(usuarioId: string): Promise<FuncionarioDetalhe | null> {
+    const bar = await this.barDoGerente();
+
+    const [perfil, entrada] = await Promise.all([
+      this.supabase.client
+        .from('perfis')
+        .select('id, nome, email, telefone, foto_url')
+        .eq('id', usuarioId)
+        .eq('tipo', 'funcionario')
+        .eq('estabelecimento_id', bar)
+        .maybeSingle(),
+      this.supabase.client
+        .from('solicitacoes_equipe')
+        .select('respondida_em, convite_id')
+        .eq('usuario_id', usuarioId)
+        .eq('estabelecimento_id', bar)
+        .eq('status', 'aprovada')
+        .order('respondida_em', { ascending: false })
+        .limit(1)
+        .maybeSingle(),
+    ]);
+
+    if (perfil.error) throw perfil.error;
+    if (entrada.error) throw entrada.error;
+    if (!perfil.data) return null;
+
+    const aprovacao = entrada.data as { respondida_em: string | null; convite_id: string | null } | null;
+    return {
+      ...(perfil.data as Funcionario),
+      naEquipeDesde: aprovacao?.respondida_em ?? null,
+      peloConvite: Boolean(aprovacao?.convite_id),
+    };
   }
 
   /** Aprovar transforma quem pediu em funcionário do bar; recusar só encerra o pedido. */

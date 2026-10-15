@@ -65,7 +65,7 @@ describe('GraficoHoras', () => {
     ]);
 
     expect(tela.querySelectorAll('li')).toHaveLength(3);
-    expect(tela.querySelector('.pico .hora')?.textContent).toBe('23h');
+    expect(tela.querySelector('.pico .rotulo')?.textContent).toBe('23h');
     expect(texto(tela)).toContain('Seu pico foi às 23h, com 38 comandas abertas ao mesmo tempo.');
   });
 

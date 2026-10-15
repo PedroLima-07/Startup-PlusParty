@@ -1,15 +1,15 @@
 import { Component, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { traduzirErroAuth } from '../../erros-auth';
 import { AuthService } from '../../services/auth.service';
-import { EquipeService, ROTA_CADASTRO_ATENDENTE } from '../../services/equipe.service';
+import { EquipeService, ROTA_CONVITE } from '../../services/equipe.service';
 
 type Modo = 'login' | 'cadastro' | 'recuperar';
 
 @Component({
   selector: 'app-login',
-  imports: [ReactiveFormsModule, RouterLink],
+  imports: [ReactiveFormsModule],
   templateUrl: './login.html',
   styleUrl: './login.scss',
 })
@@ -24,7 +24,6 @@ export class LoginPage {
   protected readonly carregando = signal(false);
   protected readonly erro = signal<string | null>(null);
   protected readonly aviso = signal<string | null>(null);
-  protected readonly rotaCadastroAtendente = ROTA_CADASTRO_ATENDENTE;
 
   protected readonly form = this.fb.nonNullable.group({
     nome: [''],
@@ -89,7 +88,8 @@ export class LoginPage {
     const voltar = this.route.snapshot.queryParamMap.get('voltar');
     const tipo = await this.authService.buscarTipoAtual();
 
-    const abertaAoCliente = voltar?.startsWith('/cliente/') || voltar === ROTA_CADASTRO_ATENDENTE;
+    // Telas do cliente e o link de convite (quem entrou para aceitar um convite volta para ele).
+    const abertaAoCliente = voltar?.startsWith('/cliente/') || voltar?.startsWith(ROTA_CONVITE);
     if (tipo === 'cliente' && voltar && abertaAoCliente) return voltar;
 
     return (await this.equipeService.telaInicial()) ?? this.authService.telaInicial(tipo);

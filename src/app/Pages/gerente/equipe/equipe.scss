@@ -2,14 +2,22 @@
 
 .equipe-container {
   @include g.pagina;
-  gap: 22px;
+  gap: 18px;
 }
 
-h1 {
-  margin: 0 0 -6px;
-  font-size: 24px;
-  font-weight: 800;
-  letter-spacing: -0.02em;
+.cabecalho {
+  h1 {
+    margin: 0;
+    font-size: 24px;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+  }
+
+  p {
+    margin: 4px 0 0;
+    font-size: 13px;
+    color: g.$texto-suave;
+  }
 }
 
 section {
@@ -18,38 +26,91 @@ section {
   gap: 10px;
 }
 
-h2 {
+.rotulo {
   @include g.rotulo;
   display: flex;
   align-items: center;
   gap: 8px;
+}
 
-  .contador {
-    min-width: 20px;
-    padding: 1px 6px;
-    border-radius: 10px;
-    background: #e4ecff;
-    color: #1d4ed8;
-    letter-spacing: 0;
-    text-align: center;
+.contador {
+  min-width: 20px;
+  padding: 1px 6px;
+  border-radius: 10px;
+  background: #e4ecff;
+  color: #1d4ed8;
+  letter-spacing: 0;
+  text-align: center;
+
+  &.alerta {
+    background: #fde8e8;
+    color: #b91c1c;
   }
 }
 
-.card {
+.cartao {
   @include g.cartao;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  padding: 14px 16px;
 }
 
+// ------------------------------------------------------ convidar atendente
+.convidar {
+  gap: 14px;
+  padding: 18px 16px;
+  border-radius: 16px;
+  background: g.$marinho;
+  color: #fff;
+
+  h2 {
+    margin: 0;
+    font-size: 15px;
+  }
+
+  p {
+    margin: 4px 0 0;
+    font-size: 12px;
+    line-height: 1.5;
+    color: rgba(255, 255, 255, 0.78);
+  }
+}
+
+.convidar-texto {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.convidar-icone {
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.14);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+}
+
+.botao-convidar {
+  @include g.botao-azul;
+  min-height: 44px;
+  font-size: 14px;
+}
+
+// ---------------------------------------------------------- pessoas
 .pessoa {
   display: flex;
-  flex-direction: column;
-  gap: 3px;
+  align-items: center;
+  gap: 12px;
+}
+
+.pessoa-texto {
+  flex: 1;
   min-width: 0;
-  font-size: 13px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-size: 12px;
   color: g.$texto-suave;
 
   strong {
@@ -58,8 +119,7 @@ h2 {
   }
 
   strong,
-  span,
-  a {
+  span {
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -71,18 +131,27 @@ h2 {
   }
 
   .quando {
-    font-size: 12px;
+    font-size: 11px;
+    color: g.$rotulo;
   }
 }
 
-.acoes {
+.pedido {
   display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 14px 16px;
+}
+
+.acoes {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 8px;
-  flex-shrink: 0;
 }
 
 .botao {
   @include g.botao;
+  min-height: 44px;
   background: #fff;
   border-color: g.$borda;
   color: g.$marinho;
@@ -92,10 +161,37 @@ h2 {
     border-color: g.$azul;
     color: #fff;
   }
+}
 
-  &.perigo {
-    border-color: g.$perigo;
-    color: g.$perigo;
+// --------------------------------------------------------- atendentes
+.lista {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  overflow: hidden;
+
+  li + li {
+    border-top: 1px solid #eef1f6;
+  }
+}
+
+.atendente {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  color: g.$marinho;
+  text-decoration: none;
+
+  &:hover,
+  &:focus-visible {
+    background: #f7f9fd;
+    outline: none;
+  }
+
+  > app-icone {
+    font-size: 18px;
+    color: g.$rotulo;
   }
 }
 
@@ -112,56 +208,10 @@ h2 {
 }
 
 .mensagem-erro {
-  margin: 0;
-  padding: 10px 12px;
-  border-radius: 10px;
-  background: #fde8e8;
-  color: #991b1b;
-  font-size: 13px;
+  @include g.mensagem-erro;
 }
 
-.overlay {
-  position: fixed;
-  inset: 0;
-  z-index: 10;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 20px;
-  background: rgba(15, 31, 75, 0.45);
-}
-
-.modal {
-  width: 100%;
-  max-width: 360px;
-  padding: 20px;
-  border-radius: 16px;
-  background: #fff;
-
-  h3 {
-    margin: 0 0 8px;
-    font-size: 17px;
-  }
-
-  p {
-    margin: 0 0 18px;
-    color: g.$texto-suave;
-    font-size: 14px;
-    line-height: 1.5;
-  }
-
-  .acoes {
-    justify-content: flex-end;
-  }
-}
-
-@media (max-width: 560px) {
-  .card {
-    flex-direction: column;
-    align-items: stretch;
-  }
-
-  .acoes .botao {
-    flex: 1;
-  }
+// No cartão de cada lista, o .cartao do mixin já põe padding; a lista não quer.
+.lista.cartao {
+  padding: 0;
 }

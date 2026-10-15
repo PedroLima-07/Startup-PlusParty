@@ -41,12 +41,9 @@
             <p class="titulo-estado">Pedido não aprovado</p>
             <p class="instrucao">
               O gerente do <strong>{{ s.estabelecimento.nome }}</strong> não aprovou o seu pedido.
-              Se foi engano, fale com ele e peça de novo.
+              Se foi engano, fale com ele e peça um novo link de convite.
             </p>
-            <button class="botao-primario" type="button" [disabled]="processando()" (click)="pedirDeNovo()">
-              Pedir de novo
-            </button>
-            <button class="link" type="button" [disabled]="processando()" (click)="cancelarPedido()">
+            <button class="botao-primario" type="button" [disabled]="processando()" (click)="cancelarPedido()">
               Continuar como cliente
             </button>
           }

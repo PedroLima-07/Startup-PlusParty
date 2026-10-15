@@ -1,0 +1,81 @@
+<div class="pagina">
+  @if (erro(); as mensagem) {
+    <p class="mensagem-erro" role="alert">{{ mensagem }}</p>
+  }
+
+  @if (carregando()) {
+    <app-carregando texto="Carregando convites" />
+  } @else {
+    <section class="cartao link-convite" aria-labelledby="titulo-link">
+      <div>
+        <h2 id="titulo-link" class="rotulo">Link de convite</h2>
+        <p class="explicacao">
+          Envie para quem vai trabalhar no bar. A pessoa cria a conta por este link e você aprova
+          na aba Equipe.
+        </p>
+      </div>
+
+      @if (atual(); as convite) {
+        <div class="endereco">
+          <app-icone nome="link" />
+          <span>{{ link() }}</span>
+        </div>
+
+        <button type="button" class="botao-azul" [class.copiado]="copiado()" (click)="copiar()">
+          <app-icone [nome]="copiado() ? 'check' : 'copiar'" />
+          {{ copiado() ? 'Link copiado' : 'Copiar link' }}
+        </button>
+        <a class="botao-contorno" [href]="linkWhatsapp()" target="_blank" rel="noopener">
+          Enviar pelo WhatsApp
+        </a>
+        <button type="button" class="link-acao" [disabled]="gerando()" (click)="gerar()">
+          {{ gerando() ? 'Gerando...' : 'Gerar outro link' }}
+        </button>
+      } @else {
+        <button type="button" class="botao-azul" [disabled]="gerando()" (click)="gerar()">
+          <app-icone nome="link" />
+          {{ gerando() ? 'Gerando...' : 'Gerar link de convite' }}
+        </button>
+      }
+    </section>
+
+    <section class="cartao regras" aria-labelledby="titulo-regras">
+      <h2 id="titulo-regras">Como o convite protege o bar</h2>
+      <p><app-icone nome="relogio" /> <span>Vale por <strong>48 horas</strong>. Depois disso, gere outro.</span></p>
+      <p>
+        <app-icone nome="pessoa" />
+        <span>Serve para <strong>uma pessoa só</strong>. Usado uma vez, o link para de funcionar.</span>
+      </p>
+      <p>
+        <app-icone nome="escudo" />
+        <span>Quem usar o link ainda precisa da <strong>sua aprovação</strong> para ver os pedidos.</span>
+      </p>
+    </section>
+
+    @if (convites().length > 0) {
+      <section class="abertos" aria-labelledby="titulo-abertos">
+        <h2 id="titulo-abertos" class="rotulo">Convites em aberto</h2>
+        <ul class="cartao lista">
+          @for (convite of convites(); track convite.id) {
+            <li>
+              <span class="convite-texto">
+                <strong>{{ convite.codigo }}</strong>
+                <span>
+                  Criado {{ convite.criado_em | date: "dd/MM 'às' HH:mm" }} · {{ expiraEm(convite) }}
+                </span>
+              </span>
+              <button
+                type="button"
+                class="cancelar"
+                [disabled]="cancelando() !== null"
+                (click)="cancelar(convite)"
+              >
+                {{ cancelando() === convite.id ? 'Cancelando...' : 'Cancelar' }}
+              </button>
+            </li>
+          }
+        </ul>
+      </section>
+    }
+  }
+</div>

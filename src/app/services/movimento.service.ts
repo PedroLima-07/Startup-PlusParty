@@ -14,7 +14,7 @@ import { HomeService } from './home.service';
 import { SupabaseService } from './supabase.service';
 
 /** A noite do bar começa às 6h: comandas da madrugada contam para a noite anterior. */
-const HORA_VIRADA_DO_DIA = 6;
+export const HORA_VIRADA_DO_DIA = 6;
 
 /** Quantos itens a lista de mais vendidos mostra. */
 const TOP_MAIS_VENDIDOS = 5;

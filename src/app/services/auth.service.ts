@@ -3,6 +3,8 @@ import { User } from '@supabase/supabase-js';
 import { TipoPerfil } from '../models';
 import { SupabaseService } from './supabase.service';
 
+const BUCKET_FOTOS = 'fotos-perfil';
+
 /** O que as telas e os guards precisam saber de quem está logado. */
 export interface PerfilAtual {
   nome: string;
@@ -67,6 +69,29 @@ export class AuthService {
   /** Troca a senha do usuário da sessão atual (a sessão aberta pelo link do e-mail). */
   async definirNovaSenha(senha: string): Promise<void> {
     const { error } = await this.supabase.client.auth.updateUser({ password: senha });
+    if (error) throw error;
+  }
+
+  /**
+   * Envia a foto de perfil de quem está logado (bucket fotos-perfil, na pasta
+   * com o id da pessoa, ver supabase/equipe_convites.sql) e grava o endereço
+   * no perfil. Um arquivo novo a cada troca: o endereço muda e nenhum
+   * navegador fica mostrando a foto antiga guardada.
+   */
+  async atualizarFoto(foto: Blob): Promise<void> {
+    const usuario = await this.usuarioAtual();
+    if (!usuario) throw new Error('Usuário não autenticado.');
+
+    const caminho = `${usuario.id}/${Date.now()}.jpg`;
+    const armazenamento = this.supabase.client.storage.from(BUCKET_FOTOS);
+    const envio = await armazenamento.upload(caminho, foto, { contentType: 'image/jpeg' });
+    if (envio.error) throw envio.error;
+
+    const { error } = await this.supabase.client
+      .from('perfis')
+      .update({ foto_url: armazenamento.getPublicUrl(caminho).data.publicUrl })
+      .eq('id', usuario.id);
+
     if (error) throw error;
   }
 

@@ -52,11 +52,11 @@ export const routes: Routes = [
     data: { modo: 'pedir' },
     canActivate: [authGuard],
   },
-  // Quem quer trabalhar num bar pede aqui; o gerente aprova na aba Equipe.
+  // Link de convite do gerente: a única porta de entrada para a equipe de um
+  // bar. Quem aceita espera a aprovação do gerente na tela seguinte.
   {
-    path: 'atendente/cadastro',
-    loadComponent: () =>
-      import('./Pages/atendente-cadastro/atendente-cadastro').then((m) => m.AtendenteCadastroPage),
+    path: 'convite/:codigo',
+    loadComponent: () => import('./Pages/convite/convite').then((m) => m.ConvitePage),
   },
   {
     path: 'atendente/aguardando',
@@ -89,6 +89,8 @@ export const routes: Routes = [
       { path: 'resultados', loadComponent: () => import('./Pages/gerente/resultados/resultados').then(m => m.Resultados) },
       { path: 'postagens', loadComponent: () => import('./Pages/gerente/postagens/postagens').then(m => m.Postagens) },
       { path: 'equipe', loadComponent: () => import('./Pages/gerente/equipe/equipe').then(m => m.Equipe) },
+      { path: 'equipe/convite', loadComponent: () => import('./Pages/gerente/equipe-convite/equipe-convite').then(m => m.EquipeConvite) },
+      { path: 'equipe/:id', loadComponent: () => import('./Pages/gerente/equipe-perfil/equipe-perfil').then(m => m.EquipePerfil) },
       // Aberta pela engrenagem do topo. O endereço antigo continua valendo.
       { path: 'configuracoes', loadComponent: () => import('./Pages/gerente/perfil-bar/perfil-bar').then(m => m.PerfilBarComponent) },
       { path: 'perfil-bar', redirectTo: 'configuracoes', pathMatch: 'full' }

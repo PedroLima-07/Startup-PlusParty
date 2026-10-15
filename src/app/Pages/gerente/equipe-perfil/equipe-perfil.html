@@ -1,0 +1,154 @@
+@if (carregando()) {
+  <app-carregando texto="Carregando perfil" />
+} @else if (funcionario(); as f) {
+  <section class="destaque">
+    <div class="destaque-conteudo">
+      <app-avatar [nome]="f.nome || '?'" [foto]="f.foto_url" [tamanho]="76" />
+      <div class="destaque-texto">
+        <h1>{{ f.nome || 'Sem nome' }}</h1>
+        @if (f.naEquipeDesde) {
+          <span>Na equipe desde {{ f.naEquipeDesde | date: 'dd/MM/yyyy' }}</span>
+        }
+        @if ((desempenho()?.hoje?.pedidos ?? 0) > 0) {
+          <span class="selo-ativo">Trabalhando hoje</span>
+        }
+      </div>
+    </div>
+  </section>
+
+  <div class="pagina">
+    @if (erro(); as mensagem) {
+      <p class="mensagem-erro" role="alert">{{ mensagem }}</p>
+    }
+
+    <section class="cartao" aria-labelledby="titulo-desempenho">
+      <div class="cartao-topo">
+        <h2 id="titulo-desempenho">Desempenho</h2>
+        @if (painel()) {
+          <div class="periodos" role="group" aria-label="Período">
+            <button
+              type="button"
+              [class.ativo]="periodo() === 'hoje'"
+              [attr.aria-pressed]="periodo() === 'hoje'"
+              (click)="periodo.set('hoje')"
+            >
+              Hoje
+            </button>
+            <button
+              type="button"
+              [class.ativo]="periodo() === 'semana'"
+              [attr.aria-pressed]="periodo() === 'semana'"
+              (click)="periodo.set('semana')"
+            >
+              {{ noites }} noites
+            </button>
+          </div>
+        }
+      </div>
+
+      @if (painel(); as p) {
+        <dl class="quadros">
+          <div>
+            <dt>{{ p.rotuloTotal }}</dt>
+            <dd>{{ p.total }}</dd>
+          </div>
+          <div>
+            <dt>{{ p.rotuloMedia }}</dt>
+            <dd>{{ p.media }}</dd>
+          </div>
+        </dl>
+
+        @if (p.temBarras) {
+          <p class="subtitulo">{{ p.descricaoGrafico }}</p>
+          <app-grafico-barras [dados]="p.resumo.barras" [descricao]="p.descricaoGrafico" />
+        }
+        <p class="leitura">{{ p.leitura }}</p>
+
+        <dl class="trio">
+          <div>
+            <dt>Itens entregues</dt>
+            <dd>{{ p.resumo.itens }}</dd>
+          </div>
+          <div>
+            <dt>Comandas liberadas</dt>
+            <dd>{{ p.resumo.comandasLiberadas }}</dd>
+          </div>
+          <div>
+            <dt>Pagamentos</dt>
+            <dd>{{ p.resumo.pagamentosConfirmados }}</dd>
+          </div>
+        </dl>
+      } @else {
+        <p class="leitura">Os números de desempenho ainda não estão disponíveis.</p>
+      }
+    </section>
+
+    <section class="cartao" aria-labelledby="titulo-cadastro">
+      <h2 id="titulo-cadastro">Dados do cadastro</h2>
+      <dl class="dados">
+        <div>
+          <dt>Nome</dt>
+          <dd>{{ f.nome || 'Sem nome' }}</dd>
+        </div>
+        <div>
+          <dt>E-mail</dt>
+          <dd><a [href]="'mailto:' + f.email">{{ f.email }}</a></dd>
+        </div>
+        <div>
+          <dt>Telefone</dt>
+          <dd>
+            @if (f.telefone; as telefone) {
+              <a [href]="'tel:' + telefone">{{ telefone }}</a>
+            } @else {
+              Não informado
+            }
+          </dd>
+        </div>
+        @if (f.naEquipeDesde) {
+          <div>
+            <dt>Entrada na equipe</dt>
+            <dd>
+              {{ f.naEquipeDesde | date: 'dd/MM/yyyy' }}{{ f.peloConvite ? ', pelo seu convite' : '' }}
+            </dd>
+          </div>
+        }
+      </dl>
+    </section>
+
+    <button type="button" class="remover" (click)="confirmandoRemocao.set(true)">
+      Remover da equipe
+    </button>
+  </div>
+
+  @if (confirmandoRemocao()) {
+    <div class="overlay" (click)="cancelarRemocao()">
+      <div
+        class="modal"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="titulo-remocao"
+        (click)="$event.stopPropagation()"
+      >
+        <h3 id="titulo-remocao">Remover {{ f.nome || 'esta pessoa' }} da equipe?</h3>
+        <p>A pessoa deixa de ver os pedidos e as comandas do bar na hora e volta a ser cliente.</p>
+        <div class="acoes">
+          <button type="button" class="botao" [disabled]="removendo()" (click)="cancelarRemocao()">
+            Cancelar
+          </button>
+          <button type="button" class="botao perigo" [disabled]="removendo()" (click)="remover()">
+            {{ removendo() ? 'Removendo...' : 'Remover' }}
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+} @else {
+  <div class="pagina">
+    @if (erro(); as mensagem) {
+      <p class="mensagem-erro" role="alert">{{ mensagem }}</p>
+    } @else {
+      <p class="vazio">Este atendente não faz mais parte da equipe.</p>
+    }
+    <a class="voltar" routerLink="/gerente/equipe">Voltar para a Equipe</a>
+  </div>
+}
