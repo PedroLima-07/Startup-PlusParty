@@ -7,6 +7,7 @@ import { SupabaseService } from '../../services/supabase.service';
 import { NavCliente } from '../../components/nav-cliente/nav-cliente';
 import { Carregando } from '../../components/carregando/carregando';
 import { ErroCarregar } from '../../components/erro-carregar/erro-carregar';
+import { AtivarAvisos } from '../../components/ativar-avisos/ativar-avisos';
 
 const ROTULOS_STATUS_ITEM: Record<StatusPedidoItem, string> = {
   novo: 'Enviado',
@@ -16,7 +17,7 @@ const ROTULOS_STATUS_ITEM: Record<StatusPedidoItem, string> = {
 
 @Component({
   selector: 'app-comanda',
-  imports: [Carregando, CurrencyPipe, ErroCarregar, NavCliente, RouterLink],
+  imports: [AtivarAvisos, Carregando, CurrencyPipe, ErroCarregar, NavCliente, RouterLink],
   templateUrl: './comanda.html',
   styleUrl: './comanda.scss',
 })

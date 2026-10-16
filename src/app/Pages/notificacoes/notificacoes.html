@@ -1,0 +1,66 @@
+<header class="app-header">
+  <div class="header-content">
+    <h1>Notificações</h1>
+    @if (servico.naoLidas() > 0) {
+      <button type="button" class="marcar" [disabled]="marcando()" (click)="marcarTodas()">
+        Marcar todas como lidas
+      </button>
+    }
+  </div>
+</header>
+
+<main class="page-content">
+  <app-ativar-avisos [explicarBloqueio]="true" />
+
+  @if (erroMarcar()) {
+    <p class="erro" role="alert">Não foi possível marcar como lidas. Tente de novo.</p>
+  }
+
+  @if (servico.erroCarregar()) {
+    <app-erro-carregar
+      mensagem="Não foi possível carregar suas notificações. Verifique sua conexão."
+      (tentarDeNovo)="servico.carregar()"
+    />
+  } @else if (!servico.carregada()) {
+    <app-carregando texto="Carregando notificações" />
+  } @else {
+    @for (grupo of grupos(); track grupo.titulo) {
+      <section class="grupo">
+        <h2>{{ grupo.titulo }}</h2>
+        <ul class="lista">
+          @for (n of grupo.itens; track n.id) {
+            <li>
+              <button
+                type="button"
+                class="notificacao"
+                [class.nova]="!n.lida_em"
+                [attr.data-tipo]="n.tipo"
+                (click)="servico.abrir(n)"
+              >
+                <span class="icone" aria-hidden="true">{{ icones[n.tipo] }}</span>
+                <span class="texto">
+                  <strong>{{ n.titulo }}</strong>
+                  @if (n.texto) {
+                    <span>{{ n.texto }}</span>
+                  }
+                  <time [attr.datetime]="n.criada_em">{{ quando(n) }}</time>
+                </span>
+                @if (!n.lida_em) {
+                  <span class="ponto"><span class="visualmente-oculto">Não lida</span></span>
+                }
+              </button>
+            </li>
+          }
+        </ul>
+      </section>
+    } @empty {
+      <div class="vazio">
+        <span aria-hidden="true">🔔</span>
+        <p>Nenhuma notificação por enquanto.</p>
+        <small>Quando sua comanda for liberada ou seu pedido ficar pronto, o aviso aparece aqui.</small>
+      </div>
+    }
+  }
+</main>
+
+<app-nav-cliente />

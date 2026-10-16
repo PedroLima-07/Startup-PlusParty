@@ -1,0 +1,45 @@
+<header class="app-header">
+  <div class="header-content">
+    <h1>Feed</h1>
+    <p>Promoções e novidades dos bares</p>
+  </div>
+</header>
+
+<main class="page-content">
+  <div class="filtros" role="group" aria-label="Filtrar o Feed">
+    @for (f of filtros; track f.valor) {
+      <button
+        type="button"
+        class="filtro"
+        [class.ativo]="filtro() === f.valor"
+        [attr.aria-pressed]="filtro() === f.valor"
+        (click)="filtro.set(f.valor)"
+      >
+        {{ f.rotulo }}
+      </button>
+    }
+  </div>
+
+  @if (carregando()) {
+    <app-carregando texto="Carregando o Feed" />
+  } @else if (erroCarregar()) {
+    <app-erro-carregar
+      mensagem="Não foi possível carregar o Feed. Verifique sua conexão."
+      (tentarDeNovo)="carregar()"
+    />
+  } @else {
+    <div class="lista">
+      @for (postagem of visiveis(); track postagem.id) {
+        <app-cartao-postagem [postagem]="postagem" [bar]="postagem.estabelecimento" />
+      } @empty {
+        <div class="vazio">
+          <span aria-hidden="true">🍻</span>
+          <p>Nada por aqui ainda.</p>
+          <small>Quando os bares publicarem promoções e eventos, eles aparecem aqui.</small>
+        </div>
+      }
+    </div>
+  }
+</main>
+
+<app-nav-cliente />

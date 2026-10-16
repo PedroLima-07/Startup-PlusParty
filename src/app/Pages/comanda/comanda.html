@@ -80,6 +80,7 @@
         @if (erroCancelamento(); as mensagem) {
           <p class="erro-cancelamento" role="alert">{{ mensagem }}</p>
         }
+        <app-ativar-avisos class="avisos-comanda" titulo="Quer saber na hora em que for liberado?" />
       </div>
     </div>
   } @else {

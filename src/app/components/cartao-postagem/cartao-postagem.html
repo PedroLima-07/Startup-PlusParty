@@ -1,0 +1,57 @@
+@let p = postagem();
+<article class="cartao" [attr.data-tipo]="p.tipo">
+  @if (bar(); as b) {
+    <header class="topo">
+      <a class="bar" [routerLink]="['/cliente/estabelecimento', b.id]">
+        @if (b.foto_url) {
+          <img class="bar-foto" [src]="b.foto_url" alt="" />
+        } @else {
+          <span class="bar-foto bar-inicial" aria-hidden="true">{{ b.nome.charAt(0) }}</span>
+        }
+        <span class="bar-nome">{{ b.nome }}</span>
+      </a>
+      <time [attr.datetime]="p.criada_em">{{ publicada() }}</time>
+    </header>
+  }
+
+  <div class="midia">
+    @if (p.imagem_url; as foto) {
+      <img [src]="foto" alt="" loading="lazy" />
+    } @else {
+      <span class="arte" aria-hidden="true">{{ emoji() }}</span>
+    }
+    @if (desconto(); as d) {
+      <span class="selo-desconto">-{{ d }}%</span>
+    }
+  </div>
+
+  <div class="corpo">
+    <span class="etiqueta">{{ etiqueta() }}</span>
+    @if (p.titulo) {
+      <h3>{{ p.titulo }}</h3>
+    }
+    @if (p.texto) {
+      <p class="texto">{{ p.texto }}</p>
+    }
+    @if (p.preco !== null) {
+      <p class="precos">
+        <strong>{{ p.preco | currency: 'BRL' }}</strong>
+        @if (p.preco_antigo !== null) {
+          <s aria-label="Preço normal">{{ p.preco_antigo | currency: 'BRL' }}</s>
+        }
+      </p>
+    }
+
+    <footer class="rodape">
+      @if (validade(); as v) {
+        <span class="validade" [class.encerrada]="!vigente()">{{ v }}</span>
+      }
+      @if (!bar()) {
+        <time [attr.datetime]="p.criada_em">Publicada {{ publicada() }}</time>
+      }
+      @if (destino(); as d) {
+        <a class="acao" [routerLink]="d.link">{{ d.rotulo }} <span aria-hidden="true">→</span></a>
+      }
+    </footer>
+  </div>
+</article>

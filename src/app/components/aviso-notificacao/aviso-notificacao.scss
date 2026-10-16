@@ -1,0 +1,98 @@
+.regiao {
+  position: fixed;
+  top: calc(12px + env(safe-area-inset-top));
+  left: 12px;
+  right: 12px;
+  z-index: 100;
+  display: flex;
+  justify-content: center;
+  pointer-events: none;
+}
+
+.aviso {
+  display: flex;
+  align-items: flex-start;
+  width: 100%;
+  max-width: 440px;
+  border: 1px solid #e1e5ee;
+  border-radius: 18px;
+  background: #fff;
+  color: #0f1f4b;
+  box-shadow: 0 16px 40px rgba(15, 31, 75, 0.3);
+  pointer-events: auto;
+  animation: descer 360ms cubic-bezier(0.34, 1.3, 0.5, 1);
+}
+
+.conteudo {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+  padding: 14px 4px 14px 14px;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.icone {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+  border-radius: 12px;
+  background: #eef2ff;
+  font-size: 20px;
+}
+
+[data-tipo='comanda_recusada'] .icone {
+  background: #fde8e8;
+  color: #dc2626;
+  font-weight: 800;
+}
+
+.texto {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+
+  strong {
+    font-size: 15px;
+  }
+
+  span {
+    overflow: hidden;
+    color: #4b5366;
+    font-size: 13px;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+}
+
+.fechar {
+  padding: 8px 14px;
+  border: 0;
+  background: none;
+  color: #8a93a6;
+  font-size: 22px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+@keyframes descer {
+  from {
+    opacity: 0;
+    transform: translateY(-24px) scale(0.96);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .aviso {
+    animation-duration: 1ms;
+  }
+}

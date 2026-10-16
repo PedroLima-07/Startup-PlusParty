@@ -1,0 +1,105 @@
+:host {
+  display: block;
+}
+
+.convite {
+  display: flex;
+  gap: 14px;
+  padding: 16px;
+  border: 1px solid #cddafd;
+  border-radius: 16px;
+  background: linear-gradient(135deg, #eef2ff, #f7f9ff);
+  color: #0f1f4b;
+  text-align: left;
+}
+
+.sino {
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: #2f6bff;
+  font-size: 20px;
+  animation: balancar 2.4s ease-in-out infinite;
+}
+
+.corpo {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+
+  strong {
+    font-size: 15px;
+  }
+
+  p {
+    margin: 0;
+    color: #4b5366;
+    font-size: 13px;
+    line-height: 1.45;
+  }
+}
+
+.acoes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 8px;
+
+  button {
+    min-height: 38px;
+    padding: 8px 16px;
+    border-radius: 999px;
+    font: inherit;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+  }
+}
+
+.ligar {
+  border: 0;
+  background: #2f6bff;
+  color: #fff;
+}
+
+.depois {
+  border: 1px solid #cdd3df;
+  background: #fff;
+  color: #0f1f4b;
+}
+
+.bloqueado {
+  margin: 0;
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: #f1f2f5;
+  color: #4b5366;
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+@keyframes balancar {
+  0%,
+  80%,
+  100% {
+    transform: rotate(0);
+  }
+  85% {
+    transform: rotate(14deg);
+  }
+  90% {
+    transform: rotate(-12deg);
+  }
+  95% {
+    transform: rotate(6deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sino {
+    animation: none;
+  }
+}
