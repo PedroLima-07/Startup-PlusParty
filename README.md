@@ -108,6 +108,7 @@ O fluxo completo funciona de ponta a ponta, com dados reais:
 - **Equipe por convite**: o gerente gera um link (válido por 48 horas e para uma pessoa só), o atendente cria a conta por ele, com foto, e o gerente aprova. No perfil de cada atendente, o gerente vê os pedidos entregues por hora e por noite
 - **Feed de promoções**: o gerente publica promoções de bebida e comida, eventos e novidades, vendo a prévia do cartão; o cliente vê tudo no Feed, com filtro por tipo, desconto e validade
 - **Notificações do cliente**: comanda liberada ou recusada, pedido pronto (bar e cozinha), pagamento confirmado e promoção nova de um bar que ele já visitou. Chegam na hora, com aviso no topo da tela e, se a pessoa permitir, aviso do navegador quando o +party está em outra aba
+- **Layout para celular e desktop** nas três áreas: no computador, menu lateral; o atendente vê os pedidos em colunas (Novos e Em preparo) e as comandas com o detalhe ao lado; o gerente tem o Movimento em painel e o perfil de cada atendente ao lado da lista da Equipe
 - **Atualização em tempo real** entre a tela do cliente e a do atendente (requer o script `realtime.sql` aplicado no banco)
 - **Segurança no banco**: as regras valem mesmo para quem chama a API diretamente
 

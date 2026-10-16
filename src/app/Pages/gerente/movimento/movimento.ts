@@ -54,7 +54,7 @@ const APARENCIA_ALERTA: Record<TipoAlertaGerente, { icone: NomeIcone; acao: stri
   selector: 'app-movimento',
   imports: [Carregando, CurrencyPipe, DatePipe, Icone, RouterLink],
   templateUrl: './movimento.html',
-  styleUrl: './movimento.scss',
+  styleUrls: ['./movimento.scss', './movimento.desktop.scss'],
   host: { '(document:keydown.escape)': 'fecharDetalhe()' },
 })
 export class Movimento implements OnInit {

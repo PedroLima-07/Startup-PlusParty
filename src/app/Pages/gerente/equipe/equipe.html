@@ -1,3 +1,6 @@
+<!-- No desktop a lista fica à esquerda e o perfil do atendente escolhido à
+     direita. No celular o perfil abre no lugar da lista, como antes. -->
+<div class="equipe-layout" [class.com-perfil]="perfilAberto()">
 <div class="equipe-container">
   <header class="cabecalho">
     <h1>Equipe</h1>
@@ -76,7 +79,7 @@
         <ul class="cartao lista">
           @for (funcionario of funcionarios(); track funcionario.id) {
             <li>
-              <a class="atendente" [routerLink]="['/gerente/equipe', funcionario.id]">
+              <a class="atendente" [routerLink]="['/gerente/equipe', funcionario.id]" routerLinkActive="ativo">
                 <app-avatar [nome]="funcionario.nome || '?'" [foto]="funcionario.foto_url" />
                 <span class="pessoa-texto">
                   <strong>{{ funcionario.nome || 'Sem nome' }}</strong>
@@ -92,4 +95,15 @@
       }
     </section>
   }
+</div>
+
+<div class="coluna-perfil">
+  <router-outlet (activate)="perfilAberto.set(true)" (deactivate)="aoFecharPerfil()" />
+  @if (!perfilAberto()) {
+    <div class="sem-perfil">
+      <app-icone nome="pessoa" />
+      <p>Escolha um atendente na lista para ver o desempenho e os dados do cadastro.</p>
+    </div>
+  }
+</div>
 </div>

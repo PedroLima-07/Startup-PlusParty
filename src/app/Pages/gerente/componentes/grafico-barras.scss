@@ -51,3 +51,21 @@
     background: g.$marinho;
   }
 }
+
+// Desktop: o cartão é largo; as barras ficam mais altas e não viram blocos.
+@media (min-width: 1024px) {
+  .barras {
+    gap: 14px;
+  }
+
+  .barra {
+    max-width: 88px;
+    height: calc(var(--altura) * 2px);
+    border-radius: 8px 8px 0 0;
+  }
+
+  .valor,
+  .rotulo {
+    font-size: 13px;
+  }
+}

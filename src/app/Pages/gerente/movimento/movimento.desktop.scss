@@ -1,0 +1,211 @@
+@use '../gerente' as g;
+@use '../../../../styles/desktop' as d;
+
+// No celular o status tem o próprio cartão, mais abaixo. (`.numeros div`
+// do estilo do celular põe display: flex; daí o seletor com .numeros.)
+.numeros .numero-status {
+  display: none;
+}
+
+// ---------------------------------------------------------------------
+// Desktop: números em cartões no topo; comandas do dia à esquerda e
+// "Precisa de atenção" com o faturamento numa coluna à direita.
+// ---------------------------------------------------------------------
+@include d.desktop {
+  .saudacao {
+    background: transparent;
+    color: g.$marinho;
+  }
+
+  .saudacao-conteudo {
+    max-width: 1240px;
+    padding: 36px 40px 0;
+
+    h1 {
+      font-size: 32px;
+    }
+  }
+
+  .atualizar {
+    min-height: 44px;
+    padding: 0 16px;
+    border: 1px solid #d5dbe6;
+    border-radius: 12px;
+    background: #fff;
+    color: g.$marinho;
+    font-size: 14px;
+
+    &:hover:not(:disabled) {
+      border-color: g.$azul;
+      background: #fff;
+      color: g.$azul;
+    }
+  }
+
+  .data {
+    margin: 4px 0 24px;
+    color: #5b6475;
+    font-size: 15px;
+  }
+
+  .numeros {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 16px;
+
+    div,
+    div + div {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 8px;
+      padding: 20px;
+      border: 1px solid g.$borda;
+      border-radius: 18px;
+      background: #fff;
+      text-align: left;
+    }
+
+    div:first-child {
+      border-color: g.$marinho;
+      background: g.$marinho;
+      color: #fff;
+
+      dt {
+        color: rgba(255, 255, 255, 0.78);
+      }
+    }
+
+    dt {
+      color: #5b6475;
+      font-size: 13px;
+      font-weight: 700;
+
+      &::first-letter {
+        text-transform: uppercase;
+      }
+    }
+
+    dd {
+      @include g.numero;
+      font-size: 40px;
+      line-height: 1.1;
+    }
+  }
+
+  .numeros .numero-status {
+    display: flex;
+
+    dd {
+      font-family: inherit;
+      font-size: inherit;
+    }
+
+    .selo {
+      margin-top: 6px;
+    }
+  }
+
+  .pagina {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 360px;
+    grid-template-areas:
+      'erro erro'
+      'comandas atencao'
+      'comandas faturamento';
+    align-items: start;
+    gap: 0 24px;
+    max-width: 1240px;
+    padding-top: 24px;
+
+    > app-carregando {
+      grid-column: 1 / -1;
+    }
+  }
+
+  .mensagem-erro {
+    grid-area: erro;
+    margin-bottom: 16px;
+  }
+
+  // O cartão de status subiu para a linha dos números.
+  .cartao-status {
+    display: none;
+  }
+
+  .atencao {
+    grid-area: atencao;
+    margin-bottom: 24px;
+    padding: 22px;
+    border: 1px solid g.$borda;
+    border-radius: 20px;
+    background: #fff;
+
+    h2 {
+      font-size: 18px;
+    }
+
+    .alerta {
+      box-shadow: none;
+      background: #f7f8fb;
+    }
+  }
+
+  .faturamento {
+    grid-area: faturamento;
+    padding: 22px;
+    border-radius: 20px;
+  }
+
+  // Comandas do dia: um painel, cada comanda uma linha.
+  .comandas {
+    grid-area: comandas;
+    gap: 12px;
+    padding: 22px;
+    border: 1px solid g.$borda;
+    border-radius: 20px;
+    background: #fff;
+
+    > .rotulo {
+      color: g.$marinho;
+      font-size: 18px;
+      letter-spacing: -0.01em;
+      text-transform: none;
+    }
+  }
+
+  .comanda {
+    grid-template-columns: minmax(200px, 0.9fr) minmax(0, 1.4fr) auto;
+    grid-template-areas: 'identificacao detalhe valor';
+    gap: 12px 16px;
+    padding: 14px 16px;
+    border-radius: 12px;
+    box-shadow: none;
+  }
+
+  .comanda-identificacao {
+    grid-area: identificacao;
+  }
+
+  .comanda-detalhe {
+    grid-area: detalhe;
+    grid-column: auto;
+    font-size: 14px;
+  }
+
+  .comanda-valor {
+    grid-area: valor;
+  }
+}
+
+// Notebooks: a coluna da direita fica mais estreita.
+@include d.desktop-compacto {
+  .pagina {
+    grid-template-columns: minmax(0, 1fr) 320px;
+  }
+
+  .comanda {
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas:
+      'identificacao valor'
+      'detalhe detalhe';
+  }
+}

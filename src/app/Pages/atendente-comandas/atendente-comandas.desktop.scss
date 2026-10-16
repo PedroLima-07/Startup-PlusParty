@@ -1,0 +1,309 @@
+@use '../../../styles/desktop' as d;
+
+$marinho: #0f1f4b;
+$azul: #2f6bff;
+$suave: #5b6475;
+
+// ---------------------------------------------------------------------
+// Celular: a lista e o detalhe se revezam, como antes. As peças do
+// desktop (título, filtros, painel vazio) ficam escondidas.
+// ---------------------------------------------------------------------
+.topo-pagina,
+.filtros,
+.sem-selecao,
+.icone-fechar,
+.aberta-as {
+  display: none;
+}
+
+.layout,
+.coluna-lista,
+.coluna-detalhe {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+}
+
+.layout.com-detalhe .coluna-lista,
+.layout:not(.com-detalhe) .coluna-detalhe {
+  display: none;
+}
+
+// No detalhe o celular mostra os botões de ação no pé, no lugar do menu.
+@media (max-width: 1023px) {
+  app-nav-atendente.escondido-no-celular {
+    display: none;
+  }
+}
+
+// ---------------------------------------------------------------------
+// Desktop: título em cima, lista à esquerda e detalhe à direita
+// ---------------------------------------------------------------------
+@include d.desktop {
+  :host {
+    padding-left: d.$largura-menu;
+    background: #f5f6fa;
+    color: $marinho;
+  }
+
+  // As colunas da lista se desfazem (display: contents) para o título
+  // ocupar a largura toda, acima da lista e do detalhe.
+  .layout {
+    display: grid;
+    flex: none;
+    grid-template-columns: minmax(360px, 1fr) minmax(0, 1.35fr);
+    align-items: start;
+    gap: 0 24px;
+    width: 100%;
+    max-width: 1240px;
+    box-sizing: border-box;
+    margin: 0 auto;
+    padding: 0 40px 48px;
+  }
+
+  .coluna-lista,
+  .layout.com-detalhe .coluna-lista {
+    display: contents;
+  }
+
+  .coluna-lista > .header {
+    display: none;
+  }
+
+  .topo-pagina {
+    display: flex;
+    flex-wrap: wrap;
+    grid-row: 1;
+    grid-column: 1 / -1;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 22px;
+    padding-top: 36px;
+  }
+
+  .titulo-pagina {
+    h2 {
+      margin: 0;
+      font-size: 32px;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+    }
+
+    p {
+      margin: 4px 0 0;
+      color: $suave;
+      font-size: 15px;
+    }
+  }
+
+  .btn-atualizar {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 44px;
+    padding: 0 16px;
+    border: 1px solid #d5dbe6;
+    border-radius: 12px;
+    background: #fff;
+    color: $marinho;
+    font: inherit;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+
+    &:hover:not(:disabled) {
+      border-color: $azul;
+      color: $azul;
+    }
+
+    &:disabled {
+      opacity: 0.6;
+      cursor: wait;
+    }
+  }
+
+  .coluna-lista > .mensagem-erro {
+    grid-row: 2;
+    grid-column: 1 / -1;
+    margin: 0 0 16px;
+  }
+
+  .conteudo {
+    grid-row: 3;
+    grid-column: 1;
+    padding: 0;
+  }
+
+  .filtros {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 4px;
+  }
+
+  .filtro {
+    min-height: 38px;
+    padding: 0 16px;
+    border: 1.5px solid #d5dbe6;
+    border-radius: 999px;
+    background: #fff;
+    color: $marinho;
+    font: inherit;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+
+    &.ativo {
+      border-color: $marinho;
+      background: $marinho;
+      color: #fff;
+    }
+
+    &:not(.ativo):hover {
+      border-color: $azul;
+      color: $azul;
+    }
+  }
+
+  .card {
+    border-radius: 16px;
+    transition: border-color 120ms ease, box-shadow 120ms ease;
+
+    .local {
+      font-size: 1.15rem;
+    }
+
+    &:hover {
+      box-shadow: 0 6px 18px rgba(47, 107, 255, 0.12);
+    }
+
+    &.selecionada {
+      border-top-color: $azul;
+      border-right-color: $azul;
+      border-bottom-color: $azul;
+      box-shadow: 0 0 0 3px rgba(47, 107, 255, 0.16);
+    }
+  }
+
+  .vazio {
+    padding: 28px 16px;
+    border: 1px dashed #cfd5e1;
+    border-radius: 14px;
+    font-size: 15px;
+  }
+
+  // ------------------------------------------------------------ detalhe
+  .coluna-detalhe,
+  .layout:not(.com-detalhe) .coluna-detalhe {
+    display: flex;
+    grid-row: 3;
+    grid-column: 2;
+    position: sticky;
+    top: 24px;
+    flex: none;
+    box-sizing: border-box;
+    padding: 24px 28px 28px;
+    border: 1px solid #e1e5ee;
+    border-radius: 22px;
+    background: #fff;
+    box-shadow: 0 10px 30px rgba(15, 31, 75, 0.06);
+  }
+
+  .coluna-detalhe > .header {
+    padding: 0 0 16px;
+    border-bottom: 1px solid #eef0f4;
+    background: transparent;
+    color: $marinho;
+
+    .titulo-detalhe {
+      font-size: 22px;
+    }
+
+    .identificador {
+      color: $suave;
+    }
+
+    // A seta de voltar vira o X de fechar, no canto do painel.
+    .btn-voltar {
+      order: 3;
+      margin: 0 -8px 0 0;
+      border-radius: 50%;
+      color: $suave;
+
+      &:hover:not(:disabled) {
+        background: #f1f3f7;
+        color: $marinho;
+      }
+    }
+
+    .icone-voltar {
+      display: none;
+    }
+
+    .icone-fechar {
+      display: block;
+    }
+  }
+
+  .aberta-as {
+    display: inline;
+  }
+
+  .detalhe {
+    flex: none;
+    gap: 14px;
+    padding: 18px 0 0;
+  }
+
+  .bloco {
+    border-color: #e8ebf1;
+    border-radius: 14px;
+  }
+
+  .acoes {
+    position: static;
+    padding: 20px 0 0;
+    border-top: 0;
+    background: transparent;
+
+    button {
+      min-height: 52px;
+      border-radius: 14px;
+      font-size: 1rem;
+    }
+
+    .btn-principal {
+      background: $azul;
+
+      &:hover:not(:disabled) {
+        background: #1746c9;
+      }
+    }
+  }
+
+  .sem-selecao {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    min-height: 320px;
+    padding: 0 24px;
+    color: #8a93a6;
+    text-align: center;
+
+    p {
+      max-width: 320px;
+      margin: 0;
+      color: $suave;
+      font-size: 15px;
+      line-height: 1.5;
+    }
+  }
+
+  .aviso {
+    left: d.$largura-menu;
+    bottom: 24px;
+  }
+}

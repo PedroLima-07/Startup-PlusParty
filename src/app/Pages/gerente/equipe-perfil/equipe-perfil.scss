@@ -262,3 +262,20 @@
     color: #b91c1c;
   }
 }
+
+// Desktop: o perfil abre dentro do painel da direita, na aba Equipe.
+@media (min-width: 1024px) {
+  .destaque-conteudo {
+    max-width: none;
+    padding: 24px 28px;
+  }
+
+  .destaque-texto h1 {
+    font-size: 26px;
+  }
+
+  .pagina {
+    max-width: none;
+    padding: 24px 28px 28px;
+  }
+}

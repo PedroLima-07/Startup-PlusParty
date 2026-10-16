@@ -34,12 +34,24 @@ describe('AtendentePedidos', () => {
     return (fixture.nativeElement as HTMLElement).textContent ?? '';
   }
 
+  /** No celular o botão cobre o cartão inteiro: tocar no cartão é tocar nele. */
   function clicarNoCard(texto: string): void {
     const cards = Array.from(
-      (fixture.nativeElement as HTMLElement).querySelectorAll<HTMLButtonElement>('.card-pedido'),
+      (fixture.nativeElement as HTMLElement).querySelectorAll<HTMLElement>('.card-pedido'),
     );
-    cards.find((card) => card.textContent?.includes(texto))!.click();
+    cards.find((card) => card.textContent?.includes(texto))!.querySelector<HTMLButtonElement>('.card-acao')!.click();
     fixture.detectChanges();
+  }
+
+  function tituloDoModal(): string | null {
+    fixture.detectChanges();
+    return (fixture.nativeElement as HTMLElement).querySelector('.modal-content h3')?.textContent ?? null;
+  }
+
+  function seloDoCard(texto: string): string | null {
+    fixture.detectChanges();
+    const cards = Array.from((fixture.nativeElement as HTMLElement).querySelectorAll<HTMLElement>('.card-pedido'));
+    return cards.find((card) => card.textContent?.includes(texto))?.querySelector('.badge')?.textContent?.trim() ?? null;
   }
 
   async function confirmarModal(): Promise<void> {
@@ -112,17 +124,18 @@ describe('AtendentePedidos', () => {
 
   it('pedido novo vira "em andamento" ao confirmar', async () => {
     clicarNoCard('Mesa 12');
-    expect(textoDaTela()).toContain('Começar a preparar');
+    expect(tituloDoModal()).toContain('Começar a preparar');
 
     await confirmarModal();
 
     expect(service.atualizarStatus).toHaveBeenCalledWith(['p1-item'], 'em_andamento');
-    expect(textoDaTela()).not.toContain('Novo');
+    expect(seloDoCard('Mesa 12')).toBe('Em andamento');
+    expect(tituloDoModal()).toBeNull();
   });
 
   it('pedido em andamento sai da lista ao marcar como pronto', async () => {
     clicarNoCard('Mariana');
-    expect(textoDaTela()).toContain('Marcar como pronto');
+    expect(tituloDoModal()).toContain('Marcar como pronto');
 
     await confirmarModal();
 
@@ -172,5 +185,54 @@ describe('AtendentePedidos', () => {
 
     expect(supabase.escutarMudancas).toHaveBeenCalledWith([{ tabela: 'pedido_itens' }], expect.any(Function));
     expect(textoDaTela()).toContain('Josias');
+  });
+
+  describe('no desktop', () => {
+    let desktop: ReturnType<typeof vi.fn>;
+
+    beforeEach(async () => {
+      desktop = vi.fn(() => ({
+        matches: true,
+        addEventListener: vi.fn(),
+        removeEventListener: vi.fn(),
+      }));
+      vi.stubGlobal('matchMedia', desktop);
+      // Recria a tela já com a largura de desktop.
+      fixture.destroy();
+      fixture = TestBed.createComponent(AtendentePedidos);
+      fixture.detectChanges();
+      await fixture.whenStable();
+      fixture.detectChanges();
+    });
+
+    afterEach(() => vi.unstubAllGlobals());
+
+    it('separa os pedidos em Novos e Em preparo', () => {
+      const colunas = Array.from((fixture.nativeElement as HTMLElement).querySelectorAll('.coluna')).map((coluna) => ({
+        titulo: coluna.querySelector('.coluna-titulo')?.textContent?.replace(/\s+/g, ' ').trim(),
+        cartoes: Array.from(coluna.querySelectorAll('.mesa')).map((m) => m.textContent),
+      }));
+
+      expect(colunas).toEqual([
+        { titulo: 'Novos 1', cartoes: ['Mesa 12'] },
+        { titulo: 'Em preparo 1', cartoes: ['Balcão'] },
+      ]);
+    });
+
+    it('o botão do cartão já age, sem a janela de confirmação', async () => {
+      clicarNoCard('Mesa 12');
+      await fixture.whenStable();
+
+      expect(tituloDoModal()).toBeNull();
+      expect(service.atualizarStatus).toHaveBeenCalledWith(['p1-item'], 'em_andamento');
+    });
+
+    it('marca em laranja o pedido esperando há 15 minutos ou mais', () => {
+      const espera = (fixture.nativeElement as HTMLElement).querySelector('.espera');
+
+      // Os pedidos do teste são de 2026-09-24: esperam há muito tempo.
+      expect(espera?.classList).toContain('atrasado');
+      expect(espera?.textContent).toMatch(/^há \d+ min$/);
+    });
   });
 });
