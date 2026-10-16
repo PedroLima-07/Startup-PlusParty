@@ -1,5 +1,6 @@
 <div class="gerente">
-  <header class="topo">
+  <!-- No desktop o topo só aparece nas subpáginas (seta de voltar e título). -->
+  <header class="topo" [class.titulo-no-desktop]="tituloNoDesktop()">
     <div class="topo-conteudo">
       @if (subpagina(); as pagina) {
         <a class="botao-topo" [routerLink]="pagina.voltar" aria-label="Voltar">
@@ -23,6 +24,14 @@
 
   <nav class="menu" aria-label="Área do gerente">
     <div class="menu-conteudo">
+      <!-- Só no desktop: logo e bar no topo da coluna. -->
+      <a class="menu-marca" routerLink="/gerente/movimento" aria-label="+party, ir para o Movimento">
+        <span class="menu-logo"><span class="menu-logo-icone" aria-hidden="true">+</span>party</span>
+        @if (nomeDoBar()) {
+          <span class="menu-bar">{{ nomeDoBar() }} · Gerente</span>
+        }
+      </a>
+
       <a routerLink="/gerente/movimento" routerLinkActive="ativo" class="item">
         <app-icone nome="movimento" />
         <span>Movimento</span>
@@ -49,6 +58,21 @@
         </span>
         <span>Equipe</span>
       </a>
+
+      <!-- Só no desktop: no celular o perfil do bar fica na engrenagem do topo. -->
+      <a routerLink="/gerente/configuracoes" routerLinkActive="ativo" class="item item-perfil">
+        <app-icone nome="configuracoes" />
+        <span>Perfil do bar</span>
+      </a>
+
+      <div class="usuario">
+        <span class="usuario-avatar" aria-hidden="true">{{ iniciais() }}</span>
+        <span class="usuario-texto">
+          <strong>{{ nomeDoGerente() || 'Gerente' }}</strong>
+          <span>Gerente</span>
+        </span>
+        <button type="button" class="usuario-sair" (click)="sair()">Sair</button>
+      </div>
     </div>
   </nav>
 </div>

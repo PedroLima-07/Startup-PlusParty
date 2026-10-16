@@ -1,0 +1,234 @@
+@use '../gerente' as g;
+@use '../../../../styles/desktop' as d;
+
+// No celular o menu é a barra de baixo: logo, perfil do bar e conta ficam
+// no topo e na engrenagem, como antes.
+.menu-marca,
+.item-perfil,
+.usuario {
+  display: none;
+}
+
+// ---------------------------------------------------------------------
+// Desktop: menu numa coluna à esquerda; o topo só nas subpáginas
+// ---------------------------------------------------------------------
+@include d.desktop {
+  .gerente {
+    display: grid;
+    grid-template-columns: d.$largura-menu minmax(0, 1fr);
+    grid-template-rows: auto minmax(0, 1fr);
+    grid-template-areas:
+      'menu topo'
+      'menu conteudo';
+  }
+
+  .menu {
+    grid-area: menu;
+    min-height: 0;
+    overflow-y: auto;
+    padding-bottom: 0;
+  }
+
+  .menu-conteudo {
+    flex-direction: column;
+    gap: 6px;
+    min-height: 100%;
+    max-width: none;
+    box-sizing: border-box;
+    margin: 0;
+    padding: 28px 16px 24px;
+  }
+
+  .menu-marca {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 22px;
+    padding: 0 10px;
+    color: #fff;
+    text-decoration: none;
+  }
+
+  .menu-logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 24px;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+  }
+
+  .menu-logo-icone {
+    display: grid;
+    place-items: center;
+    width: 38px;
+    height: 38px;
+    border-radius: 11px;
+    background: g.$azul;
+    font-size: 24px;
+    line-height: 1;
+  }
+
+  .menu-bar {
+    color: rgba(255, 255, 255, 0.72);
+    font-size: 13px;
+  }
+
+  .item {
+    position: relative;
+    flex: none;
+    flex-direction: row;
+    gap: 12px;
+    min-height: 46px;
+    padding: 0 12px;
+    border-radius: 12px;
+    font-size: 15px;
+    transition: background 120ms ease, color 120ms ease;
+
+    app-icone {
+      font-size: 20px;
+    }
+
+    &:hover,
+    &:focus-visible {
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    &.ativo {
+      background: rgba(255, 255, 255, 0.14);
+      color: #fff;
+    }
+  }
+
+  // O contador sai de cima do ícone e vai para a ponta do item.
+  .icone-com-contador {
+    position: static;
+  }
+
+  .contador {
+    top: 50%;
+    right: 12px;
+    min-width: 22px;
+    height: 22px;
+    border-radius: 11px;
+    font-size: 12px;
+    line-height: 22px;
+    transform: translateY(-50%);
+  }
+
+  .item-perfil {
+    display: flex;
+    margin-top: 14px;
+
+    &::before {
+      content: '';
+      position: absolute;
+      top: -8px;
+      left: 12px;
+      right: 12px;
+      border-top: 1px solid rgba(255, 255, 255, 0.12);
+    }
+  }
+
+  .usuario {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: auto;
+    padding: 14px 12px;
+    border-radius: 14px;
+    background: rgba(255, 255, 255, 0.08);
+    color: #fff;
+  }
+
+  .usuario-avatar {
+    display: grid;
+    place-items: center;
+    width: 36px;
+    height: 36px;
+    flex-shrink: 0;
+    border-radius: 50%;
+    background: g.$azul-claro;
+    color: g.$marinho;
+    font-size: 13px;
+    font-weight: 800;
+  }
+
+  .usuario-texto {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    min-width: 0;
+
+    strong {
+      overflow: hidden;
+      font-size: 14px;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+    }
+
+    span {
+      color: rgba(255, 255, 255, 0.7);
+      font-size: 12px;
+    }
+  }
+
+  .usuario-sair {
+    min-height: 36px;
+    padding: 0 12px;
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    border-radius: 999px;
+    background: transparent;
+    color: #fff;
+    font: inherit;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+
+    &:hover,
+    &:focus-visible {
+      background: rgba(255, 255, 255, 0.12);
+    }
+  }
+
+  // Topo: só nas subpáginas, claro, com a seta de voltar e o título.
+  .topo {
+    grid-area: topo;
+    background: transparent;
+    color: g.$marinho;
+
+    &:not(.titulo-no-desktop) {
+      display: none;
+    }
+  }
+
+  .topo-conteudo,
+  .topo-conteudo:has(h1) {
+    max-width: 1240px;
+    min-height: 0;
+    gap: 12px;
+    padding: 28px 40px 0;
+
+    h1 {
+      font-size: 24px;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+    }
+  }
+
+  .botao-topo {
+    border: 1px solid g.$borda;
+    background: #fff;
+    color: g.$marinho;
+
+    &:hover,
+    &:focus-visible {
+      border-color: g.$azul;
+      background: #eef2ff;
+    }
+  }
+
+  .conteudo {
+    grid-area: conteudo;
+  }
+}

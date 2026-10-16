@@ -1,136 +1,184 @@
-@if (selecionada(); as comanda) {
-  <header class="header">
-    <button class="btn-voltar" type="button" (click)="fechar()" [disabled]="processando() !== null" aria-label="Voltar para as comandas">
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 19-7-7 7-7"></path><path d="M19 12H5"></path></svg>
-    </button>
-    <h1 class="titulo-detalhe">{{ tituloDetalhe(comanda) }}</h1>
-    <span class="identificador">{{ identificador(comanda) }}</span>
-  </header>
+<!-- No celular, a lista e o detalhe se revezam na tela (como antes).
+     No desktop ficam lado a lado: a lista à esquerda, o detalhe à direita. -->
+<div class="layout" [class.com-detalhe]="selecionada()">
+  <div class="coluna-lista">
+    <header class="header">
+      <div class="brand">
+        <h1>+party</h1>
+      </div>
+      <div class="acoes-header">
+        <button
+          class="btn-refresh"
+          type="button"
+          (click)="atualizarLista()"
+          [disabled]="carregando()"
+          aria-label="Atualizar comandas"
+        >
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 2v6h-6"></path><path d="M3 12a9 9 0 1 0 2.1-5.7L2 9"></path></svg>
+        </button>
+        <button class="btn-sair" type="button" (click)="sair()">Sair</button>
+      </div>
+    </header>
 
-  <main class="detalhe">
-    @if (comanda.status === 'aguardando_liberacao') {
-      <section class="bloco bloco-cliente">
-        <p class="rotulo">Cliente</p>
-        <p class="cliente-destaque">{{ comanda.cliente }}</p>
-      </section>
+    <div class="topo-pagina">
+      <div class="titulo-pagina">
+        <h2>Comandas</h2>
+        <p>{{ resumoPendencias() }}</p>
+      </div>
+      <button class="btn-atualizar" type="button" (click)="atualizarLista()" [disabled]="carregando()">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 2v6h-6"></path><path d="M3 12a9 9 0 1 0 2.1-5.7L2 9"></path></svg>
+        Atualizar
+      </button>
+    </div>
 
-      <dl class="dados">
-        <div>
-          <dt>Local</dt>
-          <dd>{{ rotuloLocal(comanda) }}</dd>
-        </div>
-        <div>
-          <dt>Solicitada às</dt>
-          <dd>{{ comanda.criada_em | date: 'HH:mm' }}</dd>
-        </div>
-      </dl>
-
-      <p class="orientacao">
-        Confirme que o cliente está no local antes de liberar.
-        @if (!comanda.mesa) {
-          No balcão não há mesa: identifique a pessoa pelo nome.
-        }
-      </p>
-    } @else {
-      <section class="bloco">
-        <p class="cliente-destaque">{{ comanda.cliente }}</p>
-        <p class="local-detalhe">{{ rotuloLocal(comanda) }}</p>
-      </section>
-
-      <section class="bloco" aria-labelledby="titulo-itens">
-        <h2 id="titulo-itens">Itens consumidos</h2>
-        <ul class="itens">
-          @for (item of comanda.itens; track $index) {
-            <li>
-              <span class="quantidade">{{ item.quantidade }}x</span>
-              <span class="nome-item">{{ item.nome }}</span>
-              <span class="valor-item">{{ item.quantidade * item.preco_unitario | currency: 'BRL' }}</span>
-            </li>
-          } @empty {
-            <li class="sem-itens">Nenhum item pedido ainda.</li>
-          }
-        </ul>
-      </section>
-
-      <section class="bloco total-destaque">
-        <span>{{ comanda.status === 'aberta' ? 'Parcial até agora' : 'Total a receber' }}</span>
-        <strong>{{ comanda.total | currency: 'BRL' }}</strong>
-      </section>
-
-      @if (comanda.status === 'aguardando_pagamento') {
-        <p class="orientacao">O pagamento é feito no caixa. Confirme só depois de receber.</p>
-      }
-    }
-
-    @if (erro(); as mensagem) {
+    @if (erroLista() ?? (selecionada() ? null : erro()); as mensagem) {
       <p class="mensagem-erro" role="alert">{{ mensagem }}</p>
     }
-  </main>
 
-  @if (comanda.status === 'aguardando_liberacao') {
-    <footer class="acoes">
-      <button class="btn-recusar" type="button" (click)="recusar()" [disabled]="processando() !== null">
-        {{ processando() === 'recusar' ? 'Recusando...' : 'Recusar' }}
-      </button>
-      <button class="btn-principal" type="button" (click)="liberar()" [disabled]="processando() !== null">
-        {{ processando() === 'liberar' ? 'Liberando...' : 'Liberar comanda' }}
-      </button>
-    </footer>
-  } @else if (comanda.status === 'aguardando_pagamento') {
-    <footer class="acoes">
-      <button class="btn-principal" type="button" (click)="confirmarPagamento()" [disabled]="processando() !== null">
-        {{ processando() === 'pagar' ? 'Confirmando...' : 'Confirmar pagamento' }}
-      </button>
-    </footer>
-  }
-} @else {
-  <header class="header">
-    <div class="brand">
-      <h1>+party</h1>
-    </div>
-    <div class="acoes-header">
-      <button
-        class="btn-refresh"
-        type="button"
-        (click)="atualizarLista()"
-        [disabled]="carregando()"
-        aria-label="Atualizar comandas"
-      >
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 2v6h-6"></path><path d="M3 12a9 9 0 1 0 2.1-5.7L2 9"></path></svg>
-      </button>
-      <button class="btn-sair" type="button" (click)="sair()">Sair</button>
-    </div>
-  </header>
+    <main class="conteudo">
+      @if (carregando()) {
+        <app-carregando texto="Carregando comandas" />
+      } @else {
+        <div class="filtros" role="group" aria-label="Filtrar comandas">
+          @for (opcao of filtros(); track opcao.valor) {
+            <button
+              type="button"
+              class="filtro"
+              [class.ativo]="filtro() === opcao.valor"
+              [attr.aria-pressed]="filtro() === opcao.valor"
+              (click)="filtro.set(opcao.valor)"
+            >
+              {{ opcao.rotulo }} · {{ opcao.quantidade }}
+            </button>
+          }
+        </div>
 
-  @if (erroLista() ?? erro(); as mensagem) {
-    <p class="mensagem-erro" role="alert">{{ mensagem }}</p>
-  }
-
-  <main class="conteudo">
-    @if (carregando()) {
-      <app-carregando texto="Carregando comandas" />
-    } @else {
-      @for (comanda of comandas(); track comanda.id) {
-        <button class="card" type="button" [class]="comanda.status" (click)="abrir(comanda)">
-          <span class="card-topo">
-            <span class="local">{{ rotuloLocal(comanda) }}</span>
-            <span class="selo">{{ rotuloStatus(comanda) }}</span>
-          </span>
-          <span class="cliente">{{ comanda.cliente }}</span>
-          <span class="card-rodape">
-            <span class="identificador">Comanda {{ identificador(comanda) }} · {{ comanda.criada_em | date: 'HH:mm' }}</span>
-            <span class="total">{{ comanda.total | currency: 'BRL' }}</span>
-          </span>
-        </button>
-      } @empty {
-        <p class="vazio">Nenhuma comanda no momento.</p>
+        @for (comanda of comandasVisiveis(); track comanda.id) {
+          <button
+            class="card"
+            type="button"
+            [class]="comanda.status"
+            [class.selecionada]="comanda.id === selecionada()?.id"
+            [attr.aria-current]="comanda.id === selecionada()?.id ? 'true' : null"
+            (click)="abrir(comanda)"
+          >
+            <span class="card-topo">
+              <span class="local">{{ rotuloLocal(comanda) }}</span>
+              <span class="selo">{{ rotuloStatus(comanda) }}</span>
+            </span>
+            <span class="cliente">{{ comanda.cliente }}</span>
+            <span class="card-rodape">
+              <span class="identificador">Comanda {{ identificador(comanda) }} · {{ comanda.criada_em | date: 'HH:mm' }}</span>
+              <span class="total">{{ comanda.total | currency: 'BRL' }}</span>
+            </span>
+          </button>
+        } @empty {
+          <p class="vazio">
+            {{ comandas().length === 0 ? 'Nenhuma comanda no momento.' : 'Nenhuma comanda neste filtro.' }}
+          </p>
+        }
       }
+    </main>
+  </div>
+
+  <div class="coluna-detalhe">
+    @if (selecionada(); as comanda) {
+      <header class="header">
+        <button class="btn-voltar" type="button" (click)="fechar()" [disabled]="processando() !== null" aria-label="Voltar para as comandas">
+          <svg class="icone-voltar" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 19-7-7 7-7"></path><path d="M19 12H5"></path></svg>
+          <svg class="icone-fechar" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg>
+        </button>
+        <h1 class="titulo-detalhe">{{ tituloDetalhe(comanda) }}</h1>
+        <span class="identificador">{{ identificador(comanda) }}</span>
+      </header>
+
+      <main class="detalhe">
+        @if (comanda.status === 'aguardando_liberacao') {
+          <section class="bloco bloco-cliente">
+            <p class="rotulo">Cliente</p>
+            <p class="cliente-destaque">{{ comanda.cliente }}</p>
+          </section>
+
+          <dl class="dados">
+            <div>
+              <dt>Local</dt>
+              <dd>{{ rotuloLocal(comanda) }}</dd>
+            </div>
+            <div>
+              <dt>Solicitada às</dt>
+              <dd>{{ comanda.criada_em | date: 'HH:mm' }}</dd>
+            </div>
+          </dl>
+
+          <p class="orientacao">
+            Confirme que o cliente está no local antes de liberar.
+            @if (!comanda.mesa) {
+              No balcão não há mesa: identifique a pessoa pelo nome.
+            }
+          </p>
+        } @else {
+          <section class="bloco">
+            <p class="cliente-destaque">{{ comanda.cliente }}</p>
+            <p class="local-detalhe">{{ rotuloLocal(comanda) }}<span class="aberta-as"> · aberta às {{ comanda.criada_em | date: 'HH:mm' }}</span></p>
+          </section>
+
+          <section class="bloco" aria-labelledby="titulo-itens">
+            <h2 id="titulo-itens">Itens consumidos</h2>
+            <ul class="itens">
+              @for (item of comanda.itens; track $index) {
+                <li>
+                  <span class="quantidade">{{ item.quantidade }}x</span>
+                  <span class="nome-item">{{ item.nome }}</span>
+                  <span class="valor-item">{{ item.quantidade * item.preco_unitario | currency: 'BRL' }}</span>
+                </li>
+              } @empty {
+                <li class="sem-itens">Nenhum item pedido ainda.</li>
+              }
+            </ul>
+          </section>
+
+          <section class="bloco total-destaque">
+            <span>{{ comanda.status === 'aberta' ? 'Parcial até agora' : 'Total a receber' }}</span>
+            <strong>{{ comanda.total | currency: 'BRL' }}</strong>
+          </section>
+
+          @if (comanda.status === 'aguardando_pagamento') {
+            <p class="orientacao">O pagamento é feito no caixa. Confirme só depois de receber.</p>
+          }
+        }
+
+        @if (erro(); as mensagem) {
+          <p class="mensagem-erro" role="alert">{{ mensagem }}</p>
+        }
+      </main>
+
+      @if (comanda.status === 'aguardando_liberacao') {
+        <footer class="acoes">
+          <button class="btn-recusar" type="button" (click)="recusar()" [disabled]="processando() !== null">
+            {{ processando() === 'recusar' ? 'Recusando...' : 'Recusar' }}
+          </button>
+          <button class="btn-principal" type="button" (click)="liberar()" [disabled]="processando() !== null">
+            {{ processando() === 'liberar' ? 'Liberando...' : 'Liberar comanda' }}
+          </button>
+        </footer>
+      } @else if (comanda.status === 'aguardando_pagamento') {
+        <footer class="acoes">
+          <button class="btn-principal" type="button" (click)="confirmarPagamento()" [disabled]="processando() !== null">
+            {{ processando() === 'pagar' ? 'Confirmando...' : 'Confirmar pagamento' }}
+          </button>
+        </footer>
+      }
+    } @else {
+      <div class="sem-selecao">
+        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1Z"></path><path d="M14 8H8"></path><path d="M16 12H8"></path><path d="M13 16H8"></path></svg>
+        <p>Escolha uma comanda na lista para ver os itens, liberar a entrada ou confirmar o pagamento.</p>
+      </div>
     }
-  </main>
+  </div>
+</div>
 
-  @if (aviso(); as mensagem) {
-    <p class="aviso" role="status">{{ mensagem }}</p>
-  }
-
-  <app-nav-atendente [acompanhar]="false" />
+@if (aviso(); as mensagem) {
+  <p class="aviso" role="status">{{ mensagem }}</p>
 }
+
+<app-nav-atendente [acompanhar]="false" [class.escondido-no-celular]="selecionada()" />

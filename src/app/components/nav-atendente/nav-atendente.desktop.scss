@@ -1,0 +1,173 @@
+@use '../../../styles/desktop' as d;
+
+// No celular o menu é a barra de baixo: o logo, o bar e quem está logado
+// ficam no topo de cada tela, então aqui não aparecem.
+.marca,
+.usuario {
+  display: none;
+}
+
+// ---------------------------------------------------------------------
+// Desktop: coluna fixa à esquerda, como o menu do cliente
+// ---------------------------------------------------------------------
+@include d.desktop {
+  :host {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    width: d.$largura-menu;
+    margin: 0;
+  }
+
+  .nav-atendente {
+    flex-direction: column;
+    gap: 6px;
+    height: 100%;
+    box-sizing: border-box;
+    padding: 28px 16px 24px;
+    overflow-y: auto;
+    box-shadow: none;
+  }
+
+  .marca {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 22px;
+    padding: 0 10px;
+    color: #fff;
+  }
+
+  .marca-logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 24px;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+  }
+
+  .marca-icone {
+    display: grid;
+    place-items: center;
+    width: 38px;
+    height: 38px;
+    border-radius: 11px;
+    background: #2f6bff;
+    font-size: 24px;
+    line-height: 1;
+  }
+
+  .marca-bar {
+    color: rgba(255, 255, 255, 0.72);
+    font-size: 13px;
+  }
+
+  .item-nav {
+    flex: none;
+    flex-direction: row;
+    gap: 12px;
+    min-height: 46px;
+    padding: 0 12px;
+    border-top: 0;
+    border-radius: 12px;
+    color: rgba(255, 255, 255, 0.72);
+    transition: background 120ms ease, color 120ms ease;
+
+    &:hover,
+    &:focus-visible {
+      background: rgba(255, 255, 255, 0.05);
+      color: #fff;
+      outline: none;
+    }
+
+    &.ativo {
+      background: rgba(255, 255, 255, 0.14);
+      color: #fff;
+    }
+  }
+
+  .icone {
+    position: static;
+    width: 21px;
+    height: 21px;
+  }
+
+  .rotulo {
+    flex: 1;
+    font-size: 15px;
+  }
+
+  // O contador sai de cima do ícone e vai para a ponta do item (o ícone
+  // deixa de ser a referência da posição; o item passa a ser).
+  .contador {
+    top: 50%;
+    right: 12px;
+    left: auto;
+    border: 0;
+    line-height: 22px;
+    transform: translateY(-50%);
+  }
+
+  .usuario {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: auto;
+    padding: 14px 12px;
+    border-radius: 14px;
+    background: rgba(255, 255, 255, 0.08);
+    color: #fff;
+  }
+
+  .usuario-avatar {
+    display: grid;
+    place-items: center;
+    width: 36px;
+    height: 36px;
+    flex-shrink: 0;
+    border-radius: 50%;
+    background: #cddafd;
+    color: #0f1f4b;
+    font-size: 13px;
+    font-weight: 800;
+  }
+
+  .usuario-texto {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    min-width: 0;
+
+    strong {
+      overflow: hidden;
+      font-size: 14px;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+    }
+
+    span {
+      color: rgba(255, 255, 255, 0.7);
+      font-size: 12px;
+    }
+  }
+
+  .usuario-sair {
+    min-height: 36px;
+    padding: 0 12px;
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    border-radius: 999px;
+    background: transparent;
+    color: #fff;
+    font: inherit;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+
+    &:hover,
+    &:focus-visible {
+      background: rgba(255, 255, 255, 0.12);
+    }
+  }
+}

@@ -9,7 +9,7 @@ import { TempoPreparo } from '../componentes/tempo-preparo';
   selector: 'app-resultados',
   imports: [GraficoHoras, MaisVendidos, TempoPreparo],
   templateUrl: './resultados.html',
-  styleUrl: './resultados.scss',
+  styleUrls: ['./resultados.scss', './resultados.desktop.scss'],
 })
 export class Resultados implements OnInit {
   protected readonly movimento = inject(MovimentoService);

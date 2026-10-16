@@ -32,6 +32,15 @@
         <dt>aguardando pgto</dt>
         <dd>{{ carregandoPrimeiraVez() ? '–' : movimento.comandasAguardandoPagamento() }}</dd>
       </div>
+      <!-- Só no desktop: o status sobe para a linha dos números. -->
+      <div class="numero-status">
+        <dt>status do movimento</dt>
+        <dd>
+          <span class="selo" [class.quente]="movimento.statusMovimento() === 'quente'">
+            {{ movimento.statusMovimento() === 'quente' ? 'Quente' : 'Normal' }}
+          </span>
+        </dd>
+      </div>
     </dl>
   </div>
 </section>
@@ -84,7 +93,7 @@
     }
   </section>
 
-  <section class="cartao">
+  <section class="cartao cartao-status">
     <h2 class="rotulo">
       Status do movimento
       <span class="ajuda" title="Normal ou Quente, conforme as comandas abertas em relação à capacidade do bar.">?</span>

@@ -1,4 +1,12 @@
 <nav class="nav-atendente" aria-label="Telas do atendente">
+  <!-- Só no desktop: o menu vira uma coluna, com o logo e o bar no topo. -->
+  <div class="marca">
+    <span class="marca-logo"><span class="marca-icone" aria-hidden="true">+</span>party</span>
+    @if (nomeDoBar()) {
+      <span class="marca-bar">{{ nomeDoBar() }} · Atendente</span>
+    }
+  </div>
+
   <a class="item-nav" routerLink="/atendente/pedidos" routerLinkActive="ativo">
     <span class="icone">
       <svg viewBox="0 0 24 24" aria-hidden="true">
@@ -33,4 +41,14 @@
       >
     }
   </a>
+
+  <!-- Só no desktop: quem está logado e o Sair, que no celular ficam no topo da tela. -->
+  <div class="usuario">
+    <span class="usuario-avatar" aria-hidden="true">{{ iniciais() }}</span>
+    <span class="usuario-texto">
+      <strong>{{ nomeDoUsuario() || 'Atendente' }}</strong>
+      <span>Atendente</span>
+    </span>
+    <button type="button" class="usuario-sair" (click)="sair()">Sair</button>
+  </div>
 </nav>

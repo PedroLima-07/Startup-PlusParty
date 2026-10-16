@@ -396,4 +396,34 @@ describe('AtendenteComandas', () => {
     expect(authService.sair).toHaveBeenCalled();
     expect(router.navigateByUrl).toHaveBeenCalledWith('/login');
   });
+
+  it('filtra a lista pela situação, com quantas comandas há em cada', () => {
+    const filtros = () => Array.from(tela().querySelectorAll<HTMLButtonElement>('.filtro'));
+
+    expect(filtros().map((f) => f.textContent?.trim())).toEqual([
+      'Todas · 3',
+      'Liberar · 1',
+      'Receber · 1',
+      'Abertas · 1',
+    ]);
+
+    filtros()[2].click();
+
+    expect(cards().map((card) => card.querySelector('.cliente')?.textContent)).toEqual(['Mariana']);
+    expect(filtros()[2].getAttribute('aria-pressed')).toBe('true');
+  });
+
+  it('resume no título quantas comandas esperam o atendente', () => {
+    expect(tela().querySelector('.titulo-pagina p')?.textContent).toBe(
+      '2 esperam por você: 1 para liberar e 1 para receber',
+    );
+  });
+
+  it('a comanda aberta no detalhe fica marcada na lista', () => {
+    abrir('Mariana');
+
+    const marcada = tela().querySelector('.card.selecionada');
+    expect(marcada?.textContent).toContain('Mariana');
+    expect(marcada?.getAttribute('aria-current')).toBe('true');
+  });
 });

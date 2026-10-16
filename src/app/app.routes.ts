@@ -99,10 +99,19 @@ export const routes: Routes = [
       { path: 'movimento/resumo', loadComponent: () => import('./Pages/gerente/resumo/resumo').then(m => m.Resumo) },
       { path: 'resultados', loadComponent: () => import('./Pages/gerente/resultados/resultados').then(m => m.Resultados) },
       { path: 'postagens', loadComponent: () => import('./Pages/gerente/postagens/postagens').then(m => m.Postagens) },
-      { path: 'equipe', loadComponent: () => import('./Pages/gerente/equipe/equipe').then(m => m.Equipe) },
+      // O convite vem antes da Equipe: senão "convite" seria lido como o id de um atendente.
       { path: 'equipe/convite', loadComponent: () => import('./Pages/gerente/equipe-convite/equipe-convite').then(m => m.EquipeConvite) },
-      { path: 'equipe/:id', loadComponent: () => import('./Pages/gerente/equipe-perfil/equipe-perfil').then(m => m.EquipePerfil) },
-      // Aberta pela engrenagem do topo. O endereço antigo continua valendo.
+      // O perfil do atendente abre dentro da Equipe: ao lado da lista no
+      // desktop, no lugar dela no celular.
+      {
+        path: 'equipe',
+        loadComponent: () => import('./Pages/gerente/equipe/equipe').then(m => m.Equipe),
+        children: [
+          { path: ':id', loadComponent: () => import('./Pages/gerente/equipe-perfil/equipe-perfil').then(m => m.EquipePerfil) },
+        ],
+      },
+      // Aberta pela engrenagem do topo (celular) e pelo menu lateral (desktop).
+      // O endereço antigo continua valendo.
       { path: 'configuracoes', loadComponent: () => import('./Pages/gerente/perfil-bar/perfil-bar').then(m => m.PerfilBarComponent) },
       { path: 'perfil-bar', redirectTo: 'configuracoes', pathMatch: 'full' }
     ]

@@ -13,6 +13,16 @@ import { NavAtendente } from '../../components/nav-atendente/nav-atendente';
 
 type Acao = 'liberar' | 'recusar' | 'pagar';
 
+type Filtro = 'todas' | ComandaAtendente['status'];
+
+/** Filtros da lista no desktop, com o nome curto de cada situação. */
+const FILTROS: { valor: Filtro; rotulo: string }[] = [
+  { valor: 'todas', rotulo: 'Todas' },
+  { valor: 'aguardando_liberacao', rotulo: 'Liberar' },
+  { valor: 'aguardando_pagamento', rotulo: 'Receber' },
+  { valor: 'aberta', rotulo: 'Abertas' },
+];
+
 const ROTULOS_STATUS: Record<ComandaAtendente['status'], string> = {
   aguardando_liberacao: 'Aguardando liberação',
   aguardando_pagamento: 'Aguardando pagamento',
@@ -32,7 +42,7 @@ const DURACAO_AVISO_MS = 3000;
   selector: 'app-atendente-comandas',
   imports: [Carregando, CurrencyPipe, DatePipe, NavAtendente],
   templateUrl: './atendente-comandas.html',
-  styleUrl: './atendente-comandas.scss',
+  styleUrls: ['./atendente-comandas.scss', './atendente-comandas.desktop.scss'],
 })
 export class AtendenteComandas implements OnInit {
   private comandasService = inject(ComandasAtendenteService);
@@ -54,6 +64,41 @@ export class AtendenteComandas implements OnInit {
   protected readonly processando = signal<Acao | null>(null);
 
   private readonly selecionadaId = signal<string | null>(null);
+
+  /** Filtro da lista (só aparece no desktop; no celular fica em "Todas"). */
+  protected readonly filtro = signal<Filtro>('todas');
+
+  protected readonly filtros = computed(() => {
+    const comandas = this.comandas();
+    return FILTROS.map((opcao) => ({
+      ...opcao,
+      quantidade:
+        opcao.valor === 'todas'
+          ? comandas.length
+          : comandas.filter((comanda) => comanda.status === opcao.valor).length,
+    }));
+  });
+
+  protected readonly comandasVisiveis = computed(() => {
+    const filtro = this.filtro();
+    const comandas = this.comandas();
+    return filtro === 'todas' ? comandas : comandas.filter((comanda) => comanda.status === filtro);
+  });
+
+  /** Subtítulo do desktop: quantas esperam o atendente e por quê. */
+  protected readonly resumoPendencias = computed(() => {
+    const comandas = this.comandas();
+    const liberar = comandas.filter((c) => c.status === 'aguardando_liberacao').length;
+    const receber = comandas.filter((c) => c.status === 'aguardando_pagamento').length;
+    const total = liberar + receber;
+    if (total === 0) return 'Nenhuma comanda esperando por você.';
+
+    const partes = [
+      liberar > 0 ? `${liberar} para liberar` : '',
+      receber > 0 ? `${receber} para receber` : '',
+    ].filter(Boolean);
+    return `${total} ${total === 1 ? 'espera' : 'esperam'} por você: ${partes.join(' e ')}`;
+  });
 
   /**
    * Comanda aberta na tela de detalhe. Sai sempre da lista atual: se o total

@@ -1,0 +1,85 @@
+@use '../gerente' as g;
+@use '../../../../styles/desktop' as d;
+
+// ---------------------------------------------------------------------
+// Celular: a lista e o perfil se revezam, como antes.
+// ---------------------------------------------------------------------
+.equipe-layout:not(.com-perfil) .coluna-perfil,
+.equipe-layout.com-perfil .equipe-container,
+.sem-perfil {
+  display: none;
+}
+
+// ---------------------------------------------------------------------
+// Desktop: lista à esquerda, perfil do atendente escolhido à direita
+// ---------------------------------------------------------------------
+@include d.desktop {
+  .equipe-layout {
+    display: grid;
+    grid-template-columns: minmax(340px, 420px) minmax(0, 1fr);
+    align-items: start;
+    gap: 24px;
+    max-width: 1240px;
+    box-sizing: border-box;
+    margin: 0 auto;
+    padding: 32px 40px 48px;
+  }
+
+  .equipe-container,
+  .equipe-layout.com-perfil .equipe-container {
+    display: flex;
+    max-width: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .cabecalho {
+    h1 {
+      font-size: 32px;
+    }
+
+    p {
+      font-size: 15px;
+    }
+  }
+
+  .coluna-perfil,
+  .equipe-layout:not(.com-perfil) .coluna-perfil {
+    display: block;
+    position: sticky;
+    top: 24px;
+    min-width: 0;
+    overflow: hidden;
+    border: 1px solid g.$borda;
+    border-radius: 22px;
+    background: #fff;
+    box-shadow: 0 10px 30px rgba(15, 31, 75, 0.06);
+  }
+
+  .sem-perfil {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    min-height: 420px;
+    padding: 0 32px;
+    color: g.$rotulo;
+    font-size: 40px;
+    text-align: center;
+
+    p {
+      max-width: 340px;
+      margin: 0;
+      color: g.$texto-suave;
+      font-size: 15px;
+      line-height: 1.5;
+    }
+  }
+
+  // Quem está aberto à direita fica marcado na lista.
+  .atendente.ativo {
+    background: #eef2ff;
+    box-shadow: inset 3px 0 0 g.$azul;
+  }
+}

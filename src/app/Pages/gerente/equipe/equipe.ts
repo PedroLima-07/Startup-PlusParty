@@ -1,6 +1,6 @@
 import { DatePipe } from '@angular/common';
 import { Component, OnInit, inject, signal } from '@angular/core';
-import { RouterLink } from '@angular/router';
+import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { Carregando } from '../../../components/carregando/carregando';
 import { mensagemDoBanco } from '../../../erros-banco';
 import { Funcionario, SolicitacaoPendente } from '../../../models';
@@ -18,9 +18,9 @@ import { Icone } from '../componentes/icone';
  */
 @Component({
   selector: 'app-equipe',
-  imports: [Avatar, Carregando, DatePipe, Icone, RouterLink],
+  imports: [Avatar, Carregando, DatePipe, Icone, RouterLink, RouterLinkActive, RouterOutlet],
   templateUrl: './equipe.html',
-  styleUrl: './equipe.scss',
+  styleUrls: ['./equipe.scss', './equipe.desktop.scss'],
 })
 export class Equipe implements OnInit {
   private equipeService = inject(EquipeService);
@@ -36,6 +36,8 @@ export class Equipe implements OnInit {
   /** As listas já vieram do banco ao menos uma vez (senão "0 pedidos" seria enganoso). */
   protected readonly carregou = signal(false);
   protected readonly erro = signal<string | null>(null);
+  /** O perfil de um atendente está aberto (rota filha /gerente/equipe/<id>). */
+  protected readonly perfilAberto = signal(false);
   /** id do pedido com uma resposta em andamento, para travar os botões. */
   protected readonly processando = signal<string | null>(null);
 
@@ -63,6 +65,15 @@ export class Equipe implements OnInit {
     } finally {
       this.processando.set(null);
     }
+  }
+
+  /**
+   * O perfil fechou: o gerente voltou para a lista ou removeu o atendente.
+   * Recarrega para quem foi removido sair da lista.
+   */
+  protected async aoFecharPerfil(): Promise<void> {
+    this.perfilAberto.set(false);
+    if (this.carregou()) await this.carregar();
   }
 
   /** "42 pedidos entregues hoje", ou o e-mail quando o número não está disponível. */

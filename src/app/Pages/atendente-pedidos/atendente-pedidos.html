@@ -16,9 +16,26 @@
   </div>
 </header>
 
-<div class="tabs">
-  <button class="tab-btn" type="button" [class.active]="abaAtiva() === 'bar'" (click)="abaAtiva.set('bar')">Bar</button>
-  <button class="tab-btn" type="button" [class.active]="abaAtiva() === 'cozinha'" (click)="abaAtiva.set('cozinha')">Cozinha</button>
+<!-- No celular é só a linha das abas; no desktop vira o título com as abas e o Atualizar. -->
+<div class="topo-pagina">
+  <div class="titulo-pagina">
+    <h2>Pedidos</h2>
+    <p>Chegam aqui na hora, sem precisar atualizar.</p>
+  </div>
+
+  <div class="tabs">
+    <button class="tab-btn" type="button" [class.active]="abaAtiva() === 'bar'" (click)="abaAtiva.set('bar')">
+      Bar <span class="contagem">{{ quantidadePorSetor().bar }}</span>
+    </button>
+    <button class="tab-btn" type="button" [class.active]="abaAtiva() === 'cozinha'" (click)="abaAtiva.set('cozinha')">
+      Cozinha <span class="contagem">{{ quantidadePorSetor().cozinha }}</span>
+    </button>
+  </div>
+
+  <button class="btn-atualizar" type="button" (click)="atualizarLista()" [disabled]="carregando()">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 2v6h-6"></path><path d="M3 12a9 9 0 1 0 2.1-5.7L2 9"></path></svg>
+    Atualizar
+  </button>
 </div>
 
 @if (erro(); as mensagem) {
@@ -29,28 +46,62 @@
   @if (carregando()) {
     <app-carregando texto="Carregando pedidos" />
   } @else {
-    @for (pedido of pedidosFiltrados(); track pedido.id) {
-      <button type="button" class="card-pedido" (click)="abrirAcao(pedido)">
-        <div class="card-header">
-          <span class="mesa">{{ rotuloLocal(pedido) }}</span>
-          <span class="tempo">{{ pedido.criado_em | date: 'HH:mm' }}</span>
-        </div>
+    <!-- No desktop, uma coluna por situação. No celular as colunas somem
+         (display: contents) e os cartões voltam a ficar em ordem de chegada. -->
+    <div class="colunas">
+      @for (coluna of colunas(); track coluna.status) {
+        <section class="coluna" [attr.aria-labelledby]="'coluna-' + coluna.status">
+          <h3 class="coluna-titulo" [id]="'coluna-' + coluna.status">
+            <span class="coluna-ponto" [class]="coluna.status"></span>
+            {{ coluna.titulo }}
+            <span class="coluna-quantidade">{{ coluna.pedidos.length }}</span>
+          </h3>
 
-        <div class="cliente">{{ pedido.cliente }}</div>
+          @for (pedido of coluna.pedidos; track pedido.id) {
+            <article class="card-pedido" [style.order]="ordemDeChegada(pedido)">
+              <div class="card-header">
+                <span class="mesa">{{ rotuloLocal(pedido) }}</span>
+                <span class="tempo">{{ pedido.criado_em | date: 'HH:mm' }}</span>
+                <span class="espera" [class.atrasado]="atrasado(pedido)">{{ espera(pedido) }}</span>
+              </div>
 
-        <ul class="itens-lista">
-          @for (item of pedido.itens; track $index) {
-            <li><strong>{{ item.quantidade }}x</strong> {{ item.nome }}</li>
+              <div class="cliente">
+                {{ pedido.cliente }}<span class="pedido-hora"> · pedido às {{ pedido.criado_em | date: 'HH:mm' }}</span>
+              </div>
+
+              <ul class="itens-lista">
+                @for (item of pedido.itens; track $index) {
+                  <li><strong>{{ item.quantidade }}x</strong> {{ item.nome }}</li>
+                }
+              </ul>
+
+              <div class="card-footer">
+                <span class="badge" [ngClass]="pedido.status">
+                  {{ pedido.status === 'novo' ? 'Novo' : 'Em andamento' }}
+                </span>
+              </div>
+
+              <!-- No celular cobre o cartão inteiro e abre a confirmação;
+                   no desktop é o botão do pé do cartão e já age. -->
+              <button
+                type="button"
+                class="card-acao"
+                [class.pronto]="pedido.status !== 'novo'"
+                [disabled]="salvando()"
+                [attr.aria-label]="rotuloAcao(pedido) + ': ' + rotuloLocal(pedido) + ', ' + pedido.cliente"
+                (click)="agir(pedido)"
+              >
+                {{ salvandoId() === pedido.id ? 'Salvando...' : rotuloAcao(pedido) }}
+              </button>
+            </article>
+          } @empty {
+            <p class="coluna-vazia">{{ coluna.vazio }}</p>
           }
-        </ul>
+        </section>
+      }
+    </div>
 
-        <div class="card-footer">
-          <span class="badge" [ngClass]="pedido.status">
-            {{ pedido.status === 'novo' ? 'Novo' : 'Em andamento' }}
-          </span>
-        </div>
-      </button>
-    } @empty {
+    @if (pedidosFiltrados().length === 0) {
       <div class="empty-state">
         <p>Nenhum pedido pendente no momento.</p>
       </div>
