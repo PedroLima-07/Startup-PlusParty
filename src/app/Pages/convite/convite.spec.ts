@@ -16,6 +16,7 @@ describe('ConvitePage', () => {
   let sessaoDepoisDoCadastro: boolean;
   let cadastrar: ReturnType<typeof vi.fn>;
   let aceitarConvite: ReturnType<typeof vi.fn>;
+  let confirmarEmail: ReturnType<typeof vi.fn>;
 
   function tela(): HTMLElement {
     fixture.detectChanges();
@@ -42,6 +43,7 @@ describe('ConvitePage', () => {
   async function abrir(): Promise<void> {
     cadastrar = vi.fn().mockResolvedValue(undefined);
     aceitarConvite = vi.fn().mockResolvedValue(undefined);
+    confirmarEmail = vi.fn().mockResolvedValue(undefined);
 
     await TestBed.configureTestingModule({
       imports: [ConvitePage],
@@ -53,6 +55,8 @@ describe('ConvitePage', () => {
             perfilAtual: () => Promise.resolve(perfil),
             usuarioAtual: () => Promise.resolve(sessaoDepoisDoCadastro ? { id: 'u1' } : null),
             cadastrar,
+            confirmarEmail,
+            reenviarCodigo: vi.fn().mockResolvedValue(undefined),
             atualizarFoto: vi.fn(),
             telaInicial: () => '/atendente/pedidos',
           },
@@ -136,7 +140,7 @@ describe('ConvitePage', () => {
     expect(router.navigateByUrl).not.toHaveBeenCalled();
   });
 
-  it('com confirmação de e-mail ligada, avisa e não tenta aceitar sem sessão', async () => {
+  it('com confirmação de e-mail ligada, pede o código antes de aceitar', async () => {
     sessaoDepoisDoCadastro = false;
     await abrir();
     preencherConta();
@@ -145,7 +149,25 @@ describe('ConvitePage', () => {
     await enviar();
 
     expect(aceitarConvite).not.toHaveBeenCalled();
-    expect(tela().textContent).toContain('Confirme o e-mail');
+    expect(tela().textContent).toContain('Confirme seu e-mail');
+    expect(tela().textContent).toContain('gil@party.app');
+    expect(tela().querySelector('form input[type=password]')).toBeNull();
+  });
+
+  it('depois do código, o pedido segue sozinho, sem abrir o link de novo', async () => {
+    sessaoDepoisDoCadastro = false;
+    await abrir();
+    preencherConta();
+    preencher('input[type=tel]', '15999990000');
+    await enviar();
+
+    preencher('input[autocomplete=one-time-code]', '123456');
+    await fixture.whenStable();
+    await new Promise((resolver) => setTimeout(resolver));
+
+    expect(confirmarEmail).toHaveBeenCalledWith('gil@party.app', '123456');
+    expect(aceitarConvite).toHaveBeenCalledWith('A3F9-C17B-2D40', '15999990000');
+    expect(router.navigateByUrl).toHaveBeenCalledWith('/atendente/aguardando', { replaceUrl: true });
   });
 
   it('convite usado ou expirado não mostra o formulário', async () => {

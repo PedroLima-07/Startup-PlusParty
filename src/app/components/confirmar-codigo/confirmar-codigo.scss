@@ -1,0 +1,197 @@
+// Mesmas cores e botões do cartão de login, onde esta tela aparece.
+$marinho: #0f1f4b;
+$azul: #2f6bff;
+$cinza: #6b7280;
+$borda: #e5e7eb;
+
+:host {
+  display: block;
+  width: 100%;
+}
+
+.confirmar {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  color: $marinho;
+  text-align: center;
+
+  h2 {
+    margin: 4px 0 0;
+    font-size: 1.2rem;
+    font-weight: 800;
+  }
+}
+
+.icone {
+  display: grid;
+  place-items: center;
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: #eef2ff;
+  color: $azul;
+
+  svg {
+    width: 26px;
+    height: 26px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+}
+
+.instrucao {
+  margin: 0 0 8px;
+  color: $cinza;
+  font-size: 0.88rem;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+
+  strong {
+    color: $marinho;
+  }
+}
+
+form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  width: 100%;
+}
+
+// O campo de verdade fica por cima das caixas, invisível: recebe o toque,
+// o colar e o preenchimento automático; as caixas só mostram os números.
+.caixas {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 8px;
+  cursor: text;
+}
+
+.campo-codigo {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: transparent;
+  caret-color: transparent;
+  font-size: 16px; // evita o zoom automático do iPhone ao focar
+  letter-spacing: 1em;
+  outline: none;
+  opacity: 0.01;
+}
+
+.caixa {
+  display: grid;
+  place-items: center;
+  height: 54px;
+  border: 1.5px solid $borda;
+  border-radius: 12px;
+  background: #fff;
+  font-size: 1.5rem;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  transition: border-color 120ms ease, box-shadow 120ms ease;
+
+  &.preenchida {
+    border-color: #c7d2fe;
+    background: #f7f9ff;
+  }
+
+  &.atual {
+    border-color: $azul;
+    box-shadow: 0 0 0 3px rgba(47, 107, 255, 0.18);
+  }
+
+  &.com-erro {
+    border-color: #fca5a5;
+  }
+}
+
+.erro-geral,
+.aviso-geral {
+  margin: 0;
+  padding: 10px 12px;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  line-height: 1.4;
+}
+
+.erro-geral {
+  background: #fef2f2;
+  color: #dc2626;
+}
+
+.aviso-geral {
+  background: #eff6ff;
+  color: #1d4ed8;
+}
+
+.botao-primario {
+  padding: 14px;
+  border: none;
+  border-radius: 10px;
+  background: $marinho;
+  color: #fff;
+  font: inherit;
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+}
+
+.reenviar {
+  margin: 8px 0 0;
+  color: $cinza;
+  font-size: 0.85rem;
+  line-height: 1.5;
+
+  strong {
+    color: $marinho;
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+.link {
+  padding: 0;
+  border: none;
+  background: none;
+  color: $azul;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+
+  &:hover:not(:disabled) {
+    text-decoration: underline;
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: wait;
+  }
+}
+
+.voltar {
+  margin-top: 4px;
+  font-size: 0.85rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .caixa {
+    transition: none;
+  }
+}

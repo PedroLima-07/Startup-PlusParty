@@ -1,7 +1,8 @@
 import { Component, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { traduzirErroAuth } from '../../erros-auth';
+import { ConfirmarCodigo } from '../../components/confirmar-codigo/confirmar-codigo';
+import { emailNaoConfirmado, traduzirErroAuth } from '../../erros-auth';
 import { AuthService } from '../../services/auth.service';
 import { EquipeService, ROTA_CONVITE } from '../../services/equipe.service';
 
@@ -9,7 +10,7 @@ type Modo = 'login' | 'cadastro' | 'recuperar';
 
 @Component({
   selector: 'app-login',
-  imports: [ReactiveFormsModule],
+  imports: [ConfirmarCodigo, ReactiveFormsModule],
   templateUrl: './login.html',
   styleUrl: './login.scss',
 })
@@ -24,6 +25,12 @@ export class LoginPage {
   protected readonly carregando = signal(false);
   protected readonly erro = signal<string | null>(null);
   protected readonly aviso = signal<string | null>(null);
+  /**
+   * E-mail esperando o código de confirmação: o formulário dá lugar à tela
+   * do código. Acontece logo depois do cadastro e quando alguém tenta entrar
+   * numa conta que ainda não confirmou.
+   */
+  protected readonly emailParaConfirmar = signal<string | null>(null);
 
   protected readonly form = this.fb.nonNullable.group({
     nome: [''],
@@ -68,16 +75,54 @@ export class LoginPage {
       if (this.modo() === 'login') {
         await this.authService.login(email, senha);
       } else {
-        await this.authService.cadastrar(nome, email, senha);
+        const { precisaConfirmar } = await this.authService.cadastrar(nome, email, senha);
+        if (precisaConfirmar) {
+          this.emailParaConfirmar.set(email);
+          return;
+        }
       }
 
-      // replaceUrl tira o login do histórico: o "voltar" não cai de novo aqui.
-      await this.router.navigateByUrl(await this.destino(), { replaceUrl: true });
+      await this.entrar();
     } catch (erro) {
+      if (emailNaoConfirmado(erro)) {
+        await this.pedirCodigoDeNovo(email);
+        return;
+      }
       this.erro.set(traduzirErroAuth(erro));
     } finally {
       this.carregando.set(false);
     }
+  }
+
+  /** O código conferiu: a conta está confirmada e a sessão, aberta. */
+  protected async aoConfirmar(): Promise<void> {
+    await this.entrar();
+  }
+
+  /** "Usar outro e-mail": volta ao formulário de onde a pessoa veio. */
+  protected voltarDoCodigo(): void {
+    this.emailParaConfirmar.set(null);
+    this.form.controls.senha.reset('');
+  }
+
+  private async entrar(): Promise<void> {
+    // replaceUrl tira o login do histórico: o "voltar" não cai de novo aqui.
+    await this.router.navigateByUrl(await this.destino(), { replaceUrl: true });
+  }
+
+  /**
+   * Tentou entrar numa conta que não confirmou o e-mail (fechou o app antes
+   * de digitar o código, por exemplo): manda um código novo e abre a tela
+   * dele. Se o envio for recusado por ser cedo demais, o código anterior
+   * ainda vale e a própria tela mostra quando dá para pedir outro.
+   */
+  private async pedirCodigoDeNovo(email: string): Promise<void> {
+    try {
+      await this.authService.reenviarCodigo(email);
+    } catch {
+      // Segue para a tela do código mesmo assim.
+    }
+    this.emailParaConfirmar.set(email);
   }
 
   /**

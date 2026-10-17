@@ -6,6 +6,14 @@
     </div>
     <p class="tagline">Seu rolê começa aqui</p>
 
+    @if (emailParaConfirmar(); as email) {
+      <app-confirmar-codigo
+        [email]="email"
+        [rotuloVoltar]="modo() === 'cadastro' ? 'Errei o e-mail, voltar ao cadastro' : 'Voltar ao login'"
+        (confirmado)="aoConfirmar()"
+        (voltar)="voltarDoCodigo()"
+      />
+    } @else {
       @if (modo() === 'recuperar') {
         <p class="instrucao">Informe seu e-mail e enviaremos um link para criar uma nova senha.</p>
       }
@@ -82,6 +90,7 @@
           <button class="link" type="button" (click)="mudarModo('login')">Entrar</button>
         </p>
       }
+    }
   </div>
 
   <p class="rodape">+party 2026 · São Paulo</p>

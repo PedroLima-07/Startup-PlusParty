@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Seu código do +party</title>
+  </head>
+  <body style="margin: 0; padding: 0; background: #f7f8fa">
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background: #f7f8fa">
+      <tr>
+        <td align="center" style="padding: 32px 16px">
+          <table
+            role="presentation"
+            width="100%"
+            cellpadding="0"
+            cellspacing="0"
+            style="max-width: 440px; background: #ffffff; border-radius: 16px; font-family: Arial, Helvetica, sans-serif; color: #0f1f4b"
+          >
+            <tr>
+              <td style="padding: 32px 28px 8px; text-align: center">
+                <span
+                  style="display: inline-block; width: 36px; height: 36px; line-height: 36px; border-radius: 10px; background: #0f1f4b; color: #ffffff; font-size: 22px; font-weight: bold; vertical-align: middle"
+                  >+</span
+                >
+                <span style="font-size: 24px; font-weight: bold; vertical-align: middle">party</span>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding: 16px 28px 0; text-align: center">
+                <h1 style="margin: 0; font-size: 20px">Confirme seu e-mail</h1>
+                <p style="margin: 10px 0 0; color: #4b5366; font-size: 15px; line-height: 22px">
+                  Digite este código no +party para terminar o seu cadastro:
+                </p>
+              </td>
+            </tr>
+            <tr>
+              <td align="center" style="padding: 24px 28px">
+                <div
+                  style="display: inline-block; padding: 16px 24px; border-radius: 12px; background: #eef2ff; color: #0f1f4b; font-family: 'Courier New', Courier, monospace; font-size: 34px; font-weight: bold; letter-spacing: 10px"
+                >
+                  {{ .Token }}
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding: 0 28px 28px; text-align: center">
+                <p style="margin: 0; color: #4b5366; font-size: 14px; line-height: 21px">
+                  O código vale por 10 minutos. Se pedir outro, use sempre o mais recente.
+                </p>
+                <p style="margin: 16px 0 0; color: #8a93a6; font-size: 13px; line-height: 20px">
+                  Não foi você que criou uma conta com {{ .Email }}? É só ignorar este e-mail.
+                  Nenhuma conta é ativada sem o código.
+                </p>
+              </td>
+            </tr>
+          </table>
+          <p style="margin: 16px 0 0; color: #8a93a6; font-family: Arial, Helvetica, sans-serif; font-size: 12px">
+            +party 2026 · São Paulo
+          </p>
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>
