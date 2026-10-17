@@ -1,0 +1,66 @@
+<section class="confirmar" aria-labelledby="titulo-confirmar">
+  <span class="icone" aria-hidden="true">
+    <svg viewBox="0 0 24 24">
+      <rect width="20" height="16" x="2" y="4" rx="2" />
+      <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" />
+    </svg>
+  </span>
+
+  <h2 id="titulo-confirmar">Confirme seu e-mail</h2>
+  <p class="instrucao">
+    Enviamos um código de 6 números para <strong>{{ email() }}</strong>. Se não aparecer, confira
+    também a caixa de spam.
+  </p>
+
+  <form (submit)="$event.preventDefault(); confirmar()">
+    <div class="caixas">
+      <input
+        #campo
+        class="campo-codigo"
+        type="text"
+        inputmode="numeric"
+        autocomplete="one-time-code"
+        pattern="[0-9]*"
+        aria-label="Código de 6 números"
+        [value]="codigo()"
+        (input)="aoDigitar($event)"
+        (focus)="focado.set(true)"
+        (blur)="focado.set(false)"
+      />
+      @for (digito of caixas(); track $index) {
+        <span
+          class="caixa"
+          aria-hidden="true"
+          [class.preenchida]="digito !== ''"
+          [class.atual]="focado() && $index === posicao()"
+          [class.com-erro]="erro() !== null"
+          >{{ digito }}</span
+        >
+      }
+    </div>
+
+    @if (erro(); as mensagem) {
+      <p class="erro-geral" role="alert">{{ mensagem }}</p>
+    }
+    @if (aviso(); as mensagem) {
+      <p class="aviso-geral" role="status">{{ mensagem }}</p>
+    }
+
+    <button class="botao-primario" type="submit" [disabled]="confirmando()">
+      {{ confirmando() ? 'Confirmando...' : 'CONFIRMAR' }}
+    </button>
+  </form>
+
+  <p class="reenviar">
+    @if (espera() > 0) {
+      Não recebeu? Você pode pedir outro código em <strong>{{ tempoRestante() }}</strong>
+    } @else {
+      Não recebeu?
+      <button class="link" type="button" [disabled]="reenviando()" (click)="reenviar()">
+        {{ reenviando() ? 'Enviando...' : 'Reenviar código' }}
+      </button>
+    }
+  </p>
+
+  <button class="link voltar" type="button" (click)="voltar.emit()">{{ rotuloVoltar() }}</button>
+</section>

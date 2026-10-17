@@ -40,15 +40,53 @@ export class AuthService {
    * O perfil é criado pelo trigger `ao_criar_usuario` (supabase/trigger_criar_perfil.sql),
    * que lê o `nome` de `options.data` e sempre cria como cliente.
    * Não inserir manualmente em `perfis`: um insert duplicado colidiria com a chave primária.
+   *
+   * Com "Confirm email" ligado no Supabase, o cadastro não abre a sessão: o
+   * Supabase manda um código de 6 dígitos por e-mail, e a conta só entra
+   * depois de `confirmarEmail`. Quem chama descobre isso por `precisaConfirmar`.
    */
-  async cadastrar(nome: string, email: string, senha: string): Promise<void> {
+  async cadastrar(
+    nome: string,
+    email: string,
+    senha: string,
+  ): Promise<{ precisaConfirmar: boolean }> {
     this.perfilGuardado = null;
-    const { error } = await this.supabase.client.auth.signUp({
+    const { data, error } = await this.supabase.client.auth.signUp({
       email,
       password: senha,
       options: { data: { nome } },
     });
 
+    if (error) throw error;
+
+    // E-mail já cadastrado e confirmado: com a confirmação ligada o Supabase não
+    // responde com erro (para não revelar quem tem conta) e devolve um usuário
+    // sem identidades, sem mandar código nenhum. Aqui vira o erro de sempre.
+    if (data.user && data.user.identities?.length === 0) {
+      throw new Error('User already registered');
+    }
+
+    return { precisaConfirmar: !data.session };
+  }
+
+  /**
+   * Confere o código de 6 dígitos do e-mail de cadastro. Deu certo: a conta
+   * fica confirmada e a sessão abre, como num login.
+   */
+  async confirmarEmail(email: string, codigo: string): Promise<void> {
+    this.perfilGuardado = null;
+    const { error } = await this.supabase.client.auth.verifyOtp({
+      email,
+      token: codigo,
+      type: 'email',
+    });
+
+    if (error) throw error;
+  }
+
+  /** Manda outro código de confirmação para quem se cadastrou e ainda não confirmou. */
+  async reenviarCodigo(email: string): Promise<void> {
+    const { error } = await this.supabase.client.auth.resend({ type: 'signup', email });
     if (error) throw error;
   }
 

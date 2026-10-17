@@ -2,6 +2,7 @@ import { Component, OnInit, inject, input, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { Carregando } from '../../components/carregando/carregando';
+import { ConfirmarCodigo } from '../../components/confirmar-codigo/confirmar-codigo';
 import { mensagemDoBanco } from '../../erros-banco';
 import { traduzirErroAuth } from '../../erros-auth';
 import { prepararFotoDePerfil } from '../../foto';
@@ -21,7 +22,7 @@ import {
  */
 @Component({
   selector: 'app-convite',
-  imports: [Carregando, ReactiveFormsModule, RouterLink],
+  imports: [Carregando, ConfirmarCodigo, ReactiveFormsModule, RouterLink],
   templateUrl: './convite.html',
   styleUrls: ['../login/login.scss', './convite.scss'],
 })
@@ -41,6 +42,8 @@ export class ConvitePage implements OnInit {
   protected readonly aviso = signal<string | null>(null);
   /** Nome de quem já tem conta e está logado; null enquanto a conta ainda vai ser criada. */
   protected readonly contaLogada = signal<string | null>(null);
+  /** Conta criada esperando o código do e-mail: o formulário dá lugar à tela do código. */
+  protected readonly emailParaConfirmar = signal<string | null>(null);
   /** A foto escolhida, para mostrar antes de enviar. */
   protected readonly fotoPrevia = signal<string | null>(null);
 
@@ -106,7 +109,7 @@ export class ConvitePage implements OnInit {
     this.erro.set(null);
     this.aviso.set(null);
     this.enviando.set(true);
-    const { nome, email, senha, telefone } = this.form.getRawValue();
+    const { nome, email, senha } = this.form.getRawValue();
 
     try {
       if (this.contaLogada() === null) {
@@ -117,11 +120,10 @@ export class ConvitePage implements OnInit {
           return;
         }
 
-        // Com confirmação de e-mail ligada no Supabase, o cadastro não abre sessão.
+        // Com confirmação de e-mail ligada no Supabase, o cadastro não abre
+        // sessão: primeiro o código, depois o pedido (ver aoConfirmarEmail).
         if (!(await this.authService.usuarioAtual())) {
-          this.aviso.set(
-            'Conta criada. Confirme o e-mail que enviamos e depois abra este link de convite de novo.',
-          );
+          this.emailParaConfirmar.set(email);
           return;
         }
 
@@ -129,6 +131,35 @@ export class ConvitePage implements OnInit {
         this.usarContaLogada(nome.trim());
       }
 
+      await this.concluirPedido();
+    } finally {
+      this.enviando.set(false);
+    }
+  }
+
+  /** O código conferiu: a conta está aberta, e o pedido segue de onde parou. */
+  protected async aoConfirmarEmail(): Promise<void> {
+    this.emailParaConfirmar.set(null);
+    this.usarContaLogada(this.form.controls.nome.value.trim());
+    this.enviando.set(true);
+    try {
+      await this.concluirPedido();
+    } finally {
+      this.enviando.set(false);
+    }
+  }
+
+  /** "Errei o e-mail": volta ao formulário para corrigir e cadastrar de novo. */
+  protected voltarDoCodigo(): void {
+    this.emailParaConfirmar.set(null);
+    this.form.controls.senha.reset('');
+  }
+
+  /** Com a conta aberta: envia a foto (se houver) e cria o pedido para entrar na equipe. */
+  private async concluirPedido(): Promise<void> {
+    const telefone = this.form.controls.telefone.value;
+
+    try {
       if (this.fotoEscolhida) {
         try {
           await this.authService.atualizarFoto(await prepararFotoDePerfil(this.fotoEscolhida));
@@ -145,8 +176,6 @@ export class ConvitePage implements OnInit {
       this.erro.set(
         mensagemDoBanco(erro) ?? 'Não foi possível enviar o pedido agora. Tente novamente.',
       );
-    } finally {
-      this.enviando.set(false);
     }
   }
 

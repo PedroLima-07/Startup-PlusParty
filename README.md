@@ -100,6 +100,7 @@ O fluxo completo funciona de ponta a ponta, com dados reais:
 
 - **Login único com redirecionamento por perfil**: cliente, atendente e gerente, cada um na sua área
 - **Recuperação de senha por e-mail**
+- **Confirmação do e-mail com código de 6 números** no cadastro do cliente e no convite de atendente (ligar no Supabase: [`supabase/emails/COMO_CONFIGURAR.md`](supabase/emails/COMO_CONFIGURAR.md))
 - **Discovery de bares** com fotos, busca e perfil completo do estabelecimento
 - **Comanda digital** em mesa ou balcão, sem comandas duplicadas
 - **Cardápio por categoria** com carrinho; o pedido é gravado numa única transação no banco

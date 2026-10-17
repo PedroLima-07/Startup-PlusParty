@@ -19,6 +19,14 @@
             </span>
           </div>
 
+          @if (emailParaConfirmar(); as email) {
+            <app-confirmar-codigo
+              [email]="email"
+              rotuloVoltar="Errei o e-mail, voltar"
+              (confirmado)="aoConfirmarEmail()"
+              (voltar)="voltarDoCodigo()"
+            />
+          } @else {
           <form [formGroup]="form" (ngSubmit)="enviar()">
             <div class="foto">
               <label class="foto-escolher">
@@ -106,11 +114,12 @@
               {{ enviando() ? 'Enviando...' : 'PEDIR PARA ENTRAR' }}
             </button>
           </form>
+          }
 
           <p class="instrucao rodape-convite">
             O gerente do {{ c.estabelecimento_nome }} confirma o seu acesso antes de você começar.
           </p>
-          @if (contaLogada() === null) {
+          @if (contaLogada() === null && !emailParaConfirmar()) {
             <p class="rodape-link">
               Já tem conta no +party?
               <a class="link" routerLink="/login" [queryParams]="{ voltar: enderecoDesteConvite() }"
