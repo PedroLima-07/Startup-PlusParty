@@ -42,6 +42,8 @@ export interface LinhaComandaMovimento {
       quantidade: number;
       preco_unitario: number;
       status: StatusPedidoItem;
+      /** Quando o item foi marcado como pronto (supabase/equipe_convites.sql). */
+      pronto_em?: string | null;
       item: { nome: string; setor: SetorItem } | null;
     }[];
   }[];
@@ -63,6 +65,9 @@ export interface NumerosMovimento {
   itensDaCozinha: number;
   pedidosEmPreparo: number;
   pedidosProntos: number;
+  /** Média de minutos do pedido até ficar pronto; null sem nada pronto na noite. */
+  minutosPreparoBar: number | null;
+  minutosPreparoCozinha: number | null;
   lotacaoPorHora: LotacaoPorHora[];
   maisVendidos: ItemVendido[];
   alertas: AlertaGerente[];
@@ -92,9 +97,10 @@ export interface DetalheComanda {
  * `carregar()` busca as comandas da noite no Supabase e preenche os sinais de
  * base. O RLS já limita a consulta ao estabelecimento do gerente logado.
  *
- * Ainda sem dado no banco, por isso ficam vazios: a meta de faturamento (não
- * há coluna para ela) e o tempo de preparo (pedido_itens não guarda quando o
- * item ficou pronto). As telas escondem esses blocos enquanto estiverem nulos.
+ * Ainda sem dado no banco, por isso fica vazia: a meta de faturamento (não há
+ * coluna para ela). A tela esconde esse bloco enquanto for nulo. O tempo de
+ * preparo sai de `pronto_em`, gravado pelo banco quando o atendente marca o
+ * item como pronto.
  */
 @Injectable({
   providedIn: 'root',
@@ -233,7 +239,7 @@ export class MovimentoService {
       .from('comandas')
       .select(
         'id, status, mesa, criada_em, fechada_em, cliente:perfis(nome), ' +
-          'pedidos(id, criado_em, pedido_itens(quantidade, preco_unitario, status, item:itens(nome, setor)))',
+          'pedidos(id, criado_em, pedido_itens(quantidade, preco_unitario, status, pronto_em, item:itens(nome, setor)))',
       )
       .gte('criada_em', inicio)
       .order('criada_em');
@@ -280,6 +286,8 @@ export class MovimentoService {
     this.itensDaCozinha.set(numeros.itensDaCozinha);
     this.pedidosEmPreparo.set(numeros.pedidosEmPreparo);
     this.pedidosProntos.set(numeros.pedidosProntos);
+    this.minutosPreparoBar.set(numeros.minutosPreparoBar);
+    this.minutosPreparoCozinha.set(numeros.minutosPreparoCozinha);
     this.lotacaoPorHora.set(numeros.lotacaoPorHora);
     this.maisVendidos.set(numeros.maisVendidos);
     this.alertas.set(numeros.alertas);
@@ -333,6 +341,8 @@ export function calcularMovimento(linhas: LinhaComandaMovimento[], agora: Date):
     itensDaCozinha: quantidadeDoSetor('cozinha'),
     pedidosEmPreparo: pedidosComItens.length - prontos.length,
     pedidosProntos: prontos.length,
+    minutosPreparoBar: minutosDePreparo(todosPedidos, 'bar'),
+    minutosPreparoCozinha: minutosDePreparo(todosPedidos, 'cozinha'),
     lotacaoPorHora: calcularLotacaoPorHora(ordenadas, agora),
     maisVendidos: calcularMaisVendidos(itens),
     alertas: calcularAlertas(ordenadas, numeros, agora),
@@ -477,6 +487,30 @@ function calcularAlertas(
 
   const ordem: AlertaGerente['tipo'][] = ['pagamento', 'pedido_parado', 'liberacao', 'sem_pedido'];
   return alertas.sort((a, b) => ordem.indexOf(a.tipo) - ordem.indexOf(b.tipo));
+}
+
+/**
+ * Tempo médio de preparo de um setor, em minutos: do pedido enviado até o
+ * último item daquele setor ficar pronto. Cada pedido conta uma vez por
+ * setor (o atendente marca os itens do card juntos). Null sem nada pronto.
+ */
+function minutosDePreparo(
+  pedidos: LinhaComandaMovimento['pedidos'],
+  setor: SetorItem,
+): number | null {
+  const duracoes: number[] = [];
+
+  for (const pedido of pedidos) {
+    const prontos = pedido.pedido_itens
+      .filter((item) => item.item?.setor === setor && item.pronto_em)
+      .map((item) => tempo(item.pronto_em!));
+    if (prontos.length === 0) continue;
+
+    const minutos = (Math.max(...prontos) - tempo(pedido.criado_em)) / 60_000;
+    if (minutos >= 0) duracoes.push(minutos);
+  }
+
+  return duracoes.length > 0 ? Math.round(soma(duracoes) / duracoes.length) : null;
 }
 
 /**

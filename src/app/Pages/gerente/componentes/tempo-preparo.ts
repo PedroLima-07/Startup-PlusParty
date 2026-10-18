@@ -10,7 +10,7 @@ const DIFERENCA_RELEVANTE = 2;
   imports: [Icone],
   template: `
     @if (bar() === null && cozinha() === null) {
-      <p class="leitura">O tempo de preparo ainda não é registrado pelo sistema.</p>
+      <p class="leitura">Nenhum pedido ficou pronto ainda nesta noite.</p>
     } @else {
       <div class="setores">
         <div class="setor" [class.lento]="maisLento() === 'bar'">
