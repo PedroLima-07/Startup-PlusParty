@@ -277,5 +277,37 @@ describe('calcularMovimento', () => {
     expect(vazia.faturamento).toBe(0);
     expect(vazia.lotacaoPorHora).toEqual([]);
     expect(vazia.alertas).toEqual([]);
+    expect(vazia.minutosPreparoBar).toBeNull();
+    expect(vazia.minutosPreparoCozinha).toBeNull();
+  });
+
+  it('tempo de preparo: média por setor, do pedido até o último item dele ficar pronto', () => {
+    const pronto = (nome: string, setor: 'bar' | 'cozinha', quando: string) => ({
+      ...item(nome, setor, 1, 10),
+      pronto_em: quando,
+    });
+    const noite = [
+      comanda({
+        id: 'c1',
+        pedidos: [
+          {
+            id: 'p1',
+            criado_em: em(21),
+            // Dois itens do bar marcados juntos: conta uma vez, pelo último.
+            pedido_itens: [pronto('Chope', 'bar', em(21, 4)), pronto('Gin', 'bar', em(21, 6)), pronto('Batata', 'cozinha', em(21, 15))],
+          },
+          {
+            id: 'p2',
+            criado_em: em(22),
+            pedido_itens: [pronto('Chope', 'bar', em(22, 4)), item('Iscas', 'cozinha', 1, 30, 'em_andamento')],
+          },
+        ],
+      }),
+    ];
+
+    const resultado = calcularMovimento(noite, AGORA);
+
+    expect(resultado.minutosPreparoBar).toBe(5);
+    expect(resultado.minutosPreparoCozinha).toBe(15);
   });
 });

@@ -45,7 +45,7 @@ describe('TempoPreparo', () => {
     const tela = criar(null, null);
 
     expect(tela.querySelector('.setores')).toBeNull();
-    expect(texto(tela)).toContain('ainda não é registrado');
+    expect(texto(tela)).toContain('Nenhum pedido ficou pronto ainda');
   });
 });
 
