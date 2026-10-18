@@ -30,7 +30,7 @@ export class PedidosAtendenteService {
       .from('pedido_itens')
       .select(
         'id, quantidade, status, pedido_id, item:itens(nome, setor), ' +
-          'pedido:pedidos!inner(criado_em, comanda:comandas!inner(mesa, cliente:perfis(nome)))',
+          'pedido:pedidos!inner(criado_em, comanda:comandas!inner(mesa, cliente:perfis!comandas_usuario_id_fkey(nome)))',
       )
       .in('status', ['novo', 'em_andamento']);
 

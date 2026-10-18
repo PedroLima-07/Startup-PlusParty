@@ -60,7 +60,7 @@ export class ComandasAtendenteService {
     const { data, error } = await this.supabase.client
       .from('comandas')
       .select(
-        'id, status, mesa, criada_em, cliente:perfis(nome), ' +
+        'id, status, mesa, criada_em, cliente:perfis!comandas_usuario_id_fkey(nome), ' +
           'pedidos(pedido_itens(quantidade, preco_unitario, item:itens(nome)))',
       )
       .eq('estabelecimento_id', estabelecimentoId)

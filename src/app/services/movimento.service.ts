@@ -234,11 +234,17 @@ export class MovimentoService {
     return linha && numero ? montarDetalhe(linha, numero) : null;
   }
 
+  /**
+   * `perfis!comandas_usuario_id_fkey`: comandas liga em perfis três vezes
+   * (cliente, quem liberou e quem recebeu o pagamento). Sem dizer qual, o
+   * Supabase recusa a consulta (erro PGRST201). O mesmo vale nas telas do
+   * atendente.
+   */
   private async buscarComandas(inicio: string): Promise<LinhaComandaMovimento[]> {
     const { data, error } = await this.supabase.client
       .from('comandas')
       .select(
-        'id, status, mesa, criada_em, fechada_em, cliente:perfis(nome), ' +
+        'id, status, mesa, criada_em, fechada_em, cliente:perfis!comandas_usuario_id_fkey(nome), ' +
           'pedidos(id, criado_em, pedido_itens(quantidade, preco_unitario, status, pronto_em, item:itens(nome, setor)))',
       )
       .gte('criada_em', inicio)
