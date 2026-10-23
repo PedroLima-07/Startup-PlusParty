@@ -1,93 +1,69 @@
-import { Component, computed, inject, signal } from '@angular/core';
-import { CartaoPostagem } from '../../../components/cartao-postagem/cartao-postagem';
-import { mensagemDoBanco } from '../../../erros-banco';
-import { prepararFotoDePostagem } from '../../../foto';
-import { NovaPostagem, Postagem, TipoPostagem } from '../../../models';
-import { PostagemService } from '../../../services/postagem.service';
+import { formatDate } from '@angular/common';
+import { Component, LOCALE_ID, computed, inject, signal } from '@angular/core';
+import { Postagem } from '../../../models';
+import {
+  EMOJI_DO_TIPO,
+  PostagemService,
+  ResumoBar,
+  descontoPercentual,
+  emVigor,
+} from '../../../services/postagem.service';
+import { Confirmar } from '../componentes/confirmar';
 import { Icone } from '../componentes/icone';
+import { EditorPostagem } from './editor-postagem/editor-postagem';
 
-const TIPOS: { valor: TipoPostagem; rotulo: string }[] = [
-  { valor: 'bebida', rotulo: '🍹 Bebida' },
-  { valor: 'comida', rotulo: '🍔 Comida' },
-  { valor: 'evento', rotulo: '🎶 Evento' },
-  { valor: 'novidade', rotulo: '✨ Novidade' },
+type Aba = 'ativas' | 'encerradas';
+
+const ABAS: { valor: Aba; nome: string; icone: 'grade' | 'arquivo' }[] = [
+  { valor: 'ativas', nome: 'Ativas', icone: 'grade' },
+  { valor: 'encerradas', nome: 'Encerradas', icone: 'arquivo' },
 ];
 
-/** "9", "9,9", "9,90" ou "9.90" → 9.9; vazio → null; inválido → NaN. */
-function lerPreco(texto: string): number | null {
-  const limpo = texto.trim().replace('R$', '').trim().replace(',', '.');
-  if (!limpo) return null;
-  return /^\d+(\.\d{1,2})?$/.test(limpo) ? Number(limpo) : NaN;
-}
-
-/** Data de hoje no formato do campo de data (aaaa-mm-dd), no fuso de quem usa. */
-function hojeNoCampo(): string {
-  const hoje = new Date();
-  const mes = String(hoje.getMonth() + 1).padStart(2, '0');
-  const dia = String(hoje.getDate()).padStart(2, '0');
-  return `${hoje.getFullYear()}-${mes}-${dia}`;
-}
+/** O que a janela de postagem está fazendo: criando uma nova ou editando uma. */
+type Editor = { nova: true } | { postagem: Postagem };
 
 /**
- * O gerente publica promoções, eventos e novidades do bar no Feed dos
- * clientes, vendo ao lado a prévia de como o cartão vai aparecer. Os
- * clientes que já abriram comanda no bar recebem um aviso.
+ * As postagens do bar no estilo de um perfil do Instagram: o topo com o bar
+ * e os números, e a grade de fotos. Publicar e editar acontecem numa janela
+ * em etapas. O que sai daqui aparece no Feed dos clientes.
  */
 @Component({
   selector: 'app-postagens',
-  imports: [CartaoPostagem, Icone],
+  imports: [Confirmar, EditorPostagem, Icone],
   templateUrl: './postagens.html',
   styleUrl: './postagens.scss',
+  host: { '(document:keydown.escape)': 'menuAberto.set(null)' },
 })
 export class Postagens {
   private readonly servico = inject(PostagemService);
+  private readonly locale = inject(LOCALE_ID);
 
-  protected readonly tipos = TIPOS;
-  protected readonly hoje = hojeNoCampo();
-
-  protected readonly tipo = signal<TipoPostagem>('bebida');
-  protected readonly titulo = signal('');
-  protected readonly texto = signal('');
-  protected readonly preco = signal('');
-  protected readonly precoAntigo = signal('');
-  protected readonly validaAte = signal('');
-  protected readonly foto = signal<File | null>(null);
-  protected readonly fotoPrevia = signal<string | null>(null);
-
-  protected readonly publicando = signal(false);
-  protected readonly erro = signal<string | null>(null);
-  protected readonly publicada = signal(false);
+  protected readonly abas = ABAS;
+  protected readonly emoji = EMOJI_DO_TIPO;
 
   protected readonly postagens = signal<Postagem[]>([]);
+  protected readonly resumo = signal<ResumoBar | null>(null);
   protected readonly carregando = signal(true);
   protected readonly erroCarregar = signal(false);
-  protected readonly confirmarApagar = signal<string | null>(null);
-  protected readonly apagando = signal(false);
 
-  /** Evento não tem preço; novidade tem preço, mas não "de/por". */
-  protected readonly temPreco = computed(() => this.tipo() !== 'evento');
-  protected readonly temPrecoAntigo = computed(
-    () => this.tipo() === 'bebida' || this.tipo() === 'comida',
+  protected readonly aba = signal<Aba>('ativas');
+  protected readonly editor = signal<Editor | null>(null);
+  /** Postagem com o menu "⋯" aberto (no toque). */
+  protected readonly menuAberto = signal<string | null>(null);
+  protected readonly confirmarApagar = signal<Postagem | null>(null);
+  protected readonly apagando = signal(false);
+  protected readonly erroApagar = signal<string | null>(null);
+  protected readonly aviso = signal<string | null>(null);
+
+  protected readonly ativas = computed(() => this.postagens().filter((p) => emVigor(p)));
+  protected readonly encerradas = computed(() => this.postagens().filter((p) => !emVigor(p)));
+  protected readonly visiveis = computed(() =>
+    this.aba() === 'ativas' ? this.ativas() : this.encerradas(),
   );
 
-  /** A postagem como vai sair, enquanto o gerente preenche. */
-  protected readonly previa = computed<Postagem>(() => {
-    const preco = this.temPreco() ? lerPreco(this.preco()) : null;
-    const precoAntigo = this.temPrecoAntigo() ? lerPreco(this.precoAntigo()) : null;
-    const valido = (valor: number | null) => (valor === null || Number.isNaN(valor) ? null : valor);
-
-    return {
-      id: 'previa',
-      estabelecimento_id: '',
-      tipo: this.tipo(),
-      titulo: this.titulo().trim() || 'Título da postagem',
-      texto: this.texto().trim() || null,
-      imagem_url: this.fotoPrevia(),
-      preco: valido(preco),
-      preco_antigo: valido(preco) === null ? null : valido(precoAntigo),
-      valida_ate: this.validadeEmIso(),
-      criada_em: new Date().toISOString(),
-    };
+  protected readonly editando = computed(() => {
+    const editor = this.editor();
+    return editor && 'postagem' in editor ? editor.postagem : null;
   });
 
   constructor() {
@@ -97,7 +73,13 @@ export class Postagens {
   protected async carregar(): Promise<void> {
     this.carregando.set(true);
     try {
-      this.postagens.set(await this.servico.listarDoMeuBar());
+      const [postagens, resumo] = await Promise.all([
+        this.servico.listarDoMeuBar(),
+        // O topo é um detalhe: sem ele, a grade abre do mesmo jeito.
+        this.servico.resumoDoMeuBar().catch(() => null),
+      ]);
+      this.postagens.set(postagens);
+      this.resumo.set(resumo);
       this.erroCarregar.set(false);
     } catch {
       this.erroCarregar.set(true);
@@ -106,106 +88,69 @@ export class Postagens {
     }
   }
 
-  protected campo(evento: Event): string {
-    return (evento.target as HTMLInputElement).value;
+  protected desconto(postagem: Postagem): number | null {
+    return descontoPercentual(postagem);
   }
 
-  protected escolherFoto(evento: Event): void {
-    const campo = evento.target as HTMLInputElement;
-    const arquivo = campo.files?.[0];
-    // Permite escolher o mesmo arquivo de novo depois de remover a foto.
-    campo.value = '';
-    if (!arquivo) return;
-
-    this.foto.set(arquivo);
-    const leitor = new FileReader();
-    leitor.onload = () => this.fotoPrevia.set(leitor.result as string);
-    leitor.readAsDataURL(arquivo);
+  protected validade(postagem: Postagem): string | null {
+    if (!postagem.valida_ate) return null;
+    if (!emVigor(postagem)) return 'Encerrada';
+    return `Até ${formatDate(postagem.valida_ate, 'dd/MM', this.locale)}`;
   }
 
-  protected removerFoto(): void {
-    this.foto.set(null);
-    this.fotoPrevia.set(null);
+  protected inicial(nome: string): string {
+    return nome.charAt(0).toUpperCase();
   }
 
-  protected async publicar(): Promise<void> {
-    this.publicada.set(false);
-    const nova = this.montar();
-    if (typeof nova === 'string') {
-      this.erro.set(nova);
-      return;
-    }
-
-    this.erro.set(null);
-    this.publicando.set(true);
-    try {
-      const arquivo = this.foto();
-      const foto = arquivo ? await prepararFotoDePostagem(arquivo) : null;
-      const postagem = await this.servico.publicar(nova, foto);
-
-      this.postagens.update((lista) => [postagem, ...lista]);
-      this.limpar();
-      this.publicada.set(true);
-    } catch (erro) {
-      this.erro.set(mensagemDoBanco(erro) ?? 'Não foi possível publicar. Tente de novo.');
-    } finally {
-      this.publicando.set(false);
-    }
+  protected novaPostagem(): void {
+    this.aviso.set(null);
+    this.editor.set({ nova: true });
   }
 
-  protected async apagar(postagem: Postagem): Promise<void> {
+  protected editar(postagem: Postagem): void {
+    this.menuAberto.set(null);
+    this.aviso.set(null);
+    this.editor.set({ postagem });
+  }
+
+  protected pedirParaApagar(postagem: Postagem): void {
+    this.menuAberto.set(null);
+    this.erroApagar.set(null);
+    this.confirmarApagar.set(postagem);
+  }
+
+  protected alternarMenu(postagem: Postagem): void {
+    this.menuAberto.update((aberto) => (aberto === postagem.id ? null : postagem.id));
+  }
+
+  /** A nova entra no topo; a editada fica no lugar. Vai para a aba em que ela aparece. */
+  protected aoSalvar(postagem: Postagem): void {
+    const nova = this.editando() === null;
+    this.postagens.update((lista) =>
+      nova ? [postagem, ...lista] : lista.map((p) => (p.id === postagem.id ? postagem : p)),
+    );
+    this.aba.set(emVigor(postagem) ? 'ativas' : 'encerradas');
+    this.editor.set(null);
+    this.aviso.set(
+      nova
+        ? 'Publicada! Já está no Feed, e os clientes que já vieram ao bar foram avisados.'
+        : 'Alterações salvas.',
+    );
+  }
+
+  protected async apagar(): Promise<void> {
+    const postagem = this.confirmarApagar();
+    if (!postagem) return;
+
     this.apagando.set(true);
     try {
       await this.servico.apagar(postagem);
       this.postagens.update((lista) => lista.filter((p) => p.id !== postagem.id));
       this.confirmarApagar.set(null);
     } catch {
-      this.erro.set('Não foi possível apagar a postagem. Tente de novo.');
+      this.erroApagar.set('Não foi possível apagar a postagem. Tente de novo.');
     } finally {
       this.apagando.set(false);
     }
-  }
-
-  /** A postagem pronta para gravar, ou a frase do que falta corrigir. */
-  private montar(): NovaPostagem | string {
-    const titulo = this.titulo().trim();
-    if (!titulo) return 'Dê um título para a postagem.';
-
-    const preco = this.temPreco() ? lerPreco(this.preco()) : null;
-    const precoAntigo = this.temPrecoAntigo() ? lerPreco(this.precoAntigo()) : null;
-    if (Number.isNaN(preco) || Number.isNaN(precoAntigo)) {
-      return 'Escreva o preço só com números, como 9,90.';
-    }
-    if (precoAntigo !== null && preco === null) return 'Informe o preço da promoção.';
-    if (precoAntigo !== null && preco !== null && precoAntigo <= preco) {
-      return 'O preço normal precisa ser maior que o da promoção.';
-    }
-    if (this.validaAte() && this.validaAte() < this.hoje) {
-      return 'A validade precisa ser hoje ou depois.';
-    }
-
-    return {
-      tipo: this.tipo(),
-      titulo,
-      texto: this.texto().trim() || null,
-      preco,
-      preco_antigo: precoAntigo,
-      valida_ate: this.validadeEmIso(),
-    };
-  }
-
-  /** Vale até o fim do dia escolhido. */
-  private validadeEmIso(): string | null {
-    const dia = this.validaAte();
-    return dia ? new Date(`${dia}T23:59:59`).toISOString() : null;
-  }
-
-  private limpar(): void {
-    this.titulo.set('');
-    this.texto.set('');
-    this.preco.set('');
-    this.precoAntigo.set('');
-    this.validaAte.set('');
-    this.removerFoto();
   }
 }
