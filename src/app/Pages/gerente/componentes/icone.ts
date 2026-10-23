@@ -25,7 +25,15 @@ export type NomeIcone =
   | 'copiar'
   | 'escudo'
   | 'pessoa'
-  | 'avancar';
+  | 'avancar'
+  | 'editar'
+  | 'lixeira'
+  | 'mais'
+  | 'adicionar'
+  | 'grade'
+  | 'arquivo'
+  | 'etiqueta'
+  | 'calendario';
 
 /**
  * Ícones de traço da área do gerente. O tamanho segue o `font-size` e a cor
@@ -148,6 +156,45 @@ export type NomeIcone =
         }
         @case ('avancar') {
           <polyline points="9 18 15 12 9 6" />
+        }
+        @case ('editar') {
+          <path d="M12 20h9" />
+          <path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z" />
+        }
+        @case ('lixeira') {
+          <polyline points="3 6 5 6 21 6" />
+          <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" />
+          <path d="M10 11v6M14 11v6M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2" />
+        }
+        @case ('mais') {
+          <circle cx="5" cy="12" r="1" />
+          <circle cx="12" cy="12" r="1" />
+          <circle cx="19" cy="12" r="1" />
+        }
+        @case ('adicionar') {
+          <line x1="12" y1="5" x2="12" y2="19" />
+          <line x1="5" y1="12" x2="19" y2="12" />
+        }
+        @case ('grade') {
+          <rect x="3" y="3" width="7" height="7" />
+          <rect x="14" y="3" width="7" height="7" />
+          <rect x="14" y="14" width="7" height="7" />
+          <rect x="3" y="14" width="7" height="7" />
+        }
+        @case ('arquivo') {
+          <rect x="2" y="3" width="20" height="5" rx="1" />
+          <path d="M4 8v11a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8" />
+          <line x1="10" y1="12" x2="14" y2="12" />
+        }
+        @case ('etiqueta') {
+          <path d="M20.59 13.41 13.42 20.6a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z" />
+          <line x1="7" y1="7" x2="7.01" y2="7" />
+        }
+        @case ('calendario') {
+          <rect x="3" y="4" width="18" height="18" rx="2" />
+          <line x1="16" y1="2" x2="16" y2="6" />
+          <line x1="8" y1="2" x2="8" y2="6" />
+          <line x1="3" y1="10" x2="21" y2="10" />
         }
       }
     </svg>
