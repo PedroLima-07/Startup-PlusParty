@@ -146,6 +146,7 @@ Os scripts ficam versionados na pasta [`supabase/`](supabase/) e são aplicados 
 | `equipe_convites.sql` | Entrada na equipe só por convite, foto de perfil (Storage) e registro de quem entregou cada pedido |
 | `recusar_comanda.sql` | Status `recusada`: o atendente recusa a comanda de quem não está no bar |
 | `feed_notificacoes.sql` | Postagens com tipo, preço e validade (com promoções de exemplo), fotos no Storage e notificações criadas pelo próprio banco |
+| `bar_redes_localizacao.sql` | Instagram, TikTok, WhatsApp e ponto no mapa do bar (o banco limpa o que o gerente digita); edição de postagens sem mudar a data de publicação |
 | `demo_bar_dze.sql` | Noite de demonstração no Bar D'Zé (clientes, comandas, pedidos e atendentes de exemplo, com os horários de agora). `demo_bar_dze_remover.sql` apaga tudo |
 
 ### Segurança
