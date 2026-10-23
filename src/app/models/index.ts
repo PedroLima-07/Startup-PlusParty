@@ -98,6 +98,14 @@ export interface HistoricoNaoPaga {
   vezes: number;
 }
 
+/** Conta paga esperando avaliação do cliente (supabase/avaliacoes.sql). */
+export interface AvaliacaoPendente {
+  comanda_id: string;
+  estabelecimento_id: string;
+  estabelecimento: string;
+  pedida_em: string;
+}
+
 export interface Pedido {
   id: string;
   comanda_id: string;

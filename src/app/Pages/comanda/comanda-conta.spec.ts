@@ -3,6 +3,7 @@ import localePt from '@angular/common/locales/pt';
 import { LOCALE_ID } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
+import { AvaliacaoService } from '../../services/avaliacao.service';
 import { ComandaService } from '../../services/comanda.service';
 import { SupabaseService } from '../../services/supabase.service';
 import { ComandaPage } from './comanda';
@@ -25,8 +26,10 @@ function comanda(dados: Record<string, unknown>) {
 
 describe('ComandaPage — conta fechada e status finais', () => {
   let fixture: ComponentFixture<ComandaPage>;
+  let verificarAvaliacao: ReturnType<typeof vi.fn>;
 
   async function abrir(dados: Record<string, unknown>): Promise<HTMLElement> {
+    verificarAvaliacao = vi.fn().mockResolvedValue(undefined);
     await TestBed.configureTestingModule({
       imports: [ComandaPage],
       providers: [
@@ -41,6 +44,7 @@ describe('ComandaPage — conta fechada e status finais', () => {
           },
         },
         { provide: SupabaseService, useValue: { escutarMudancas: vi.fn(() => () => {}) } },
+        { provide: AvaliacaoService, useValue: { verificar: verificarAvaliacao } },
       ],
     }).compileComponents();
 
@@ -60,6 +64,7 @@ describe('ComandaPage — conta fechada e status finais', () => {
     expect(tela.textContent).toContain('Passe no caixa para concluir o pagamento');
     expect(tela.querySelector('.nota-bloqueio')).not.toBeNull();
     expect(tela.querySelector('.aviso-atraso')).toBeNull();
+    expect(verificarAvaliacao).not.toHaveBeenCalled();
   });
 
   it('depois de 30 min sem pagamento, mostra o aviso de atraso', async () => {
@@ -74,6 +79,8 @@ describe('ComandaPage — conta fechada e status finais', () => {
     const tela = await abrir({ status: 'paga' });
 
     expect(tela.textContent).toContain('Pagamento confirmado');
+    // A conta acabou de ser paga: o pedido de avaliação é conferido na hora.
+    expect(verificarAvaliacao).toHaveBeenCalled();
     expect(tela.querySelector('.selo-fechada')).toBeNull();
     expect(tela.querySelector('.nota-bloqueio')).toBeNull();
   });
