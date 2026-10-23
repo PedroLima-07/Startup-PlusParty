@@ -21,7 +21,7 @@ const TOP_MAIS_VENDIDOS = 5;
 
 /** A partir de quantos minutos cada situação vira alerta para o gerente. */
 const MINUTOS_ALERTA = {
-  pagamento: 20,
+  pagamento: 30,
   pedido_parado: 15,
   liberacao: 5,
   sem_pedido: 180,

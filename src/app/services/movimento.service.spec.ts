@@ -158,7 +158,7 @@ describe('calcularMovimento', () => {
       status: 'aguardando_pagamento',
       mesa: '12',
       criada_em: em(21),
-      fechada_em: em(22, 35),
+      fechada_em: em(22, 25),
       cliente: { nome: 'Carlos Souza' },
       pedidos: [{ id: 'p4', criado_em: em(21, 5), pedido_itens: [item('Chope', 'bar', 3, 12)] }],
     }),
@@ -239,7 +239,7 @@ describe('calcularMovimento', () => {
   it('gera os alertas que passaram do tempo, com o pagamento primeiro', () => {
     expect(numeros.alertas.map((a) => a.tipo)).toEqual(['pagamento', 'pedido_parado', 'liberacao']);
     expect(numeros.alertas[0]).toMatchObject({
-      titulo: 'Comanda sem pagamento há 25 min',
+      titulo: 'Comanda sem pagamento há 35 min',
       comanda: '03',
     });
     expect(numeros.alertas[1].detalhe).toBe('Comanda 02 · Cozinha · 1× Iscas');
@@ -258,14 +258,15 @@ describe('calcularMovimento', () => {
     );
   });
 
-  it('não avisa antes de 3h sem pedido nem antes de 20 min sem pagamento', () => {
+  it('não avisa antes de 3h sem pedido nem antes de 30 min sem pagamento', () => {
     const recentes = [
       comanda({
         id: 'a',
         criada_em: em(20),
         pedidos: [{ id: 'p', criado_em: em(20, 10), pedido_itens: [item('Chope', 'bar', 1, 12)] }],
       }),
-      comanda({ id: 'b', status: 'aguardando_pagamento', fechada_em: em(22, 45) }),
+      // Conta fechada há 25 min: ainda dentro do prazo.
+      comanda({ id: 'b', status: 'aguardando_pagamento', fechada_em: em(22, 35) }),
     ];
 
     expect(calcularMovimento(recentes, AGORA).alertas).toEqual([]);
