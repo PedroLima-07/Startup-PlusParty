@@ -24,6 +24,7 @@ function comanda(
     fechada_em: null,
     liberada_em: null,
     liberada_por: null,
+    veio_da_fila: false,
     total: 0,
     itens: [],
     ...dados,
@@ -508,5 +509,66 @@ describe('AtendenteComandas', () => {
     const marcada = tela().querySelector('.card.selecionada');
     expect(marcada?.textContent).toContain('Mariana');
     expect(marcada?.getAttribute('aria-current')).toBe('true');
+  });
+
+  describe('mesa', () => {
+    const minutosAtras = (minutos: number) => new Date(Date.now() - minutos * 60_000).toISOString();
+
+    it('ao liberar, mostra quem mais está na mesma mesa', async () => {
+      service.listar.mockResolvedValue([
+        LIBERACAO,
+        comanda({ id: 'x1', status: 'aguardando_pagamento', mesa: '012', cliente: 'Carla', fechada_em: minutosAtras(12) }),
+        comanda({ id: 'x2', status: 'aberta', mesa: '12', cliente: 'João' }),
+        comanda({ id: 'x3', status: 'aberta', mesa: '7', cliente: 'Outra mesa' }),
+      ]);
+      await atualizar();
+
+      abrir('Carlos');
+
+      const nesta = tela().querySelector('.nesta-mesa')!;
+      expect(nesta.textContent).toContain('Carla');
+      expect(nesta.textContent).toMatch(/fechou a conta há 1[12] min/);
+      expect(nesta.textContent).toContain('João');
+      expect(nesta.textContent).toContain('comanda aberta');
+      expect(nesta.textContent).not.toContain('Outra mesa');
+    });
+
+    it('mesa sem mais ninguém: sem o quadro', () => {
+      abrir('Carlos');
+      expect(tela().querySelector('.nesta-mesa')).toBeNull();
+    });
+
+    it('comanda aberta pela fila ganha o selo', async () => {
+      service.listar.mockResolvedValue([{ ...LIBERACAO, veio_da_fila: true }]);
+      await atualizar();
+
+      abrir('Carlos');
+
+      expect(tela().querySelector('.selo-fila')?.textContent).toContain('Veio da fila');
+    });
+
+    it('trocar mesa libera na mesa corrigida', async () => {
+      abrir('Carlos');
+      botao('Trocar mesa')!.click();
+      fixture.detectChanges();
+
+      const campo = tela().querySelector<HTMLInputElement>('#nova-mesa')!;
+      campo.value = '14';
+      campo.dispatchEvent(new Event('input'));
+      await tocar('Liberar na mesa 14');
+
+      expect(service.liberar).toHaveBeenCalledWith('a1b2-c1', '14');
+      expect(tela().querySelector('.aviso')!.textContent).toContain('Comanda liberada na mesa 14');
+    });
+
+    it('cancelar a troca volta aos botões, sem liberar', () => {
+      abrir('Carlos');
+      botao('Trocar mesa')!.click();
+      botao('Cancelar')!.click();
+
+      expect(tela().querySelector('.trocar-mesa')).toBeNull();
+      expect(botao('Liberar comanda')).toBeTruthy();
+      expect(service.liberar).not.toHaveBeenCalled();
+    });
   });
 });

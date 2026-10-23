@@ -24,6 +24,7 @@ import {
 } from '../../services/comandas-atendente.service';
 import { Carregando } from '../../components/carregando/carregando';
 import { NavAtendente } from '../../components/nav-atendente/nav-atendente';
+import { normalizarMesa } from '../../mesa';
 import { telaDesktop } from '../../tela';
 import { minutosDesde, relogio } from '../../tempo';
 
@@ -204,6 +205,31 @@ export class AtendenteComandas implements OnInit {
     () => (this.minutosEsperandoPagamento() ?? 0) >= MINUTOS_ALERTA_PAGAMENTO,
   );
 
+  /** "Trocar mesa": o atendente corrige o número que o cliente digitou. */
+  protected readonly trocandoMesa = signal(false);
+  protected readonly novaMesa = signal('');
+
+  /** Quem mais está na mesa da comanda a liberar (a lista já tem todas as ativas do bar). */
+  protected readonly nestaMesa = computed(() => {
+    const comanda = this.selecionada();
+    const mesa = normalizarMesa(comanda?.mesa);
+    if (!comanda || comanda.status !== 'aguardando_liberacao' || !mesa) return [];
+
+    return this.comandas()
+      .filter((outra) => outra.id !== comanda.id && normalizarMesa(outra.mesa) === mesa)
+      .map((outra) => ({
+        id: outra.id,
+        cliente: outra.cliente,
+        situacao:
+          outra.status === 'aberta'
+            ? 'comanda aberta'
+            : outra.status === 'aguardando_pagamento'
+              ? `fechou a conta há ${minutosDesde(outra.fechada_em ?? outra.criada_em, this.agora())} min`
+              : 'esperando liberação',
+        fechando: outra.status === 'aguardando_pagamento',
+      }));
+  });
+
   /** Se o cliente da comanda a liberar já saiu sem pagar alguma vez. */
   protected readonly historicoNaoPaga = signal<HistoricoNaoPaga | null>(null);
 
@@ -216,6 +242,7 @@ export class AtendenteComandas implements OnInit {
       const id = this.comandaParaHistorico();
       untracked(() => {
         this.historicoNaoPaga.set(null);
+        this.trocandoMesa.set(false);
         const comanda = this.comandas().find((c) => c.id === id);
         if (comanda) void this.buscarHistorico(comanda);
       });
@@ -355,9 +382,21 @@ export class AtendenteComandas implements OnInit {
   }
 
   protected async liberar(): Promise<void> {
-    await this.executar('liberar', 'Comanda liberada', (comanda) =>
-      this.comandasService.liberar(comanda.id),
+    const mesa = this.trocandoMesa() ? this.novaMesa().trim() : '';
+    if (this.trocandoMesa() && !mesa) return;
+
+    await this.executar('liberar', mesa ? `Comanda liberada na mesa ${mesa}` : 'Comanda liberada', (comanda) =>
+      mesa ? this.comandasService.liberar(comanda.id, mesa) : this.comandasService.liberar(comanda.id),
     );
+  }
+
+  protected comecarTrocaDeMesa(): void {
+    this.novaMesa.set('');
+    this.trocandoMesa.set(true);
+  }
+
+  protected cancelarTrocaDeMesa(): void {
+    this.trocandoMesa.set(false);
   }
 
   protected async recusar(): Promise<void> {

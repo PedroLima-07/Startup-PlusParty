@@ -98,6 +98,19 @@ export interface HistoricoNaoPaga {
   vezes: number;
 }
 
+/** Como a mesa está antes de abrir a comanda (supabase/mesa_fila.sql). */
+export type SituacaoMesa = 'livre' | 'em_uso' | 'liberando';
+
+/** O cliente esperando na fila de uma mesa. */
+export interface EsperaNaFila {
+  id: string;
+  estabelecimento_id: string;
+  estabelecimento: string;
+  mesa: string;
+  /** 1 = o próximo a ser chamado. */
+  posicao: number;
+}
+
 /** Conta paga esperando avaliação do cliente (supabase/avaliacoes.sql). */
 export interface AvaliacaoPendente {
   comanda_id: string;
@@ -179,6 +192,8 @@ export interface ComandaAtendente {
   liberada_em: string | null;
   /** Nome de quem liberou a comanda; null enquanto não foi liberada. */
   liberada_por: string | null;
+  /** Aberta pelo banco para o primeiro da fila quando a mesa liberou. */
+  veio_da_fila: boolean;
   /** Soma de quantidade × preço de tudo o que foi pedido até agora. */
   total: number;
   itens: ItemConsumido[];
@@ -284,7 +299,8 @@ export type TipoNotificacao =
   | 'comanda_recusada'
   | 'pedido_pronto'
   | 'pagamento_confirmado'
-  | 'postagem';
+  | 'postagem'
+  | 'mesa_liberada';
 
 /** Aviso para o cliente. Quem cria é o banco (supabase/feed_notificacoes.sql). */
 export interface Notificacao {

@@ -22,6 +22,7 @@ export interface LinhaComandaAtendente {
   criada_em: string;
   fechada_em: string | null;
   liberada_em: string | null;
+  veio_da_fila?: boolean;
   cliente: { nome: string } | null;
   liberador: { nome: string } | null;
   pedidos: {
@@ -64,7 +65,7 @@ export class ComandasAtendenteService {
     const { data, error } = await this.supabase.client
       .from('comandas')
       .select(
-        'id, status, mesa, usuario_id, criada_em, fechada_em, liberada_em, ' +
+        'id, status, mesa, usuario_id, criada_em, fechada_em, liberada_em, veio_da_fila, ' +
           'cliente:perfis!comandas_usuario_id_fkey(nome), liberador:perfis!comandas_liberada_por_fkey(nome), ' +
           'pedidos(pedido_itens(quantidade, preco_unitario, item:itens(nome)))',
       )
@@ -93,8 +94,9 @@ export class ComandasAtendenteService {
     this.totalPendencias.set(count ?? 0);
   }
 
-  async liberar(comandaId: string): Promise<void> {
-    await this.mudarStatus(comandaId, 'aguardando_liberacao', 'aberta');
+  /** Libera a comanda; com `mesa`, corrige o número que o cliente digitou. */
+  async liberar(comandaId: string, mesa?: string): Promise<void> {
+    await this.mudarStatus(comandaId, 'aguardando_liberacao', 'aberta', mesa ? { mesa } : {});
   }
 
   /** Precisa do status 'recusada' no banco (supabase/recusar_comanda.sql). */
@@ -133,6 +135,7 @@ export class ComandasAtendenteService {
       fechada_em: linha.fechada_em,
       liberada_em: linha.liberada_em,
       liberada_por: linha.liberador?.nome.trim() || null,
+      veio_da_fila: linha.veio_da_fila ?? false,
       total: itens.reduce((soma, item) => soma + item.quantidade * item.preco_unitario, 0),
       itens,
     };
@@ -181,10 +184,11 @@ export class ComandasAtendenteService {
     comandaId: string,
     de: StatusComanda,
     para: StatusComanda,
+    outrosCampos: Record<string, unknown> = {},
   ): Promise<void> {
     const { data, error } = await this.supabase.client
       .from('comandas')
-      .update({ status: para })
+      .update({ ...outrosCampos, status: para })
       .eq('id', comandaId)
       .eq('status', de)
       .select('id');
