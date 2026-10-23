@@ -78,11 +78,22 @@ describe('AtendenteComandas', () => {
     return Array.from(tela().querySelectorAll<HTMLButtonElement>('.card'));
   }
 
+  function cartoes(): HTMLButtonElement[] {
+    return Array.from(tela().querySelectorAll<HTMLButtonElement>('.cartao'));
+  }
+
+  /** Abre a comanda no detalhe, trocando de cartão se ela estiver em outra lista. */
   function abrir(texto: string): void {
-    cards()
-      .find((card) => card.textContent?.includes(texto))!
-      .click();
-    fixture.detectChanges();
+    for (let i = -1; i < 3; i++) {
+      if (i >= 0) cartoes()[i].click();
+      const card = cards().find((c) => c.textContent?.includes(texto));
+      if (card) {
+        card.click();
+        fixture.detectChanges();
+        return;
+      }
+    }
+    throw new Error(`Nenhuma comanda com "${texto}"`);
   }
 
   function botao(texto: string): HTMLButtonElement | undefined {
@@ -219,23 +230,39 @@ describe('AtendenteComandas', () => {
       expect(service.listar).toHaveBeenCalledWith('bar1');
     });
 
-    it('mostra as comandas na ordem recebida, cada status com o seu selo', () => {
-      const [liberacao, pagamento, aberta] = cards();
+    it('mostra os três cartões com quantas comandas há em cada', () => {
+      expect(cartoes().map((c) => c.querySelector('.cartao-numero')?.textContent?.trim())).toEqual([
+        '1',
+        '1',
+        '1',
+      ]);
+      expect(cartoes()[0].textContent).toContain('Liberar');
+      expect(cartoes()[1].textContent).toContain('Receber');
+      expect(cartoes()[2].textContent).toContain('Abertas');
+    });
 
-      expect(liberacao.classList).toContain('aguardando_liberacao');
-      expect(liberacao.querySelector('.selo')!.textContent).toContain('Aguardando liberação');
-      expect(pagamento.classList).toContain('aguardando_pagamento');
-      expect(pagamento.querySelector('.selo')!.textContent).toContain('Aguardando pagamento');
-      expect(aberta.classList).toContain('aberta');
-      expect(aberta.querySelector('.selo')!.textContent).toContain('Aberta');
+    it('no celular a lista começa pelo primeiro cartão com alguém esperando', () => {
+      expect(cartoes()[0].getAttribute('aria-pressed')).toBe('true');
+      expect(cards().map((card) => card.querySelector('.cliente')?.textContent)).toEqual(['Carlos']);
+    });
+
+    it('tocar num cartão mostra só as comandas daquele tipo', () => {
+      cartoes()[1].click();
+
+      expect(cards().map((card) => card.querySelector('.cliente')?.textContent)).toEqual(['Mariana']);
+      expect(cartoes()[1].getAttribute('aria-pressed')).toBe('true');
+      expect(tela().querySelector('.titulo-lista')?.textContent).toContain('Receber pagamento · 1');
     });
 
     it('cada card traz identificador, cliente, mesa ou balcão e valor parcial', () => {
-      const [liberacao, pagamento] = cards();
-
+      const [liberacao] = cards();
       expect(liberacao.textContent).toContain('#A1B2');
       expect(liberacao.textContent).toContain('Carlos');
       expect(liberacao.textContent).toContain('Mesa 12');
+      expect(liberacao.textContent).toContain('esperando há');
+
+      cartoes()[1].click();
+      const [pagamento] = cards();
       expect(pagamento.textContent).toContain('Balcão');
       expect(pagamento.textContent).toContain('Mariana');
       expect(pagamento.textContent).toContain('58,00');
@@ -250,7 +277,8 @@ describe('AtendenteComandas', () => {
 
       await atualizar();
 
-      expect(tela().textContent).toContain('Nenhuma comanda no momento');
+      expect(tela().textContent).toContain('Nada para liberar.');
+      expect(cartoes().every((cartao) => cartao.classList.contains('zerado'))).toBe(true);
     });
 
     it('mostra erro quando não consegue carregar', async () => {
@@ -322,6 +350,9 @@ describe('AtendenteComandas', () => {
       expect(service.liberar).toHaveBeenCalledWith('a1b2-c1');
       expect(tela().querySelector('.aviso')!.textContent).toContain('Comanda liberada');
       expect(service.listar).toHaveBeenCalledTimes(2);
+      expect(cards().some((card) => card.textContent?.includes('Carlos'))).toBe(false);
+
+      cartoes()[2].click();
       const carlos = cards().find((card) => card.textContent?.includes('Carlos'))!;
       expect(carlos.classList).toContain('aberta');
     });
@@ -344,7 +375,7 @@ describe('AtendenteComandas', () => {
 
       expect(service.liberar).not.toHaveBeenCalled();
       expect(service.recusar).not.toHaveBeenCalled();
-      expect(cards()).toHaveLength(3);
+      expect(cards()).toHaveLength(1);
     });
   });
 
@@ -450,7 +481,8 @@ describe('AtendenteComandas', () => {
 
       expect(tela().textContent).toContain('já tinha sido atualizada por outra pessoa');
       expect(tela().querySelector('.aviso')).toBeNull();
-      expect(cards()).toHaveLength(2);
+      expect(cards().some((card) => card.textContent?.includes('Carlos'))).toBe(false);
+      expect(cartoes()[0].classList).toContain('zerado');
     });
   });
 
@@ -464,24 +496,8 @@ describe('AtendenteComandas', () => {
     expect(router.navigateByUrl).toHaveBeenCalledWith('/login');
   });
 
-  it('filtra a lista pela situação, com quantas comandas há em cada', () => {
-    const filtros = () => Array.from(tela().querySelectorAll<HTMLButtonElement>('.filtro'));
-
-    expect(filtros().map((f) => f.textContent?.trim())).toEqual([
-      'Todas · 3',
-      'Liberar · 1',
-      'Receber · 1',
-      'Abertas · 1',
-    ]);
-
-    filtros()[2].click();
-
-    expect(cards().map((card) => card.querySelector('.cliente')?.textContent)).toEqual(['Mariana']);
-    expect(filtros()[2].getAttribute('aria-pressed')).toBe('true');
-  });
-
-  it('resume no título quantas comandas esperam o atendente', () => {
-    expect(tela().querySelector('.titulo-pagina p')?.textContent).toBe(
+  it('resume quantas comandas esperam o atendente (subtítulo do desktop)', () => {
+    expect(fixture.componentInstance['resumoPendencias']()).toBe(
       '2 esperam por você: 1 para liberar e 1 para receber',
     );
   });

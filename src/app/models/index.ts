@@ -21,6 +21,9 @@ export const STATUS_ATIVOS: StatusComanda[] = ['aguardando_liberacao', 'aberta',
 /** Quantos minutos depois de fechar a conta o pagamento vira alerta (atendente e gerente). */
 export const MINUTOS_ALERTA_PAGAMENTO = 30;
 
+/** Quantos minutos esperando liberação viram alerta (atendente e gerente). */
+export const MINUTOS_ALERTA_LIBERACAO = 5;
+
 export type StatusPedidoItem = 'novo' | 'em_andamento' | 'pronto';
 
 export type SetorItem = 'bar' | 'cozinha';
