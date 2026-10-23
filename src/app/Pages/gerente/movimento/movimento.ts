@@ -1,18 +1,14 @@
-import { CurrencyPipe, DatePipe } from '@angular/common';
+import { CurrencyPipe, DatePipe, NgTemplateOutlet } from '@angular/common';
 import { Component, DestroyRef, OnInit, computed, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import {
-  AlertaGerente,
-  ComandaResumo,
-  StatusComanda,
-  StatusPedidoItem,
-  TipoAlertaGerente,
-} from '../../../models';
+import { AlertaGerente, ComandaResumo, TipoAlertaGerente } from '../../../models';
 import { Carregando } from '../../../components/carregando/carregando';
 import { AuthService } from '../../../services/auth.service';
 import { MovimentoService } from '../../../services/movimento.service';
 import { SupabaseService } from '../../../services/supabase.service';
+import { telaDesktop } from '../../../tela';
 import { Icone, NomeIcone } from '../componentes/icone';
+import { DetalheComanda } from './detalhe-comanda/detalhe-comanda';
 
 type Filtro = 'todas' | ComandaResumo['status'];
 
@@ -35,12 +31,6 @@ const ROTULOS_STATUS: Record<ComandaResumo['status'], string> = {
   paga: 'Paga',
 };
 
-const ROTULOS_ITEM: Record<StatusPedidoItem, string> = {
-  novo: 'Novo',
-  em_andamento: 'Em preparo',
-  pronto: 'Pronto',
-};
-
 /** Como cada tipo de alerta aparece: o ícone e o texto do botão. */
 const APARENCIA_ALERTA: Record<TipoAlertaGerente, { icone: NomeIcone; acao: string }> = {
   pagamento: { icone: 'alerta', acao: 'Ver detalhes' },
@@ -52,10 +42,9 @@ const APARENCIA_ALERTA: Record<TipoAlertaGerente, { icone: NomeIcone; acao: stri
 /** Painel principal do gerente: o que precisa de atenção, o faturamento e as comandas do dia. */
 @Component({
   selector: 'app-movimento',
-  imports: [Carregando, CurrencyPipe, DatePipe, Icone, RouterLink],
+  imports: [Carregando, CurrencyPipe, DatePipe, DetalheComanda, Icone, NgTemplateOutlet, RouterLink],
   templateUrl: './movimento.html',
   styleUrls: ['./movimento.scss', './movimento.desktop.scss'],
-  host: { '(document:keydown.escape)': 'fecharDetalhe()' },
 })
 export class Movimento implements OnInit {
   protected readonly movimento = inject(MovimentoService);
@@ -63,6 +52,8 @@ export class Movimento implements OnInit {
   private supabase = inject(SupabaseService);
   private destroyRef = inject(DestroyRef);
 
+  /** No desktop o cartão de faturamento sobe para o lado dos números. */
+  protected readonly desktop = telaDesktop();
   protected readonly filtros = FILTROS;
   protected readonly hoje = new Date();
   protected readonly nomeDoBar = signal('');
@@ -150,16 +141,6 @@ export class Movimento implements OnInit {
 
   protected fecharDetalhe(): void {
     this.comandaAberta.set(null);
-  }
-
-  protected rotuloStatusDetalhe(status: StatusComanda): string {
-    if (status === 'aguardando_liberacao') return 'Aguardando liberação';
-    if (status === 'recusada') return 'Recusada';
-    return ROTULOS_STATUS[status];
-  }
-
-  protected rotuloItem(status: StatusPedidoItem): string {
-    return ROTULOS_ITEM[status];
   }
 
   protected alternarValores(): void {
