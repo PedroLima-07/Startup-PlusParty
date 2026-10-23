@@ -116,7 +116,8 @@
     grid-template-columns: minmax(0, 1fr) 360px;
     grid-template-areas:
       'erro erro'
-      'comandas atencao';
+      'comandas atencao'
+      'comandas divulgar';
     align-items: start;
     gap: 0 24px;
     max-width: 1240px;
@@ -130,6 +131,10 @@
   .mensagem-erro {
     grid-area: erro;
     margin-bottom: 16px;
+  }
+
+  app-cartao-divulgar {
+    grid-area: divulgar;
   }
 
   // O cartão de status subiu para a linha dos números.

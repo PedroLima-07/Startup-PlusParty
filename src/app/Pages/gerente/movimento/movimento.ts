@@ -8,6 +8,7 @@ import { MovimentoService } from '../../../services/movimento.service';
 import { SupabaseService } from '../../../services/supabase.service';
 import { telaDesktop } from '../../../tela';
 import { Icone, NomeIcone } from '../componentes/icone';
+import { CartaoDivulgar } from '../divulgar/cartao-divulgar';
 import { DetalheComanda } from './detalhe-comanda/detalhe-comanda';
 
 type Filtro = 'todas' | ComandaResumo['status'];
@@ -42,7 +43,16 @@ const APARENCIA_ALERTA: Record<TipoAlertaGerente, { icone: NomeIcone; acao: stri
 /** Painel principal do gerente: o que precisa de atenção, o faturamento e as comandas do dia. */
 @Component({
   selector: 'app-movimento',
-  imports: [Carregando, CurrencyPipe, DatePipe, DetalheComanda, Icone, NgTemplateOutlet, RouterLink],
+  imports: [
+    Carregando,
+    CartaoDivulgar,
+    CurrencyPipe,
+    DatePipe,
+    DetalheComanda,
+    Icone,
+    NgTemplateOutlet,
+    RouterLink,
+  ],
   templateUrl: './movimento.html',
   styleUrls: ['./movimento.scss', './movimento.desktop.scss'],
 })

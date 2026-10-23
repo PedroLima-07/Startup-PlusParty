@@ -1,0 +1,122 @@
+@use '../gerente' as g;
+
+.pagina {
+  @include g.pagina;
+  max-width: 1000px;
+}
+
+h1 {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  @include g.titulo-desktop;
+}
+
+.explicacao {
+  margin: 4px 0 0;
+  color: g.$texto-suave;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.cartao {
+  @include g.cartao;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.rotulo {
+  @include g.rotulo;
+}
+
+// Story à esquerda e os textos à direita, quando cabe.
+.colunas {
+  display: grid;
+  gap: 16px;
+
+  @media (min-width: 860px) {
+    grid-template-columns: 340px minmax(0, 1fr);
+    align-items: start;
+  }
+}
+
+.textos {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.previa-story {
+  display: grid;
+  place-items: center;
+  aspect-ratio: 9 / 16;
+  max-height: 520px;
+  border-radius: 14px;
+  background: #eef1f6;
+  overflow: hidden;
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
+}
+
+.dica {
+  margin: 0;
+  color: g.$texto-suave;
+  font-size: 12px;
+}
+
+.linha-copiar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+}
+
+.link {
+  flex: 1;
+  min-width: 0;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: #f1f3f8;
+  font-family: g.$mono;
+  font-size: 13px;
+  overflow-wrap: anywhere;
+}
+
+.texto-pronto {
+  margin: 0;
+  padding: 12px 14px;
+  border-left: 3px solid g.$azul-claro;
+  border-radius: 4px;
+  background: #f7f8fb;
+  font-size: 14px;
+  line-height: 1.55;
+  white-space: pre-line;
+}
+
+.botao-azul {
+  @include g.botao-azul;
+  min-height: 44px;
+}
+
+.botao-contorno {
+  @include g.botao-contorno;
+  align-self: flex-start;
+}
+
+.vazio {
+  margin: 0;
+  padding: 18px 16px;
+  color: g.$texto-suave;
+  font-size: 13px;
+  text-align: center;
+}
+
+.mensagem-erro {
+  @include g.mensagem-erro;
+}
