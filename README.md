@@ -149,6 +149,7 @@ Os scripts ficam versionados na pasta [`supabase/`](supabase/) e são aplicados 
 | `comanda_regras.sql` | Uma comanda ativa por cliente (trava abas duplicadas e conta não paga), status `cancelada` e `nao_paga` (gerente libera quem saiu sem pagar) e histórico de contas não pagas para quem libera |
 | `avaliacoes.sql` | Avaliações verificadas: só quem pagou avalia (uma vez por comanda, até 7 dias), o pedido fica guardado até responder ou dispensar, nota do bar calculada pelo banco, resposta e denúncia do gerente |
 | `mesa_fila.sql` | Situação da mesa (livre, em uso, sendo liberada) e fila de espera: quando a mesa libera, o banco abre a comanda do primeiro da fila e avisa |
+| `agenda_eventos.sql` | Agenda de eventos do bar (com repetição semanal), "Tenho interesse", lembrete 2 h antes (pg_cron) e aviso de evento cancelado |
 | `bar_redes_localizacao.sql` | Instagram, TikTok, WhatsApp e ponto no mapa do bar (o banco limpa o que o gerente digita); edição de postagens sem mudar a data de publicação |
 | `demo_bar_dze.sql` | Noite de demonstração no Bar D'Zé (clientes, comandas, pedidos e atendentes de exemplo, com os horários de agora). `demo_bar_dze_remover.sql` apaga tudo |
 

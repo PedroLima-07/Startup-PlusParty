@@ -300,7 +300,9 @@ export type TipoNotificacao =
   | 'pedido_pronto'
   | 'pagamento_confirmado'
   | 'postagem'
-  | 'mesa_liberada';
+  | 'mesa_liberada'
+  | 'evento_lembrete'
+  | 'evento_cancelado';
 
 /** Aviso para o cliente. Quem cria é o banco (supabase/feed_notificacoes.sql). */
 export interface Notificacao {
