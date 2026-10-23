@@ -152,7 +152,7 @@ Os scripts ficam versionados na pasta [`supabase/`](supabase/) e são aplicados 
 | `agenda_eventos.sql` | Agenda de eventos do bar (com repetição semanal), "Tenho interesse", lembrete 2 h antes (pg_cron) e aviso de evento cancelado |
 | `resultados_periodo.sql` | Números da tela Resultados para 3, 7, 15 ou 30 dias, já somados no banco e comparados com o período anterior |
 | `bar_redes_localizacao.sql` | Instagram, TikTok, WhatsApp e ponto no mapa do bar (o banco limpa o que o gerente digita); edição de postagens sem mudar a data de publicação |
-| `demo_bar_dze.sql` | Noite de demonstração no Bar D'Zé (clientes, comandas, pedidos e atendentes de exemplo, com os horários de agora). `demo_bar_dze_remover.sql` apaga tudo |
+| `demo_bar_dze.sql` | Demonstração no Bar D'Zé: a noite de hoje e os 30 dias anteriores (sexta e sábado cheios), avaliações, agenda com interessados, uma fila de mesa e uma conta não paga, com os horários de agora. `demo_bar_dze_remover.sql` apaga tudo |
 
 ### Segurança
 
