@@ -4,6 +4,7 @@ import { RouterLink } from '@angular/router';
 import {
   AlertaGerente,
   ComandaResumo,
+  MINUTOS_ALERTA_PAGAMENTO,
   StatusComanda,
   StatusPedidoItem,
   TipoAlertaGerente,
@@ -33,6 +34,7 @@ const ROTULOS_STATUS: Record<ComandaResumo['status'], string> = {
   aberta: 'Aberta',
   aguardando_pagamento: 'Aguardando pagamento',
   paga: 'Paga',
+  nao_paga: 'Não paga',
 };
 
 const ROTULOS_ITEM: Record<StatusPedidoItem, string> = {
@@ -54,8 +56,8 @@ const APARENCIA_ALERTA: Record<TipoAlertaGerente, { icone: NomeIcone; acao: stri
   selector: 'app-movimento',
   imports: [Carregando, CurrencyPipe, DatePipe, Icone, RouterLink],
   templateUrl: './movimento.html',
-  styleUrls: ['./movimento.scss', './movimento.desktop.scss'],
-  host: { '(document:keydown.escape)': 'fecharDetalhe()' },
+  styleUrls: ['./movimento.scss', './movimento.desktop.scss', './movimento.nao-paga.scss'],
+  host: { '(document:keydown.escape)': 'aoApertarEsc()' },
 })
 export class Movimento implements OnInit {
   protected readonly movimento = inject(MovimentoService);
@@ -64,6 +66,7 @@ export class Movimento implements OnInit {
   private destroyRef = inject(DestroyRef);
 
   protected readonly filtros = FILTROS;
+  protected readonly limitePagamento = MINUTOS_ALERTA_PAGAMENTO;
   protected readonly hoje = new Date();
   protected readonly nomeDoBar = signal('');
   protected readonly filtro = signal<Filtro>('todas');
@@ -80,6 +83,11 @@ export class Movimento implements OnInit {
     const id = this.comandaAberta();
     return id ? this.movimento.detalhe(id) : null;
   });
+
+  /** A confirmação de "não paga" está aberta por cima do detalhe. */
+  protected readonly confirmandoNaoPaga = signal(false);
+  protected readonly marcandoNaoPaga = signal(false);
+  protected readonly erroNaoPaga = signal<string | null>(null);
 
   /** Antes da primeira resposta do banco os números seriam zeros enganosos. */
   protected readonly carregandoPrimeiraVez = computed(
@@ -149,12 +157,48 @@ export class Movimento implements OnInit {
   }
 
   protected fecharDetalhe(): void {
+    if (this.marcandoNaoPaga()) return;
+    this.cancelarNaoPaga();
     this.comandaAberta.set(null);
+  }
+
+  /** Esc fecha primeiro a confirmação; com ela fechada, o detalhe. */
+  protected aoApertarEsc(): void {
+    if (this.confirmandoNaoPaga()) this.cancelarNaoPaga();
+    else this.fecharDetalhe();
+  }
+
+  protected pedirConfirmacaoNaoPaga(): void {
+    this.erroNaoPaga.set(null);
+    this.confirmandoNaoPaga.set(true);
+  }
+
+  protected cancelarNaoPaga(): void {
+    if (this.marcandoNaoPaga()) return;
+    this.confirmandoNaoPaga.set(false);
+    this.erroNaoPaga.set(null);
+  }
+
+  protected async confirmarNaoPaga(): Promise<void> {
+    const id = this.comandaAberta();
+    if (!id || this.marcandoNaoPaga()) return;
+
+    this.marcandoNaoPaga.set(true);
+    this.erroNaoPaga.set(null);
+    try {
+      await this.movimento.marcarNaoPaga(id);
+      this.confirmandoNaoPaga.set(false);
+    } catch {
+      this.erroNaoPaga.set('Não foi possível marcar agora. Atualize o painel e tente de novo.');
+    } finally {
+      this.marcandoNaoPaga.set(false);
+    }
   }
 
   protected rotuloStatusDetalhe(status: StatusComanda): string {
     if (status === 'aguardando_liberacao') return 'Aguardando liberação';
     if (status === 'recusada') return 'Recusada';
+    if (status === 'cancelada') return 'Cancelada';
     return ROTULOS_STATUS[status];
   }
 

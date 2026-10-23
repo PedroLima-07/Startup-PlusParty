@@ -1,0 +1,173 @@
+// Detalhe da comanda: quem liberou, atraso do pagamento e "marcar como não paga".
+@use '../gerente' as g;
+
+.selo-status {
+  &.nao_paga {
+    background: #fde8e8;
+    color: #b91c1c;
+  }
+
+  &.cancelada,
+  &.recusada {
+    background: #eef1f6;
+    color: #5b6475;
+  }
+}
+
+.detalhe-selos {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.selo-atraso {
+  padding: 2px 8px;
+  border-radius: 6px;
+  background: #fde8e8;
+  color: #b91c1c;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.detalhe-responsaveis {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 10px;
+  margin: 0;
+
+  div {
+    padding: 10px 12px;
+    border-radius: 12px;
+    background: #f7f8fb;
+  }
+
+  dt {
+    font-size: 12px;
+    color: g.$texto-suave;
+  }
+
+  dd {
+    margin: 4px 0 0;
+    font-size: 14px;
+    font-weight: 600;
+  }
+}
+
+.nao-paga-acao {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 14px;
+  padding-top: 4px;
+
+  span {
+    flex: 1 1 220px;
+    font-size: 12px;
+    line-height: 1.5;
+    color: g.$texto-suave;
+  }
+}
+
+.botao-nao-paga {
+  min-height: 44px;
+  padding: 0 16px;
+  border: 1px solid #fecaca;
+  border-radius: 12px;
+  background: #fff;
+  color: #b91c1c;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+
+  &:hover {
+    background: #fef2f2;
+  }
+}
+
+// Confirmação por cima do detalhe.
+.confirmar-fundo {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: rgba(15, 31, 75, 0.35);
+}
+
+.confirmar {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+  max-width: 440px;
+  padding: 22px;
+  border-radius: 18px;
+  background: #fff;
+  color: g.$marinho;
+
+  h3 {
+    margin: 0;
+    font-size: 18px;
+    line-height: 1.3;
+  }
+
+  p {
+    margin: 0;
+    font-size: 14px;
+    line-height: 1.55;
+    color: g.$texto-suave;
+  }
+}
+
+.confirmar-icone {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #fef2f2;
+  color: #b91c1c;
+}
+
+.confirmar .confirmar-erro {
+  color: #b91c1c;
+}
+
+.confirmar-botoes {
+  display: flex;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 4px;
+
+  button {
+    min-height: 44px;
+    padding: 0 18px;
+    border-radius: 12px;
+    font: inherit;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+
+    &:disabled {
+      opacity: 0.6;
+      cursor: default;
+    }
+  }
+}
+
+.botao-cancelar {
+  border: 1px solid g.$borda;
+  background: #fff;
+  color: g.$marinho;
+}
+
+.botao-confirmar {
+  border: 0;
+  background: #b91c1c;
+  color: #fff;
+}

@@ -110,6 +110,20 @@
             </div>
           </dl>
 
+          @if (historicoNaoPaga(); as historico) {
+            <section class="aviso-historico" role="note">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 9v4"></path><path d="M12 17h.01"></path><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"></path></svg>
+              <div>
+                <strong>{{ historico.vezes === 1 ? 'Já saiu sem pagar uma vez' : 'Já saiu sem pagar ' + historico.vezes + ' vezes' }}</strong>
+                <span>
+                  {{ historico.valor | currency: 'BRL' }} no {{ historico.estabelecimento }} em
+                  {{ historico.quando | date: 'dd/MM' }}, marcada como não paga pelo gerente. Combine o
+                  pagamento antes, se achar necessário.
+                </span>
+              </div>
+            </section>
+          }
+
           <p class="orientacao">
             Confirme que o cliente está no local antes de liberar.
             @if (!comanda.mesa) {
@@ -121,6 +135,34 @@
             <p class="cliente-destaque">{{ comanda.cliente }}</p>
             <p class="local-detalhe">{{ rotuloLocal(comanda) }}<span class="aberta-as"> · aberta às {{ comanda.criada_em | date: 'HH:mm' }}</span></p>
           </section>
+
+          @if (minutosEsperandoPagamento() !== null) {
+            <section class="espera-pagamento" [class.atrasado]="pagamentoAtrasado()" role="status">
+              <strong>Esperando pagamento há {{ minutosEsperandoPagamento() }} min</strong>
+              @if (pagamentoAtrasado()) {
+                <span>Passou de 30 min. O gerente também foi avisado.</span>
+              }
+            </section>
+          }
+
+          @if (comanda.liberada_por || comanda.fechada_em) {
+            <ol class="linha-do-tempo" aria-label="Histórico da comanda">
+              @if (comanda.liberada_por) {
+                <li>
+                  <span>Liberada por <strong>{{ comanda.liberada_por }}</strong></span>
+                  @if (comanda.liberada_em) {
+                    <span>{{ comanda.liberada_em | date: 'HH:mm' }}</span>
+                  }
+                </li>
+              }
+              @if (comanda.fechada_em) {
+                <li>
+                  <span>Conta fechada pelo cliente</span>
+                  <span>{{ comanda.fechada_em | date: 'HH:mm' }}</span>
+                </li>
+              }
+            </ol>
+          }
 
           <section class="bloco" aria-labelledby="titulo-itens">
             <h2 id="titulo-itens">Itens consumidos</h2>

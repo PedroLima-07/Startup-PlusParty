@@ -22,6 +22,42 @@
   </header>
 
   <main class="page-content container-fluid">
+    @if (contaPendente(); as conta) {
+    <section class="conta-pendente" aria-labelledby="titulo-conta-pendente">
+      <h2 class="conta-pendente-titulo">Antes de abrir uma comanda nova</h2>
+
+      <div class="conta-pendente-cartao">
+        <span class="conta-pendente-icone" aria-hidden="true">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 2"></path></svg>
+        </span>
+        <div class="conta-pendente-texto">
+          <p id="titulo-conta-pendente" class="conta-pendente-chamada">Você tem uma conta esperando pagamento</p>
+          <p class="conta-pendente-explicacao">
+            Para abrir uma comanda nova, primeiro conclua o pagamento no caixa do {{ conta.estabelecimento }}.
+          </p>
+        </div>
+
+        <div class="conta-pendente-resumo">
+          <div class="conta-pendente-linha">
+            <span class="conta-pendente-bar">{{ conta.estabelecimento }} · {{ conta.mesa ? 'Mesa ' + conta.mesa : 'Balcão' }}</span>
+            <span class="conta-pendente-valor">{{ conta.total | currency: 'BRL' }}</span>
+          </div>
+          @if (conta.fechada_em) {
+            <span class="conta-pendente-hora">
+              Conta fechada às {{ conta.fechada_em | date: 'HH:mm' }} · há {{ minutosEsperandoPagamento() }} min
+            </span>
+          }
+        </div>
+
+        <button type="button" class="primary-button" (click)="verComanda(conta.id)">Ver minha comanda</button>
+      </div>
+
+      <p class="conta-pendente-ajuda">
+        Já pagou? Peça ao atendente para confirmar o pagamento no caixa. Assim que ele confirmar, você
+        pode abrir a comanda aqui.
+      </p>
+    </section>
+    } @else {
     <section class="intro-section" aria-labelledby="titulo-local">
       <h2 id="titulo-local">Onde você está?</h2>
     </section>
@@ -102,7 +138,31 @@
     @if (mensagem()) {
       <p class="mensagem-erro" role="alert">{{ mensagem() }}</p>
     }
+    }
   </main>
+
+  @if (comandaAberta(); as aberta) {
+    <div class="comanda-aberta-fundo">
+      <section class="comanda-aberta" role="dialog" aria-modal="true" aria-labelledby="titulo-comanda-aberta">
+        <span class="comanda-aberta-icone" aria-hidden="true">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"></rect><path d="M3 9h18"></path><path d="M8 4v5"></path></svg>
+        </span>
+        <div class="comanda-aberta-texto">
+          <p id="titulo-comanda-aberta" class="comanda-aberta-chamada">Sua comanda já foi aberta</p>
+          <p class="comanda-aberta-explicacao">
+            Ela foi aberta antes, em outra aba ou em outro aparelho. Cada pessoa pode ter uma comanda por vez.
+          </p>
+        </div>
+        <div class="comanda-aberta-resumo">
+          <span class="comanda-aberta-bar">{{ aberta.estabelecimento }} · {{ aberta.mesa ? 'Mesa ' + aberta.mesa : 'Balcão' }}</span>
+          <span class="comanda-aberta-status" [class.liberada]="aberta.status === 'aberta'">
+            {{ aberta.status === 'aberta' ? 'Aberta' : 'Aguardando liberação' }}
+          </span>
+        </div>
+        <button type="button" class="primary-button" (click)="verComanda(aberta.id)">Ver minha comanda</button>
+      </section>
+    </div>
+  }
 }
 
 <app-nav-cliente class="apenas-desktop" />

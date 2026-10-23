@@ -4,6 +4,7 @@ import {
   ComandaResumo,
   ItemVendido,
   LotacaoPorHora,
+  MINUTOS_ALERTA_PAGAMENTO,
   SetorItem,
   StatusComanda,
   StatusMovimento,
@@ -21,7 +22,7 @@ const TOP_MAIS_VENDIDOS = 5;
 
 /** A partir de quantos minutos cada situação vira alerta para o gerente. */
 const MINUTOS_ALERTA = {
-  pagamento: 20,
+  pagamento: MINUTOS_ALERTA_PAGAMENTO,
   pedido_parado: 15,
   liberacao: 5,
   sem_pedido: 180,
@@ -34,6 +35,9 @@ export interface LinhaComandaMovimento {
   mesa: string | null;
   criada_em: string;
   fechada_em: string | null;
+  /** Quando e por quem foi liberada (supabase/equipe_convites.sql). */
+  liberada_em?: string | null;
+  liberador?: { nome: string } | null;
   cliente: { nome: string } | null;
   pedidos: {
     id: string;
@@ -82,6 +86,13 @@ export interface DetalheComanda {
   local: string;
   status: StatusComanda;
   aberturaEm: string;
+  /** Nome de quem liberou e a hora (HH:mm); null se não consta. */
+  liberadaPor: string | null;
+  liberadaEm: string | null;
+  /** Hora (HH:mm) em que o cliente fechou a conta. */
+  fechadaEm: string | null;
+  /** Minutos desde o fechamento, só enquanto espera o pagamento. */
+  minutosSemPagamento: number | null;
   total: number;
   pedidos: {
     id: string;
@@ -231,7 +242,25 @@ export class MovimentoService {
   detalhe(id: string): DetalheComanda | null {
     const linha = this.linhas().find((l) => l.id === id);
     const numero = this.comandas().find((c) => c.id === id)?.numero;
-    return linha && numero ? montarDetalhe(linha, numero) : null;
+    return linha && numero ? montarDetalhe(linha, numero, this.atualizadoEm() ?? new Date()) : null;
+  }
+
+  /**
+   * O cliente foi embora sem pagar: a conta vira 'nao_paga' (só o gerente
+   * pode, supabase/comanda_regras.sql) e o cliente volta a poder abrir
+   * comandas. Falha se a comanda já não estava esperando pagamento.
+   */
+  async marcarNaoPaga(id: string): Promise<void> {
+    const { data, error } = await this.supabase.client
+      .from('comandas')
+      .update({ status: 'nao_paga' })
+      .eq('id', id)
+      .eq('status', 'aguardando_pagamento')
+      .select('id');
+
+    if (error) throw error;
+    if ((data ?? []).length === 0) throw new Error('A comanda já não estava esperando pagamento.');
+    await this.atualizar();
   }
 
   /**
@@ -244,7 +273,8 @@ export class MovimentoService {
     const { data, error } = await this.supabase.client
       .from('comandas')
       .select(
-        'id, status, mesa, criada_em, fechada_em, cliente:perfis!comandas_usuario_id_fkey(nome), ' +
+        'id, status, mesa, criada_em, fechada_em, liberada_em, ' +
+          'cliente:perfis!comandas_usuario_id_fkey(nome), liberador:perfis!comandas_liberada_por_fkey(nome), ' +
           'pedidos(id, criado_em, pedido_itens(quantidade, preco_unitario, status, pronto_em, item:itens(nome, setor)))',
       )
       .gte('criada_em', inicio)
@@ -309,6 +339,8 @@ export function inicioDaNoite(agora: Date): Date {
   return inicio;
 }
 
+const NUNCA_ABRIRAM: StatusComanda[] = ['aguardando_liberacao', 'recusada', 'cancelada'];
+
 /** Transforma as comandas da noite em todos os números do painel. */
 export function calcularMovimento(linhas: LinhaComandaMovimento[], agora: Date): NumerosMovimento {
   const ordenadas = [...linhas].sort((a, b) => tempo(a.criada_em) - tempo(b.criada_em));
@@ -353,9 +385,9 @@ export function calcularMovimento(linhas: LinhaComandaMovimento[], agora: Date):
     maisVendidos: calcularMaisVendidos(itens),
     alertas: calcularAlertas(ordenadas, numeros, agora),
     // Só as comandas que chegaram a abrir: aguardando liberação ainda não
-    // começou, e recusada nunca começou (o atendente não confirmou a presença).
+    // começou; recusada e cancelada nunca começaram.
     comandas: ordenadas
-      .filter((linha) => linha.status !== 'aguardando_liberacao' && linha.status !== 'recusada')
+      .filter((linha) => !NUNCA_ABRIRAM.includes(linha.status))
       .reverse()
       .map((linha) => ({
         id: linha.id,
@@ -533,7 +565,11 @@ function fimDaComanda(linha: LinhaComandaMovimento, agora: Date): number {
 }
 
 /** Itens da comanda agrupados por pedido, do mais antigo para o mais novo. */
-export function montarDetalhe(linha: LinhaComandaMovimento, numero: string): DetalheComanda {
+export function montarDetalhe(
+  linha: LinhaComandaMovimento,
+  numero: string,
+  agora = new Date(),
+): DetalheComanda {
   const pedidos = [...linha.pedidos]
     .sort((a, b) => tempo(a.criado_em) - tempo(b.criado_em))
     .filter((pedido) => pedido.pedido_itens.length > 0)
@@ -559,6 +595,13 @@ export function montarDetalhe(linha: LinhaComandaMovimento, numero: string): Det
     local: linha.mesa ? `Mesa ${linha.mesa}` : 'Balcão',
     status: linha.status,
     aberturaEm: horaMinuto(new Date(linha.criada_em)),
+    liberadaPor: linha.liberador?.nome.trim() || null,
+    liberadaEm: linha.liberada_em ? horaMinuto(new Date(linha.liberada_em)) : null,
+    fechadaEm: linha.fechada_em ? horaMinuto(new Date(linha.fechada_em)) : null,
+    minutosSemPagamento:
+      linha.status === 'aguardando_pagamento' && linha.fechada_em
+        ? Math.max(0, Math.floor((agora.getTime() - tempo(linha.fechada_em)) / 60_000))
+        : null,
     total: totalDaComanda(linha),
     pedidos,
   };
