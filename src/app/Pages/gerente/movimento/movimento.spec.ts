@@ -167,6 +167,58 @@ describe('Movimento (gerente)', () => {
     expect(tela().querySelector('.detalhe')).toBeNull();
   });
 
+  it('o detalhe fecha pelo Esc', () => {
+    botao('Comanda 07').click();
+    expect(tela().querySelector('.detalhe')).not.toBeNull();
+    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }));
+
+    expect(tela().querySelector('.detalhe')).toBeNull();
+  });
+
+  it('no celular o faturamento fica no corpo da página, depois dos alertas', () => {
+    expect(tela().querySelector('.pagina .faturamento')).not.toBeNull();
+    expect(tela().querySelector('.topo-numeros .faturamento')).toBeNull();
+  });
+
+  it('o cartão de faturamento mostra ticket médio e em aberto, e explica a soma pelo "?"', () => {
+    movimento.comandasPagas.set(4);
+    movimento.valorEmAberto.set(398);
+    const cartao = tela().querySelector('.faturamento')!;
+
+    expect(cartao.querySelector('.detalhes')?.textContent).toContain('1.205,00');
+    expect(cartao.querySelector('.detalhes')?.textContent).toContain('398,00');
+    expect(cartao.querySelector('.rotulo .ajuda')?.getAttribute('title')).toContain(
+      'Soma apenas as comandas já pagas',
+    );
+  });
+
+  describe('no desktop', () => {
+    beforeEach(async () => {
+      vi.stubGlobal(
+        'matchMedia',
+        vi.fn(() => ({ matches: true, addEventListener: vi.fn(), removeEventListener: vi.fn() })),
+      );
+      fixture.destroy();
+      fixture = TestBed.createComponent(Movimento);
+      fixture.detectChanges();
+      await fixture.whenStable();
+    });
+
+    afterEach(() => vi.unstubAllGlobals());
+
+    it('o faturamento sobe para o lado dos números e sai do corpo da página', () => {
+      expect(tela().querySelector('.topo-numeros .faturamento')).not.toBeNull();
+      expect(tela().querySelector('.pagina .faturamento')).toBeNull();
+      expect(tela().querySelectorAll('.faturamento')).toHaveLength(1);
+    });
+
+    it('antes da primeira resposta do banco o faturamento não aparece com zero', () => {
+      movimento.atualizadoEm.set(null);
+
+      expect(tela().querySelector('.faturamento')).toBeNull();
+    });
+  });
+
   it('avisar o atendente troca o botão daquele alerta por uma confirmação', () => {
     botao('Avisar atendente').click();
 

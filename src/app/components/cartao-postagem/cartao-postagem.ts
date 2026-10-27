@@ -2,16 +2,13 @@ import { CurrencyPipe, formatDate } from '@angular/common';
 import { Component, LOCALE_ID, computed, inject, input } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { Estabelecimento, Postagem, TipoPostagem } from '../../models';
-import { descontoPercentual, ehPromocao, emVigor } from '../../services/postagem.service';
+import {
+  EMOJI_DO_TIPO,
+  descontoPercentual,
+  ehPromocao,
+  emVigor,
+} from '../../services/postagem.service';
 import { haQuantoTempo } from '../../tempo';
-
-/** Desenho de quem não mandou foto: um fundo colorido com o emoji do tipo. */
-const EMOJI: Record<TipoPostagem, string> = {
-  bebida: '🍹',
-  comida: '🍔',
-  evento: '🎶',
-  novidade: '✨',
-};
 
 const NOME_DO_TIPO: Record<TipoPostagem, string> = {
   bebida: 'Bebida',
@@ -36,7 +33,7 @@ export class CartaoPostagem {
   readonly postagem = input.required<Postagem>();
   readonly bar = input<Pick<Estabelecimento, 'id' | 'nome' | 'foto_url'> | null>(null);
 
-  protected readonly emoji = computed(() => EMOJI[this.postagem().tipo]);
+  protected readonly emoji = computed(() => EMOJI_DO_TIPO[this.postagem().tipo]);
   protected readonly desconto = computed(() => descontoPercentual(this.postagem()));
   protected readonly publicada = computed(() => haQuantoTempo(this.postagem().criada_em));
   protected readonly vigente = computed(() => emVigor(this.postagem()));

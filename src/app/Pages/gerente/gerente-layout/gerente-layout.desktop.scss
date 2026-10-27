@@ -4,6 +4,7 @@
 // No celular o menu é a barra de baixo: logo, perfil do bar e conta ficam
 // no topo e na engrenagem, como antes.
 .menu-marca,
+.item-desktop,
 .item-perfil,
 .usuario {
   display: none;
@@ -117,6 +118,11 @@
   }
 
   .item-perfil {
+    display: flex;
+  }
+
+  // Divulgar e Perfil do bar: o grupo do bar, separado das telas do dia a dia.
+  .item-desktop {
     display: flex;
     margin-top: 14px;
 

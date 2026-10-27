@@ -266,7 +266,8 @@ describe('calcularMovimento', () => {
         criada_em: em(20),
         pedidos: [{ id: 'p', criado_em: em(20, 10), pedido_itens: [item('Chope', 'bar', 1, 12)] }],
       }),
-      comanda({ id: 'b', status: 'aguardando_pagamento', fechada_em: em(22, 45) }),
+      // Conta fechada há 25 min: ainda dentro do prazo.
+      comanda({ id: 'b', status: 'aguardando_pagamento', fechada_em: em(22, 35) }),
     ];
 
     expect(calcularMovimento(recentes, AGORA).alertas).toEqual([]);

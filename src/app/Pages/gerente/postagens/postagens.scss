@@ -2,155 +2,93 @@
 
 .pagina {
   @include g.pagina;
-  max-width: 1080px;
+  max-width: 960px;
 }
 
-h1 {
-  margin: 0;
-  font-size: 24px;
+// --------------------------------------------------------------- perfil
+.perfil {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: 14px 18px;
+
+  @media (min-width: 640px) {
+    grid-template-columns: auto minmax(0, 1fr) auto;
+  }
+}
+
+.foto-bar {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  object-fit: cover;
+  box-shadow: 0 0 0 3px #fff, 0 0 0 5px g.$azul-claro;
+
+  @media (min-width: 1024px) {
+    width: 96px;
+    height: 96px;
+  }
+}
+
+.inicial {
+  display: grid;
+  place-items: center;
+  background: g.$marinho;
+  color: #fff;
+  font-size: 30px;
+  font-weight: 800;
+}
+
+.perfil-texto h1 {
+  margin: 0 0 8px;
+  font-size: 22px;
   font-weight: 800;
   letter-spacing: -0.02em;
+  @include g.titulo-desktop;
 }
 
-.explicacao {
-  margin: 4px 0 0;
-  color: g.$texto-suave;
-  font-size: 14px;
-}
-
-.rotulo {
-  @include g.rotulo;
-  margin-top: 6px;
-}
-
-.cartao {
-  @include g.cartao;
-}
-
-// Formulário e prévia lado a lado quando cabe.
-.editor {
-  display: grid;
-  gap: 16px;
-
-  @media (min-width: 860px) {
-    grid-template-columns: minmax(0, 1fr) 340px;
-    align-items: start;
-  }
-}
-
-.previa {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-
-  @media (min-width: 860px) {
-    position: sticky;
-    top: 16px;
-  }
-}
-
-// ------------------------------------------------------- nova postagem
-.nova {
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-
-  .rotulo {
-    margin: 0;
-  }
-}
-
-.tipos {
+.numeros {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
-}
+  gap: 4px 22px;
+  margin: 0;
 
-.tipo {
-  padding: 8px 14px;
-  border: 1.5px solid g.$borda;
-  border-radius: 999px;
-  background: #fff;
-  color: g.$marinho;
-  font: inherit;
-  font-size: 13px;
-  font-weight: 700;
-  cursor: pointer;
-
-  &.ativo {
-    border-color: g.$marinho;
-    background: g.$marinho;
-    color: #fff;
-  }
-}
-
-.campo {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  min-width: 0;
-
-  > span {
-    font-size: 13px;
-    font-weight: 700;
+  div {
+    display: flex;
+    // No HTML o rótulo vem antes do número; na tela o número fica na frente.
+    flex-direction: row-reverse;
+    justify-content: flex-end;
+    align-items: baseline;
+    gap: 5px;
   }
 
-  small {
-    color: g.$rotulo;
-    font-weight: 500;
-  }
-
-  input,
-  textarea {
-    @include g.campo;
-  }
-
-  textarea {
-    resize: vertical;
-    line-height: 1.5;
-  }
-}
-
-.linha {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-  gap: 12px;
-}
-
-.adicionar-foto,
-.remover-foto {
-  display: inline-flex;
-  align-items: center;
-  align-self: flex-start;
-  gap: 8px;
-  padding: 0;
-  border: 0;
-  background: none;
-  font: inherit;
-  font-size: 13px;
-  font-weight: 700;
-  cursor: pointer;
-}
-
-.adicionar-foto {
-  color: g.$azul;
-
-  app-icone {
+  dd {
+    @include g.numero;
+    margin: 0;
     font-size: 17px;
   }
 
-  small {
-    color: g.$rotulo;
-    font-weight: 500;
+  dt {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    color: g.$texto-suave;
+    font-size: 13px;
   }
 }
 
-.remover-foto {
-  color: g.$perigo;
+.ajuda {
+  @include g.ajuda;
 }
 
-.mensagem-erro {
-  @include g.mensagem-erro;
+.nova {
+  @include g.botao-azul;
+  grid-column: 1 / -1;
+  min-height: 44px;
+
+  @media (min-width: 640px) {
+    grid-column: auto;
+  }
 }
 
 .sucesso {
@@ -162,67 +100,250 @@ h1 {
   font-size: 13px;
 }
 
-.publicar {
-  @include g.botao-azul;
-  align-self: stretch;
-  min-height: 46px;
-  font-size: 14px;
+// ----------------------------------------------------------------- abas
+.abas {
+  display: flex;
+  justify-content: center;
+  border-top: 1px solid g.$borda;
 }
 
-.tentar {
-  margin-left: 6px;
-  padding: 0;
+.aba {
+  @include g.balao(baixo);
+  position: relative;
+  display: flex;
+  justify-content: center;
+  width: 64px;
+  margin-top: -1px;
+  padding: 12px 0;
   border: 0;
+  border-top: 2px solid transparent;
   background: none;
-  color: inherit;
-  font: inherit;
-  font-weight: 700;
-  text-decoration: underline;
+  color: g.$rotulo;
+  font-size: 20px;
   cursor: pointer;
+  transition: color 150ms ease;
+
+  &:hover {
+    color: g.$marinho;
+  }
+
+  &.ativa {
+    border-top-color: g.$marinho;
+    color: g.$marinho;
+  }
 }
 
-// ------------------------------------------------------------ postagens
-.lista {
+// ---------------------------------------------------------------- grade
+.grade {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 16px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 4px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+
+  @media (min-width: 640px) {
+    gap: 12px;
+  }
 }
 
-.item {
+.quadro {
+  @include g.fundo-postagem;
+  position: relative;
+  aspect-ratio: 1;
+  overflow: hidden;
+
+  @media (min-width: 640px) {
+    border-radius: 12px;
+  }
+}
+
+.midia {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 220ms g.$curva-saida;
+}
+
+.arte {
+  display: grid;
+  place-items: center;
+  font-size: clamp(30px, 9vw, 56px);
+}
+
+// Só o título fica no quadro, para leitores de tela.
+.titulo {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+}
+
+// Camada escura com as informações e as ações, ao passar o mouse.
+.camada {
+  position: absolute;
+  inset: 0;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 10px;
+  background: rgba(15, 31, 75, 0.62);
+  color: #fff;
+  opacity: 0;
+  transition: opacity 220ms g.$curva-saida;
+}
 
-  app-cartao-postagem {
-    flex: 1;
-  }
+.infos {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 6px 12px;
+}
+
+.info {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 14px;
+  font-weight: 800;
 }
 
 .acoes {
   display: flex;
-  align-items: center;
-  justify-content: flex-end;
   gap: 10px;
-  font-size: 13px;
+}
 
-  button {
-    padding: 6px 10px;
-    border: 0;
-    border-radius: 8px;
-    background: none;
-    font: inherit;
-    font-weight: 700;
-    cursor: pointer;
+// O balão sai por baixo: em cima ele cobriria o desconto e a validade.
+.icone-botao {
+  @include g.balao(baixo);
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.16);
+  color: #fff;
+  font-size: 18px;
+  cursor: pointer;
+  transition: background 150ms ease;
+
+  &:hover,
+  &:focus-visible {
+    background: rgba(255, 255, 255, 0.3);
+    outline: none;
   }
 }
 
-.cancelar {
-  color: g.$texto-suave;
+@media (hover: hover) {
+  .quadro:hover,
+  .quadro:focus-within {
+    .camada {
+      opacity: 1;
+    }
+
+    .midia {
+      transform: scale(1.03);
+    }
+  }
+
+  // Com mouse, o "⋯" do toque não aparece (o seletor mais forte vence o `.mais` lá embaixo).
+  .quadro .mais {
+    display: none;
+  }
 }
 
-.apagar {
-  background: g.$perigo !important;
+// No toque: desconto e validade sempre à vista, ações no menu "⋯".
+@media (hover: none) {
+  .camada {
+    justify-content: flex-end;
+    align-items: flex-start;
+    background: linear-gradient(transparent 55%, rgba(15, 31, 75, 0.7));
+    opacity: 1;
+  }
+
+  .info {
+    font-size: 11px;
+  }
+
+  .acoes {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .camada {
+    transition-duration: 100ms;
+  }
+
+  .midia {
+    transition: none;
+  }
+
+  .quadro:hover .midia {
+    transform: none;
+  }
+}
+
+.mais {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border: 0;
+  border-radius: 50%;
+  background: rgba(15, 31, 75, 0.55);
   color: #fff;
+  font-size: 18px;
+}
+
+.menu {
+  position: absolute;
+  top: 40px;
+  right: 4px;
+  z-index: 6;
+  display: flex;
+  flex-direction: column;
+  min-width: 140px;
+  padding: 6px;
+  border-radius: 12px;
+  background: #fff;
+  box-shadow: 0 10px 30px rgba(15, 31, 75, 0.25);
+  animation: abrir-menu 160ms g.$curva-saida;
+
+  button {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px;
+    border: 0;
+    border-radius: 8px;
+    background: none;
+    color: g.$marinho;
+    font: inherit;
+    font-size: 14px;
+    font-weight: 700;
+    text-align: left;
+  }
+
+  .perigo {
+    color: g.$perigo;
+  }
+}
+
+@keyframes abrir-menu {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
 }
 
 .vazio {
@@ -235,4 +356,20 @@ h1 {
   color: g.$texto-suave;
   font-size: 13px;
   text-align: center;
+}
+
+.mensagem-erro {
+  @include g.mensagem-erro;
+}
+
+.tentar {
+  margin-left: 6px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  font-weight: 700;
+  text-decoration: underline;
+  cursor: pointer;
 }

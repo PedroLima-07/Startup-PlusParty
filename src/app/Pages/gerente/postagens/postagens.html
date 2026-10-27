@@ -1,115 +1,62 @@
 <div class="pagina">
-  <header>
-    <h1>Postagens</h1>
-    <p class="explicacao">
-      O que você publicar aparece no Feed de todos os clientes. Quem já abriu comanda no bar
-      recebe um aviso.
-    </p>
+  <header class="perfil">
+    @if (resumo()?.foto_url; as foto) {
+      <img class="foto-bar" [src]="foto" alt="" />
+    } @else {
+      <span class="foto-bar inicial" aria-hidden="true">{{ inicial(resumo()?.nome ?? 'P') }}</span>
+    }
+
+    <div class="perfil-texto">
+      <h1>{{ resumo()?.nome ?? 'Postagens' }}</h1>
+      <dl class="numeros">
+        <div>
+          <dt>ativas</dt>
+          <dd>{{ carregando() ? '–' : ativas().length }}</dd>
+        </div>
+        <div>
+          <dt>encerradas</dt>
+          <dd>{{ carregando() ? '–' : encerradas().length }}</dd>
+        </div>
+        <div>
+          <dt>
+            recebem os avisos
+            <span
+              class="ajuda"
+              tabindex="0"
+              title="Clientes que já abriram comanda no bar. Cada postagem nova chega para eles como aviso."
+              >?</span
+            >
+          </dt>
+          <dd>{{ resumo()?.clientes ?? '–' }}</dd>
+        </div>
+      </dl>
+    </div>
+
+    <button type="button" class="botao-azul nova" (click)="novaPostagem()">
+      <app-icone nome="adicionar" /> Nova postagem
+    </button>
   </header>
 
-  <div class="editor">
-    <section class="cartao nova" aria-labelledby="titulo-nova">
-      <h2 id="titulo-nova" class="rotulo">Nova postagem</h2>
+  @if (aviso(); as mensagem) {
+    <p class="sucesso" role="status">{{ mensagem }}</p>
+  }
 
-      <div class="tipos" role="radiogroup" aria-label="Tipo da postagem">
-        @for (t of tipos; track t.valor) {
-          <button
-            type="button"
-            role="radio"
-            class="tipo"
-            [class.ativo]="tipo() === t.valor"
-            [attr.aria-checked]="tipo() === t.valor"
-            (click)="tipo.set(t.valor)"
-          >
-            {{ t.rotulo }}
-          </button>
-        }
-      </div>
-
-      <label class="campo">
-        <span>Título</span>
-        <input
-          type="text"
-          maxlength="80"
-          placeholder="Ex.: Happy hour: chope a R$ 9"
-          [value]="titulo()"
-          (input)="titulo.set(campo($event))"
-        />
-      </label>
-
-      <label class="campo">
-        <span>Descrição <small>(opcional)</small></span>
-        <textarea
-          rows="3"
-          maxlength="500"
-          placeholder="Conte os detalhes: horário, o que vem, condições."
-          [value]="texto()"
-          (input)="texto.set(campo($event))"
-        ></textarea>
-      </label>
-
-      @if (temPreco()) {
-        <div class="linha">
-          <label class="campo">
-            <span>{{ temPrecoAntigo() ? 'Preço na promoção' : 'Preço' }} <small>(opcional)</small></span>
-            <input
-              type="text"
-              inputmode="decimal"
-              placeholder="9,00"
-              [value]="preco()"
-              (input)="preco.set(campo($event))"
-            />
-          </label>
-          @if (temPrecoAntigo()) {
-            <label class="campo">
-              <span>Preço normal <small>(opcional)</small></span>
-              <input
-                type="text"
-                inputmode="decimal"
-                placeholder="12,00"
-                [value]="precoAntigo()"
-                (input)="precoAntigo.set(campo($event))"
-              />
-            </label>
-          }
-        </div>
-      }
-
-      <label class="campo">
-        <span>Válida até <small>(opcional)</small></span>
-        <input type="date" [min]="hoje" [value]="validaAte()" (input)="validaAte.set(campo($event))" />
-      </label>
-
-      @if (fotoPrevia()) {
-        <button type="button" class="remover-foto" (click)="removerFoto()">Remover foto</button>
-      } @else {
-        <label class="adicionar-foto">
-          <app-icone nome="camera" /> Adicionar foto <small>(opcional)</small>
-          <input type="file" accept="image/*" hidden (change)="escolherFoto($event)" />
-        </label>
-      }
-
-      @if (erro(); as mensagem) {
-        <p class="mensagem-erro" role="alert">{{ mensagem }}</p>
-      }
-      @if (publicada()) {
-        <p class="sucesso" role="status">
-          Publicada! Já está no Feed, e os clientes que já vieram ao bar foram avisados.
-        </p>
-      }
-
-      <button type="button" class="publicar" [disabled]="publicando()" (click)="publicar()">
-        {{ publicando() ? 'Publicando...' : 'Publicar no Feed' }}
+  <div class="abas" role="tablist" aria-label="Postagens">
+    @for (a of abas; track a.valor) {
+      <button
+        type="button"
+        role="tab"
+        class="aba"
+        [class.ativa]="aba() === a.valor"
+        [attr.aria-selected]="aba() === a.valor"
+        [attr.aria-label]="a.nome"
+        [attr.data-balao]="a.nome"
+        (click)="aba.set(a.valor)"
+      >
+        <app-icone [nome]="a.icone" />
       </button>
-    </section>
-
-    <section class="previa" aria-label="Prévia no Feed">
-      <h2 class="rotulo">Prévia no Feed</h2>
-      <app-cartao-postagem [postagem]="previa()" />
-    </section>
+    }
   </div>
-
-  <h2 class="rotulo">Suas postagens</h2>
 
   @if (carregando()) {
     <p class="vazio">Carregando postagens...</p>
@@ -119,27 +66,94 @@
       <button type="button" class="tentar" (click)="carregar()">Tentar de novo</button>
     </p>
   } @else {
-    <div class="lista">
-      @for (postagem of postagens(); track postagem.id) {
-        <div class="item">
-          <app-cartao-postagem [postagem]="postagem" />
-          <div class="acoes">
-            @if (confirmarApagar() === postagem.id) {
-              <span>Apagar do Feed?</span>
-              <button type="button" class="apagar" [disabled]="apagando()" (click)="apagar(postagem)">
-                Apagar
+    <ul class="grade" role="tabpanel" [attr.aria-label]="aba() === 'ativas' ? 'Ativas' : 'Encerradas'">
+      @for (p of visiveis(); track p.id) {
+        <li class="quadro" [attr.data-tipo]="p.tipo">
+          @if (p.imagem_url; as foto) {
+            <img class="midia" [src]="foto" alt="" loading="lazy" />
+          } @else {
+            <span class="midia arte" aria-hidden="true">{{ emoji[p.tipo] }}</span>
+          }
+          <h3 class="titulo">{{ p.titulo }}</h3>
+
+          <div class="camada">
+            <div class="infos">
+              @if (desconto(p); as d) {
+                <span class="info"><app-icone nome="etiqueta" /> -{{ d }}%</span>
+              }
+              @if (validade(p); as v) {
+                <span class="info"><app-icone nome="calendario" /> {{ v }}</span>
+              }
+            </div>
+            <div class="acoes">
+              <button
+                type="button"
+                class="icone-botao"
+                [attr.aria-label]="'Editar ' + p.titulo"
+                data-balao="Editar"
+                (click)="editar(p)"
+              >
+                <app-icone nome="editar" />
               </button>
-              <button type="button" class="cancelar" (click)="confirmarApagar.set(null)">Cancelar</button>
-            } @else {
-              <button type="button" class="cancelar" (click)="confirmarApagar.set(postagem.id)">
-                Apagar postagem
+              <button
+                type="button"
+                class="icone-botao"
+                [attr.aria-label]="'Apagar ' + p.titulo"
+                data-balao="Apagar"
+                (click)="pedirParaApagar(p)"
+              >
+                <app-icone nome="lixeira" />
               </button>
-            }
+            </div>
           </div>
-        </div>
+
+          <!-- No toque não existe "passar o mouse": editar e apagar ficam neste menu. -->
+          <button
+            type="button"
+            class="mais"
+            [attr.aria-label]="'Opções de ' + p.titulo"
+            [attr.aria-expanded]="menuAberto() === p.id"
+            (click)="alternarMenu(p)"
+          >
+            <app-icone nome="mais" />
+          </button>
+          @if (menuAberto() === p.id) {
+            <div class="menu" role="menu">
+              <button type="button" role="menuitem" (click)="editar(p)">
+                <app-icone nome="editar" /> Editar
+              </button>
+              <button type="button" role="menuitem" class="perigo" (click)="pedirParaApagar(p)">
+                <app-icone nome="lixeira" /> Apagar
+              </button>
+            </div>
+          }
+        </li>
       } @empty {
-        <p class="vazio">Nenhuma postagem ainda. A primeira aparece aqui e no Feed.</p>
+        <li class="vazio">
+          @if (aba() === 'ativas') {
+            Nenhuma postagem ativa. Toque em "Nova postagem" para publicar no Feed.
+          } @else {
+            Nenhuma postagem encerrada ainda.
+          }
+        </li>
       }
-    </div>
+    </ul>
   }
 </div>
+
+@if (editor()) {
+  <app-editor-postagem [postagem]="editando()" (salva)="aoSalvar($event)" (fechar)="editor.set(null)" />
+}
+
+@if (confirmarApagar(); as p) {
+  <app-confirmar
+    [titulo]="'Apagar “' + p.titulo + '”?'"
+    texto="A postagem sai do Feed dos clientes. Não dá para desfazer."
+    rotulo="Apagar"
+    rotuloOcupado="Apagando..."
+    [ocupado]="apagando()"
+    [erro]="erroApagar()"
+    (confirmar)="apagar()"
+    (cancelar)="confirmarApagar.set(null)"
+  />
+}
