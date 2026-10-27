@@ -1,0 +1,264 @@
+@use '../../../styles/desktop' as d;
+
+$marinho: #0f1f4b;
+$azul: #2f6bff;
+$suave: #5b6475;
+$estrela: #f59e0b;
+
+// Celular: folha que sobe do pé da tela.
+.fundo {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  background: rgba(15, 31, 75, 0.4);
+  animation: aparecer 200ms ease-out;
+}
+
+.folha {
+  position: relative;
+  width: 100%;
+  max-width: 520px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  padding: 22px 22px calc(26px + env(safe-area-inset-bottom));
+  border-radius: 22px 22px 0 0;
+  background: #fff;
+  color: $marinho;
+  font-family: inherit;
+  animation: subir 260ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.fechar {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  width: 44px;
+  height: 44px;
+  border: 0;
+  border-radius: 50%;
+  background: #f1f3f7;
+  color: $suave;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.cabecalho {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding-right: 48px;
+
+  h2 {
+    margin: 0;
+    font-size: 20px;
+    font-weight: 800;
+  }
+
+  p {
+    margin: 0;
+    font-size: 14px;
+    color: $suave;
+  }
+}
+
+.nota {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.estrelas {
+  display: flex;
+  gap: 6px;
+}
+
+.estrela {
+  width: 52px;
+  height: 52px;
+  padding: 0;
+  border: 0;
+  border-radius: 12px;
+  background: transparent;
+  color: #c9ced8;
+  cursor: pointer;
+  transition: transform 120ms ease, color 120ms ease;
+
+  svg {
+    fill: none;
+  }
+
+  &.marcada {
+    color: $estrela;
+
+    svg {
+      fill: $estrela;
+    }
+  }
+
+  &:hover {
+    transform: scale(1.08);
+  }
+
+  &:focus-visible {
+    outline: 3px solid rgba(47, 107, 255, 0.35);
+  }
+}
+
+.rotulo-nota {
+  min-height: 20px;
+  font-size: 14px;
+  font-weight: 600;
+  color: $suave;
+}
+
+.comentario {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #3d4659;
+
+  textarea {
+    resize: none;
+    padding: 12px 14px;
+    border: 1px solid #dfe3eb;
+    border-radius: 12px;
+    font: inherit;
+    font-size: 14px;
+    font-weight: 400;
+    color: $marinho;
+
+    &:focus {
+      outline: none;
+      border-color: $azul;
+    }
+  }
+}
+
+.erro {
+  margin: 0;
+  padding: 10px 14px;
+  border-radius: 10px;
+  background: #fef2f2;
+  color: #b91c1c;
+  font-size: 14px;
+}
+
+.acoes {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+
+  button {
+    font: inherit;
+    cursor: pointer;
+  }
+}
+
+.enviar {
+  min-height: 50px;
+  border: 0;
+  border-radius: 12px;
+  background: $azul;
+  color: #fff;
+  font-size: 15px;
+  font-weight: 700;
+
+  &:disabled {
+    background: #c9ced8;
+    cursor: not-allowed;
+  }
+}
+
+.dispensar {
+  min-height: 44px;
+  border: 0;
+  background: transparent;
+  color: $suave;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.obrigado {
+  align-items: center;
+  gap: 10px;
+  padding-top: 30px;
+  text-align: center;
+
+  h2 {
+    margin: 0;
+    font-size: 20px;
+    font-weight: 800;
+  }
+
+  p {
+    margin: 0;
+    font-size: 14px;
+    color: $suave;
+  }
+}
+
+.icone-obrigado {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: #dcfce7;
+  color: #15803d;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+@keyframes aparecer {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes subir {
+  from {
+    transform: translateY(28px);
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fundo,
+  .folha {
+    animation: none;
+  }
+}
+
+// Desktop: janela no centro.
+@include d.desktop {
+  .fundo {
+    align-items: center;
+    padding: 24px;
+  }
+
+  .folha {
+    max-width: 440px;
+    padding: 26px 26px 22px;
+    border-radius: 20px;
+  }
+
+  .acoes {
+    flex-direction: row-reverse;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .enviar {
+    min-height: 48px;
+    padding: 0 22px;
+  }
+}

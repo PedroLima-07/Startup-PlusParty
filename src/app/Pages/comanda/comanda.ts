@@ -7,6 +7,7 @@ import {
   PedidoItemDetalhado,
   StatusPedidoItem,
 } from '../../models';
+import { AvaliacaoService } from '../../services/avaliacao.service';
 import { ComandaService } from '../../services/comanda.service';
 import { SupabaseService } from '../../services/supabase.service';
 import { NavCliente } from '../../components/nav-cliente/nav-cliente';
@@ -32,6 +33,7 @@ export class ComandaPage implements OnInit {
   private supabase = inject(SupabaseService);
   private destroyRef = inject(DestroyRef);
   private router = inject(Router);
+  private avaliacao = inject(AvaliacaoService);
   private agora = relogio();
 
   id = input.required<string>();
@@ -177,8 +179,11 @@ export class ComandaPage implements OnInit {
         this.comandaService.buscarComanda(this.id()),
         this.comandaService.buscarItensPedidos(this.id()),
       ]);
+      const acabouDePagar = comanda.status === 'paga' && this.comanda()?.status !== 'paga';
       this.comanda.set(comanda);
       this.itens.set(itens);
+      // Pagamento confirmado: o pedido de avaliação aparece na hora.
+      if (acabouDePagar) void this.avaliacao.verificar();
     } catch {
       if (this.comanda()) {
         this.avisoAtualizacao.set('Não foi possível atualizar a comanda agora. Tente de novo.');
