@@ -1,0 +1,273 @@
+// Avisos de comanda que já prende o cliente: conta a pagar e comanda aberta.
+@use '../../../../styles/desktop' as d;
+
+.conta-pendente {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding-top: 12px;
+}
+
+.conta-pendente-titulo {
+  margin: 0;
+  color: #0f1f4b;
+  font-size: 26px;
+  font-weight: 800;
+  line-height: 1.2;
+}
+
+.conta-pendente-cartao,
+.comanda-aberta {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 22px 20px;
+  border: 1px solid #e1e5ee;
+  border-radius: 16px;
+  background: #fff;
+}
+
+.conta-pendente-icone,
+.comanda-aberta-icone {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.conta-pendente-icone {
+  background: #ffedd5;
+  color: #c2410c;
+}
+
+.comanda-aberta-icone {
+  background: #eef2ff;
+  color: #2f6bff;
+}
+
+.conta-pendente-texto,
+.comanda-aberta-texto {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.conta-pendente-chamada,
+.comanda-aberta-chamada {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.conta-pendente-explicacao,
+.comanda-aberta-explicacao,
+.conta-pendente-ajuda {
+  margin: 0;
+  color: #5b6475;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.conta-pendente-ajuda {
+  font-size: 13px;
+}
+
+.conta-pendente-resumo,
+.comanda-aberta-resumo {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 14px 16px;
+  border-radius: 12px;
+  background: #f7f8fb;
+}
+
+.conta-pendente-linha {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+}
+
+.conta-pendente-bar,
+.comanda-aberta-bar {
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.conta-pendente-valor {
+  font-size: 17px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.conta-pendente-hora {
+  color: #5b6475;
+  font-size: 13px;
+}
+
+.conta-pendente .primary-button,
+.comanda-aberta .primary-button {
+  width: 100%;
+  min-height: 50px;
+  font-size: 15px;
+}
+
+// Comanda aberta: folha que sobe por cima da escolha de local.
+.comanda-aberta-fundo {
+  position: fixed;
+  inset: 58px 0 0;
+  z-index: 30;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  background: rgba(15, 31, 75, 0.35);
+  animation: aparecer 200ms ease-out;
+}
+
+.comanda-aberta {
+  width: 100%;
+  max-width: 760px;
+  padding-bottom: 30px;
+  border: 0;
+  border-radius: 22px 22px 0 0;
+  animation: subir 240ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.comanda-aberta-resumo {
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+
+.comanda-aberta-status {
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: #ffedd5;
+  color: #9a3412;
+  font-size: 12px;
+  font-weight: 700;
+  white-space: nowrap;
+
+  &.liberada {
+    background: #dcfce7;
+    color: #15803d;
+  }
+}
+
+// Mesa ocupada ou sendo liberada: a pergunta antes de abrir.
+.comanda-aberta-icone.liberando {
+  background: #ffedd5;
+  color: #c2410c;
+}
+
+.botao-outra-mesa,
+.botao-sair-fila {
+  min-height: 44px;
+  border-radius: 12px;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.botao-outra-mesa {
+  border: 0;
+  background: transparent;
+  color: #5b6475;
+}
+
+// Na fila de uma mesa.
+.na-fila {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  padding-top: 12px;
+}
+
+.na-fila-titulo {
+  margin: 0;
+  font-size: 26px;
+  font-weight: 800;
+  line-height: 1.2;
+}
+
+.na-fila-cartao {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 22px 20px;
+  border: 1px solid #e1e5ee;
+  border-radius: 16px;
+  background: #fff;
+
+  p {
+    margin: 0;
+    color: #5b6475;
+    font-size: 14px;
+    line-height: 1.5;
+  }
+}
+
+.na-fila-rotulo {
+  color: #5b6475;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.na-fila-posicao {
+  font-size: 56px;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.botao-sair-fila {
+  min-height: 48px;
+  border: 1px solid #fecaca;
+  background: #fff;
+  color: #b91c1c;
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: wait;
+  }
+}
+
+.na-fila-ajuda {
+  margin: 0;
+  color: #5b6475;
+  font-size: 13px;
+}
+
+@keyframes aparecer {
+  from { opacity: 0; }
+}
+
+@keyframes subir {
+  from { transform: translateY(24px); opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .comanda-aberta-fundo,
+  .comanda-aberta {
+    animation: none;
+  }
+}
+
+@include d.desktop {
+  .comanda-aberta-fundo {
+    inset: 0;
+    align-items: center;
+  }
+
+  .comanda-aberta {
+    max-width: 440px;
+    border-radius: 18px;
+  }
+}

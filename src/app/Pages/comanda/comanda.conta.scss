@@ -1,0 +1,53 @@
+// Conta fechada esperando pagamento: hora do fechamento, atraso e bloqueio.
+.selo-fechada {
+  margin: 4px 0 4px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: #eef1f6;
+  color: #3d4659;
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+
+.aviso-atraso {
+  width: 100%;
+  max-width: 340px;
+  box-sizing: border-box;
+  margin: 0 0 8px;
+  padding: 14px 16px;
+  border-radius: 14px;
+  background: #ffedd5;
+  color: #7c2d12;
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  text-align: left;
+
+  svg {
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+
+  div {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  strong {
+    font-size: 0.9rem;
+  }
+
+  span {
+    font-size: 0.82rem;
+    line-height: 1.45;
+  }
+}
+
+.nota-bloqueio {
+  max-width: 300px;
+  margin: 0 0 16px;
+  color: #5b6475;
+  font-size: 0.82rem;
+  line-height: 1.5;
+}

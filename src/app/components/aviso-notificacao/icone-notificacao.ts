@@ -7,4 +7,7 @@ export const ICONE_NOTIFICACAO: Record<TipoNotificacao, string> = {
   pedido_pronto: '🍽️',
   pagamento_confirmado: '💳',
   postagem: '🏷️',
+  mesa_liberada: '🪑',
+  evento_lembrete: '🎶',
+  evento_cancelado: '📅',
 };

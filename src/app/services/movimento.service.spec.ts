@@ -4,6 +4,7 @@ import {
   MovimentoService,
   calcularMovimento,
   inicioDaNoite,
+  montarDetalhe,
 } from './movimento.service';
 
 describe('MovimentoService — números derivados', () => {
@@ -158,7 +159,7 @@ describe('calcularMovimento', () => {
       status: 'aguardando_pagamento',
       mesa: '12',
       criada_em: em(21),
-      fechada_em: em(22, 35),
+      fechada_em: em(22, 25),
       cliente: { nome: 'Carlos Souza' },
       pedidos: [{ id: 'p4', criado_em: em(21, 5), pedido_itens: [item('Chope', 'bar', 3, 12)] }],
     }),
@@ -239,7 +240,7 @@ describe('calcularMovimento', () => {
   it('gera os alertas que passaram do tempo, com o pagamento primeiro', () => {
     expect(numeros.alertas.map((a) => a.tipo)).toEqual(['pagamento', 'pedido_parado', 'liberacao']);
     expect(numeros.alertas[0]).toMatchObject({
-      titulo: 'Comanda sem pagamento há 25 min',
+      titulo: 'Comanda sem pagamento há 35 min',
       comanda: '03',
     });
     expect(numeros.alertas[1].detalhe).toBe('Comanda 02 · Cozinha · 1× Iscas');
@@ -258,7 +259,7 @@ describe('calcularMovimento', () => {
     );
   });
 
-  it('não avisa antes de 3h sem pedido nem antes de 20 min sem pagamento', () => {
+  it('não avisa antes de 3h sem pedido nem antes de 30 min sem pagamento', () => {
     const recentes = [
       comanda({
         id: 'a',
@@ -269,6 +270,53 @@ describe('calcularMovimento', () => {
     ];
 
     expect(calcularMovimento(recentes, AGORA).alertas).toEqual([]);
+  });
+
+  it('cancelada fica fora da lista; não paga aparece, mas não conta como faturamento', () => {
+    const numeros = calcularMovimento(
+      [
+        comanda({ id: 'cancelada', status: 'cancelada' }),
+        comanda({
+          id: 'calote',
+          status: 'nao_paga',
+          fechada_em: em(21),
+          pedidos: [{ id: 'p', criado_em: em(20, 10), pedido_itens: [item('Chope', 'bar', 2, 12)] }],
+        }),
+      ],
+      AGORA,
+    );
+
+    expect(numeros.comandas.map((c) => [c.id, c.status])).toEqual([['calote', 'nao_paga']]);
+    expect(numeros.faturamento).toBe(0);
+    expect(numeros.valorAguardandoPagamento).toBe(0);
+  });
+
+  it('o detalhe traz quem liberou, a hora do fechamento e os minutos sem pagamento', () => {
+    const detalhe = montarDetalhe(
+      comanda({
+        id: 'x',
+        status: 'aguardando_pagamento',
+        liberada_em: em(20, 5),
+        liberador: { nome: ' Ana Lima ' },
+        fechada_em: em(22, 25),
+      }),
+      '03',
+      AGORA,
+    );
+
+    expect(detalhe).toMatchObject({
+      liberadaPor: 'Ana Lima',
+      liberadaEm: '20:05',
+      fechadaEm: '22:25',
+      minutosSemPagamento: 35,
+    });
+  });
+
+  it('sem esperar pagamento, o detalhe não conta minutos', () => {
+    const detalhe = montarDetalhe(comanda({ id: 'x', status: 'paga', fechada_em: em(22) }), '01', AGORA);
+
+    expect(detalhe.minutosSemPagamento).toBeNull();
+    expect(detalhe.liberadaPor).toBeNull();
   });
 
   it('noite sem comandas fica toda zerada, sem barras de lotação', () => {

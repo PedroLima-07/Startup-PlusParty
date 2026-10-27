@@ -1,5 +1,5 @@
 import { Injectable, inject } from '@angular/core';
-import { Comanda, Estabelecimento } from '../models';
+import { Comanda, Estabelecimento, STATUS_ATIVOS } from '../models';
 import { EstabelecimentosService } from './estabelecimentos.service';
 import { SupabaseService } from './supabase.service';
 
@@ -22,13 +22,13 @@ export class HomeService {
     return [...lista].sort((a, b) => nota(b) - nota(a));
   }
 
-  /** Paga e recusada são finais: nenhuma das duas prende o cliente à comanda. */
+  /** Só os status ativos prendem o cliente à comanda; os finais (paga, recusada...) não. */
   async buscarComandaAtiva(usuarioId: string): Promise<Comanda | null> {
     const { data, error } = await this.supabase.client
       .from('comandas')
       .select('*')
       .eq('usuario_id', usuarioId)
-      .not('status', 'in', '(paga,recusada)')
+      .in('status', STATUS_ATIVOS)
       .order('criada_em', { ascending: false })
       .limit(1)
       .maybeSingle();

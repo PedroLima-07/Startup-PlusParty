@@ -1,6 +1,6 @@
 <!-- No celular, a lista e o detalhe se revezam na tela (como antes).
      No desktop ficam lado a lado: a lista à esquerda, o detalhe à direita. -->
-<div class="layout" [class.com-detalhe]="selecionada()">
+<div class="layout" [class.com-detalhe]="selecionada()" [class.nos-cartoes]="!cartaoAtivo()">
   <div class="coluna-lista">
     <header class="header">
       <div class="brand">
@@ -21,10 +21,25 @@
     </header>
 
     <div class="topo-pagina">
-      <div class="titulo-pagina">
-        <h2>Comandas</h2>
-        <p>{{ resumoPendencias() }}</p>
-      </div>
+      @if (cartaoAtivo(); as ativo) {
+        <div class="titulo-pagina titulo-com-voltar">
+          <button
+            class="btn-cartoes"
+            type="button"
+            (click)="voltarAosCartoes()"
+            [disabled]="processando() !== null"
+            aria-label="Voltar para os cartões"
+          >
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 19-7-7 7-7"></path><path d="M19 12H5"></path></svg>
+          </button>
+          <h2>{{ ativo.titulo }} · {{ ativo.quantidade }}</h2>
+        </div>
+      } @else {
+        <div class="titulo-pagina">
+          <h2>Comandas</h2>
+          <p>{{ resumoPendencias() }}</p>
+        </div>
+      }
       <button class="btn-atualizar" type="button" (click)="atualizarLista()" [disabled]="carregando()">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 2v6h-6"></path><path d="M3 12a9 9 0 1 0 2.1-5.7L2 9"></path></svg>
         Atualizar
@@ -35,47 +50,94 @@
       <p class="mensagem-erro" role="alert">{{ mensagem }}</p>
     }
 
+    @if (!carregando()) {
+        <div class="cartoes" role="group" aria-label="Tipos de comanda">
+          @for (cartao of cartoes(); track cartao.tipo) {
+            <button
+              type="button"
+              class="cartao"
+              [class.urgente]="cartao.urgente"
+              [class.zerado]="cartao.quantidade === 0"
+              [class.ativo]="cartao.tipo === tipoAtivo()"
+              [class.pulsou]="pulsando().has(cartao.tipo)"
+              [attr.aria-pressed]="cartao.tipo === tipoAtivo()"
+              (click)="escolher(cartao.tipo)"
+            >
+              <span class="cartao-topo">
+                <span class="cartao-rotulo">
+                  <span class="rotulo-longo">{{ cartao.rotulo }}</span>
+                  <span class="rotulo-curto">{{ cartao.curto }}</span>
+                </span>
+                @if (cartao.urgente) {
+                  <span class="selo-urgente">Urgente</span>
+                }
+              </span>
+              <span class="cartao-numero">{{ cartao.quantidade }}</span>
+              @if (cartao.quantidade === 0) {
+                <span class="cartao-contexto">{{ cartao.vazio }}</span>
+              } @else {
+                @switch (cartao.tipo) {
+                  @case ('aguardando_liberacao') {
+                    <span class="cartao-contexto">
+                      <span class="contexto-longo">mais antiga esperando há {{ cartao.minutos }} min</span>
+                      <span class="contexto-curto">há {{ cartao.minutos }} min</span>
+                    </span>
+                  }
+                  @case ('aguardando_pagamento') {
+                    <span class="cartao-contexto">
+                      <strong class="contexto-longo">{{ cartao.valor | currency: 'BRL' }} esperando</strong>
+                      <span class="contexto-longo">mais antiga fechou há {{ cartao.minutos }} min</span>
+                      <span class="contexto-curto">{{ cartao.valor | currency: 'BRL' : 'symbol' : '1.0-0' }} · {{ cartao.minutos }} min</span>
+                    </span>
+                  }
+                  @default {
+                    <span class="cartao-contexto">
+                      <strong class="contexto-longo">{{ cartao.valor | currency: 'BRL' }}</strong>
+                      <span class="contexto-longo">consumindo agora</span>
+                      <span class="contexto-curto">{{ cartao.valor | currency: 'BRL' : 'symbol' : '1.0-0' }}</span>
+                    </span>
+                  }
+                }
+                <span class="cartao-ver" aria-hidden="true">Ver lista →</span>
+              }
+            </button>
+          }
+        </div>
+    }
+
     <main class="conteudo">
       @if (carregando()) {
         <app-carregando texto="Carregando comandas" />
       } @else {
-        <div class="filtros" role="group" aria-label="Filtrar comandas">
-          @for (opcao of filtros(); track opcao.valor) {
-            <button
-              type="button"
-              class="filtro"
-              [class.ativo]="filtro() === opcao.valor"
-              [attr.aria-pressed]="filtro() === opcao.valor"
-              (click)="filtro.set(opcao.valor)"
-            >
-              {{ opcao.rotulo }} · {{ opcao.quantidade }}
-            </button>
-          }
-        </div>
+        @if (cartaoAtivo(); as ativo) {
+          <h2 class="titulo-lista">{{ ativo.titulo }} · {{ ativo.quantidade }}</h2>
 
-        @for (comanda of comandasVisiveis(); track comanda.id) {
-          <button
-            class="card"
-            type="button"
-            [class]="comanda.status"
-            [class.selecionada]="comanda.id === selecionada()?.id"
-            [attr.aria-current]="comanda.id === selecionada()?.id ? 'true' : null"
-            (click)="abrir(comanda)"
-          >
-            <span class="card-topo">
-              <span class="local">{{ rotuloLocal(comanda) }}</span>
-              <span class="selo">{{ rotuloStatus(comanda) }}</span>
-            </span>
-            <span class="cliente">{{ comanda.cliente }}</span>
-            <span class="card-rodape">
-              <span class="identificador">Comanda {{ identificador(comanda) }} · {{ comanda.criada_em | date: 'HH:mm' }}</span>
-              <span class="total">{{ comanda.total | currency: 'BRL' }}</span>
-            </span>
-          </button>
-        } @empty {
-          <p class="vazio">
-            {{ comandas().length === 0 ? 'Nenhuma comanda no momento.' : 'Nenhuma comanda neste filtro.' }}
-          </p>
+          @for (linha of lista(); track linha.comanda.id) {
+            <button
+              class="card"
+              type="button"
+              [class]="linha.comanda.status"
+              [class.selecionada]="linha.comanda.id === selecionada()?.id"
+              [attr.aria-current]="linha.comanda.id === selecionada()?.id ? 'true' : null"
+              (click)="abrir(linha.comanda)"
+            >
+              <span class="card-topo">
+                <span class="local">{{ rotuloLocal(linha.comanda) }}</span>
+                <span class="espera" [class.urgente]="linha.urgente">
+                  {{ textoDaEspera(linha.comanda, linha.minutos) }}
+                </span>
+              </span>
+              <span class="cliente">{{ linha.comanda.cliente }}</span>
+              <span class="card-rodape">
+                <span class="identificador">Comanda {{ identificador(linha.comanda) }}</span>
+                @if (linha.comanda.status !== 'aguardando_liberacao') {
+                  <span class="total">{{ linha.comanda.total | currency: 'BRL' }}</span>
+                }
+              </span>
+            </button>
+          } @empty {
+            <p class="vazio">{{ ativo.vazio }}.</p>
+          }
         }
       }
     </main>
@@ -95,6 +157,9 @@
       <main class="detalhe">
         @if (comanda.status === 'aguardando_liberacao') {
           <section class="bloco bloco-cliente">
+            @if (comanda.veio_da_fila) {
+              <span class="selo-fila">Veio da fila da mesa</span>
+            }
             <p class="rotulo">Cliente</p>
             <p class="cliente-destaque">{{ comanda.cliente }}</p>
           </section>
@@ -110,6 +175,59 @@
             </div>
           </dl>
 
+          @if (historicoNaoPaga(); as historico) {
+            <section class="aviso-historico" role="note">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 9v4"></path><path d="M12 17h.01"></path><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"></path></svg>
+              <div>
+                <strong>{{ historico.vezes === 1 ? 'Já saiu sem pagar uma vez' : 'Já saiu sem pagar ' + historico.vezes + ' vezes' }}</strong>
+                <span>
+                  {{ historico.valor | currency: 'BRL' }} no {{ historico.estabelecimento }} em
+                  {{ historico.quando | date: 'dd/MM' }}, marcada como não paga pelo gerente. Combine o
+                  pagamento antes, se achar necessário.
+                </span>
+              </div>
+            </section>
+          }
+
+          @if (nestaMesa().length > 0) {
+            <section class="nesta-mesa" aria-labelledby="titulo-nesta-mesa">
+              <h2 id="titulo-nesta-mesa">Nesta mesa agora</h2>
+              <ul>
+                @for (outra of nestaMesa(); track outra.id) {
+                  <li>
+                    <span>{{ outra.cliente }}</span>
+                    <span class="situacao" [class.fechando]="outra.fechando">{{ outra.situacao }}</span>
+                  </li>
+                }
+              </ul>
+              <p>Se a mesa não está livre, libere em outra com "Trocar mesa".</p>
+            </section>
+          }
+
+          @if (trocandoMesa()) {
+            <section class="trocar-mesa">
+              <label for="nova-mesa">Liberar em qual mesa?</label>
+              <input
+                id="nova-mesa"
+                type="text"
+                inputmode="numeric"
+                autocomplete="off"
+                maxlength="4"
+                placeholder="Ex: 14"
+                [value]="novaMesa()"
+                (input)="novaMesa.set($any($event.target).value)"
+              />
+              <div class="trocar-mesa-acoes">
+                <button type="button" class="btn-cancelar-troca" (click)="cancelarTrocaDeMesa()" [disabled]="processando() !== null">
+                  Cancelar
+                </button>
+                <button type="button" class="btn-liberar-troca" (click)="liberar()" [disabled]="processando() !== null || !novaMesa().trim()">
+                  {{ processando() === 'liberar' ? 'Liberando...' : novaMesa().trim() ? 'Liberar na mesa ' + novaMesa().trim() : 'Liberar na nova mesa' }}
+                </button>
+              </div>
+            </section>
+          }
+
           <p class="orientacao">
             Confirme que o cliente está no local antes de liberar.
             @if (!comanda.mesa) {
@@ -121,6 +239,34 @@
             <p class="cliente-destaque">{{ comanda.cliente }}</p>
             <p class="local-detalhe">{{ rotuloLocal(comanda) }}<span class="aberta-as"> · aberta às {{ comanda.criada_em | date: 'HH:mm' }}</span></p>
           </section>
+
+          @if (minutosEsperandoPagamento() !== null) {
+            <section class="espera-pagamento" [class.atrasado]="pagamentoAtrasado()" role="status">
+              <strong>Esperando pagamento há {{ minutosEsperandoPagamento() }} min</strong>
+              @if (pagamentoAtrasado()) {
+                <span>Passou de 30 min. O gerente também foi avisado.</span>
+              }
+            </section>
+          }
+
+          @if (comanda.liberada_por || comanda.fechada_em) {
+            <ol class="linha-do-tempo" aria-label="Histórico da comanda">
+              @if (comanda.liberada_por) {
+                <li>
+                  <span>Liberada por <strong>{{ comanda.liberada_por }}</strong></span>
+                  @if (comanda.liberada_em) {
+                    <span>{{ comanda.liberada_em | date: 'HH:mm' }}</span>
+                  }
+                </li>
+              }
+              @if (comanda.fechada_em) {
+                <li>
+                  <span>Conta fechada pelo cliente</span>
+                  <span>{{ comanda.fechada_em | date: 'HH:mm' }}</span>
+                </li>
+              }
+            </ol>
+          }
 
           <section class="bloco" aria-labelledby="titulo-itens">
             <h2 id="titulo-itens">Itens consumidos</h2>
@@ -152,10 +298,13 @@
         }
       </main>
 
-      @if (comanda.status === 'aguardando_liberacao') {
+      @if (comanda.status === 'aguardando_liberacao' && !trocandoMesa()) {
         <footer class="acoes">
           <button class="btn-recusar" type="button" (click)="recusar()" [disabled]="processando() !== null">
             {{ processando() === 'recusar' ? 'Recusando...' : 'Recusar' }}
+          </button>
+          <button class="btn-trocar" type="button" (click)="comecarTrocaDeMesa()" [disabled]="processando() !== null">
+            Trocar mesa
           </button>
           <button class="btn-principal" type="button" (click)="liberar()" [disabled]="processando() !== null">
             {{ processando() === 'liberar' ? 'Liberando...' : 'Liberar comanda' }}
@@ -171,7 +320,7 @@
     } @else {
       <div class="sem-selecao">
         <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1Z"></path><path d="M14 8H8"></path><path d="M16 12H8"></path><path d="M13 16H8"></path></svg>
-        <p>Escolha uma comanda na lista para ver os itens, liberar a entrada ou confirmar o pagamento.</p>
+        <p>Nenhuma comanda aqui agora. Quando chegar uma, ela aparece sozinha.</p>
       </div>
     }
   </div>

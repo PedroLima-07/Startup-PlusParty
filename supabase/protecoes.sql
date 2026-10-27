@@ -1,6 +1,9 @@
 -- =====================================================================
 -- +party — Proteções de regra de negócio no banco
 -- =====================================================================
+-- ATENÇÃO: a versão atual de validar_comanda está em comanda_regras.sql.
+-- Se rodar este arquivo de novo, rode comanda_regras.sql logo depois.
+-- ---------------------------------------------------------------------
 -- O RLS decide QUEM pode mexer em cada linha. Estes triggers decidem O QUE
 -- pode ser mudado, porque o RLS sozinho deixava o cliente, pela API:
 --   1. se liberar sozinho ou marcar a própria comanda como paga

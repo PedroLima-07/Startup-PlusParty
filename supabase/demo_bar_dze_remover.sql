@@ -3,8 +3,9 @@
 -- =====================================================================
 -- Remove tudo o que supabase/demo_bar_dze.sql criou: os clientes e
 -- atendentes de demonstração (e-mails @demo.plusparty.invalid), as
--- comandas, os pedidos e os chamados de garçom deles. Os dados de verdade
--- (contas reais, cardápio, postagens) não são tocados.
+-- comandas, os pedidos, os chamados de garçom, as avaliações, a fila e os
+-- eventos de demonstração. Os dados de verdade (contas reais, cardápio,
+-- postagens, eventos do gerente) não são tocados.
 --
 -- Como aplicar: SQL Editor → colar este arquivo inteiro → Run.
 -- A última consulta deve mostrar: sobrou = 0
@@ -32,8 +33,17 @@ where comanda_id in (
   where u.email like '%@demo.plusparty.invalid'
 );
 
+-- Avaliações, pedidos de avaliação e a fila saem junto (on delete cascade).
 delete from comandas
 where usuario_id in (select id from auth.users where email like '%@demo.plusparty.invalid');
+
+-- Eventos de demonstração: marcados com a data de criação 01/01/2000.
+do $$
+begin
+  if to_regclass('public.eventos') is not null then
+    execute $q$delete from eventos where criado_em = '2000-01-01 00:00:00+00'$q$;
+  end if;
+end $$;
 
 delete from solicitacoes_equipe
 where usuario_id in (select id from auth.users where email like '%@demo.plusparty.invalid');

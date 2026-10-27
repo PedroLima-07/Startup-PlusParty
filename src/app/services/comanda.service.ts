@@ -1,5 +1,14 @@
 import { Injectable, inject } from '@angular/core';
-import { Comanda, ComandaDetalhada, PedidoItemDetalhado } from '../models';
+import {
+  Comanda,
+  ComandaDetalhada,
+  ContaPendente,
+  EsperaNaFila,
+  PedidoItemDetalhado,
+  STATUS_ATIVOS,
+  SituacaoMesa,
+  StatusComanda,
+} from '../models';
 import { AuthService } from './auth.service';
 import { SupabaseService } from './supabase.service';
 
@@ -8,6 +17,40 @@ export class ComandaEmOutroLugarError extends Error {
     super(`Já existe uma comanda ativa em ${nomeEstabelecimento}.`);
   }
 }
+
+/** O cliente fechou uma conta e ainda não pagou: não pode abrir outra comanda. */
+export class ContaPendenteError extends Error {
+  constructor(readonly conta: ContaPendente) {
+    super(`Há uma conta esperando pagamento em ${conta.estabelecimento}.`);
+  }
+}
+
+/** A comanda que ainda prende o cliente (só pode existir uma). */
+export interface ComandaAtiva {
+  id: string;
+  estabelecimento_id: string;
+  estabelecimento: string;
+  mesa: string | null;
+  status: StatusComanda;
+  fechada_em: string | null;
+  total: number;
+  /** Aberta pelo banco quando a mesa da fila liberou. */
+  veio_da_fila: boolean;
+}
+
+interface LinhaComandaAtiva {
+  id: string;
+  estabelecimento_id: string;
+  mesa: string | null;
+  status: StatusComanda;
+  fechada_em: string | null;
+  veio_da_fila?: boolean;
+  estabelecimento: { nome: string } | null;
+  pedidos: { pedido_itens: { quantidade: number; preco_unitario: number }[] }[];
+}
+
+/** Erro do Postgres para valor repetido onde só pode haver um. */
+const VIOLACAO_DE_UNICIDADE = '23505';
 
 @Injectable({
   providedIn: 'root',
@@ -18,28 +61,19 @@ export class ComandaService {
 
   /**
    * Abre a comanda no estabelecimento. Se o cliente já tem uma comanda ativa
-   * (nem paga nem recusada) nesse mesmo lugar, devolve ela em vez de criar outra.
-   * Se a comanda ativa for em outro lugar, recusa com ComandaEmOutroLugarError.
+   * nesse mesmo lugar, devolve ela em vez de criar outra. Se a comanda ativa
+   * é uma conta fechada esperando pagamento, recusa com ContaPendenteError;
+   * se é em outro lugar, com ComandaEmOutroLugarError.
+   *
+   * O banco também garante uma comanda ativa por cliente: se outra aba abrir
+   * no mesmo instante, o insert desta falha e ela passa a usar a que ficou.
    */
   async abrirComanda(estabelecimentoId: string, mesa: string | null): Promise<Pick<Comanda, 'id'>> {
+    const existente = await this.usarComandaAtiva(estabelecimentoId);
+    if (existente) return existente;
+
     const user = await this.authService.usuarioAtual();
     if (!user) throw new Error('Usuário não autenticado.');
-
-    const { data: ativa, error: erroAtiva } = await this.supabase.client
-      .from('comandas')
-      .select('id, estabelecimento_id, estabelecimento:estabelecimentos(nome)')
-      .eq('usuario_id', user.id)
-      .not('status', 'in', '(paga,recusada)')
-      .order('criada_em', { ascending: false })
-      .limit(1)
-      .maybeSingle();
-
-    if (erroAtiva) throw erroAtiva;
-    if (ativa) {
-      if (ativa.estabelecimento_id === estabelecimentoId) return { id: ativa.id };
-      const lugar = ativa.estabelecimento as unknown as { nome: string } | null;
-      throw new ComandaEmOutroLugarError(lugar?.nome ?? 'outro estabelecimento');
-    }
 
     const { data, error } = await this.supabase.client
       .from('comandas')
@@ -52,8 +86,107 @@ export class ComandaService {
       .select('id')
       .single();
 
-    if (error) throw error;
+    if (error) {
+      if (error.code === VIOLACAO_DE_UNICIDADE) {
+        const criadaEmOutraAba = await this.usarComandaAtiva(estabelecimentoId);
+        if (criadaEmOutraAba) return criadaEmOutraAba;
+      }
+      throw error;
+    }
     return data as Pick<Comanda, 'id'>;
+  }
+
+  /** A comanda ativa do cliente logado, com o total consumido; null se não tem. */
+  async buscarComandaAtiva(): Promise<ComandaAtiva | null> {
+    const user = await this.authService.usuarioAtual();
+    if (!user) return null;
+
+    const { data, error } = await this.supabase.client
+      .from('comandas')
+      .select(
+        'id, estabelecimento_id, mesa, status, fechada_em, veio_da_fila, estabelecimento:estabelecimentos(nome), ' +
+          'pedidos(pedido_itens(quantidade, preco_unitario))',
+      )
+      .eq('usuario_id', user.id)
+      .in('status', STATUS_ATIVOS)
+      .order('criada_em', { ascending: false })
+      .limit(1)
+      .maybeSingle();
+
+    if (error) throw error;
+    if (!data) return null;
+
+    const linha = data as unknown as LinhaComandaAtiva;
+    return {
+      id: linha.id,
+      estabelecimento_id: linha.estabelecimento_id,
+      estabelecimento: linha.estabelecimento?.nome ?? 'outro estabelecimento',
+      mesa: linha.mesa,
+      status: linha.status,
+      fechada_em: linha.fechada_em,
+      veio_da_fila: linha.veio_da_fila ?? false,
+      total: linha.pedidos
+        .flatMap((pedido) => pedido.pedido_itens)
+        .reduce((soma, item) => soma + item.quantidade * item.preco_unitario, 0),
+    };
+  }
+
+  /** Como a mesa está: livre, em uso (comanda aberta) ou liberando (só contas fechadas). */
+  async situacaoMesa(estabelecimentoId: string, mesa: string): Promise<SituacaoMesa> {
+    const { data, error } = await this.supabase.client.rpc('situacao_mesa', {
+      p_estabelecimento: estabelecimentoId,
+      p_mesa: mesa,
+    });
+    if (error) throw error;
+    return (data as SituacaoMesa | null) ?? 'livre';
+  }
+
+  /** Entra na fila da mesa que está sendo liberada; devolve a posição (1 = o próximo). */
+  async entrarNaFila(estabelecimentoId: string, mesa: string): Promise<number> {
+    const { data, error } = await this.supabase.client.rpc('entrar_na_fila_da_mesa', {
+      p_estabelecimento: estabelecimentoId,
+      p_mesa: mesa,
+    });
+    if (error) throw error;
+    return Number(data);
+  }
+
+  async sairDaFila(): Promise<void> {
+    const { error } = await this.supabase.client.rpc('sair_da_fila_da_mesa');
+    if (error) throw error;
+  }
+
+  /** A fila em que o cliente está esperando; null se não está em nenhuma. */
+  async minhaFila(): Promise<EsperaNaFila | null> {
+    const { data, error } = await this.supabase.client.rpc('minha_fila');
+    if (error) throw error;
+    return ((data ?? []) as EsperaNaFila[])[0] ?? null;
+  }
+
+  /** A conta fechada que o cliente ainda não pagou; null se não há. */
+  async buscarContaPendente(): Promise<ContaPendente | null> {
+    const ativa = await this.buscarComandaAtiva();
+    return ativa?.status === 'aguardando_pagamento' ? this.paraContaPendente(ativa) : null;
+  }
+
+  /** Decide o que fazer com a comanda ativa antes de abrir outra (ver abrirComanda). */
+  private async usarComandaAtiva(estabelecimentoId: string): Promise<Pick<Comanda, 'id'> | null> {
+    const ativa = await this.buscarComandaAtiva();
+    if (!ativa) return null;
+
+    if (ativa.status === 'aguardando_pagamento') throw new ContaPendenteError(this.paraContaPendente(ativa));
+    if (ativa.estabelecimento_id === estabelecimentoId) return { id: ativa.id };
+    throw new ComandaEmOutroLugarError(ativa.estabelecimento);
+  }
+
+  private paraContaPendente(ativa: ComandaAtiva): ContaPendente {
+    return {
+      id: ativa.id,
+      estabelecimento: ativa.estabelecimento,
+      mesa: ativa.mesa,
+      fechada_em: ativa.fechada_em,
+      total: ativa.total,
+    };
   }
 
   async buscarComanda(comandaId: string): Promise<ComandaDetalhada> {
@@ -78,14 +211,14 @@ export class ComandaService {
   }
 
   /**
-   * Desiste da comanda que ainda espera a liberação do atendente: ela é
-   * apagada (ver supabase/cancelar_comanda.sql). Devolve false se já não dava
+   * Desiste da comanda que ainda espera a liberação do atendente: ela vira
+   * 'cancelada' (supabase/comanda_regras.sql). Devolve false se já não dava
    * para cancelar, por exemplo porque o atendente liberou nesse meio tempo.
    */
   async cancelarSolicitacao(comandaId: string): Promise<boolean> {
     const { data, error } = await this.supabase.client
       .from('comandas')
-      .delete()
+      .update({ status: 'cancelada' })
       .eq('id', comandaId)
       .eq('status', 'aguardando_liberacao')
       .select('id');
@@ -98,10 +231,11 @@ export class ComandaService {
     return itens.reduce((total, item) => total + item.quantidade * item.preco_unitario, 0);
   }
 
+  /** A hora do fechamento (fechada_em) quem grava é o banco. */
   async fecharConta(comandaId: string): Promise<void> {
     const { error } = await this.supabase.client
       .from('comandas')
-      .update({ status: 'aguardando_pagamento', fechada_em: new Date().toISOString() })
+      .update({ status: 'aguardando_pagamento' })
       .eq('id', comandaId);
 
     if (error) throw error;

@@ -22,6 +22,64 @@
   </header>
 
   <main class="page-content container-fluid">
+    @if (contaPendente(); as conta) {
+    <section class="conta-pendente" aria-labelledby="titulo-conta-pendente">
+      <h2 class="conta-pendente-titulo">Antes de abrir uma comanda nova</h2>
+
+      <div class="conta-pendente-cartao">
+        <span class="conta-pendente-icone" aria-hidden="true">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 2"></path></svg>
+        </span>
+        <div class="conta-pendente-texto">
+          <p id="titulo-conta-pendente" class="conta-pendente-chamada">Você tem uma conta esperando pagamento</p>
+          <p class="conta-pendente-explicacao">
+            Para abrir uma comanda nova, primeiro conclua o pagamento no caixa do {{ conta.estabelecimento }}.
+          </p>
+        </div>
+
+        <div class="conta-pendente-resumo">
+          <div class="conta-pendente-linha">
+            <span class="conta-pendente-bar">{{ conta.estabelecimento }} · {{ conta.mesa ? 'Mesa ' + conta.mesa : 'Balcão' }}</span>
+            <span class="conta-pendente-valor">{{ conta.total | currency: 'BRL' }}</span>
+          </div>
+          @if (conta.fechada_em) {
+            <span class="conta-pendente-hora">
+              Conta fechada às {{ conta.fechada_em | date: 'HH:mm' }} · há {{ minutosEsperandoPagamento() }} min
+            </span>
+          }
+        </div>
+
+        <button type="button" class="primary-button" (click)="verComanda(conta.id)">Ver minha comanda</button>
+      </div>
+
+      <p class="conta-pendente-ajuda">
+        Já pagou? Peça ao atendente para confirmar o pagamento no caixa. Assim que ele confirmar, você
+        pode abrir a comanda aqui.
+      </p>
+    </section>
+    } @else if (fila(); as espera) {
+    <section class="na-fila" aria-labelledby="titulo-fila">
+      <h2 id="titulo-fila" class="na-fila-titulo">Você está na fila da mesa {{ espera.mesa }}</h2>
+
+      <div class="na-fila-cartao">
+        <span class="na-fila-rotulo">Sua posição</span>
+        <span class="na-fila-posicao">{{ espera.posicao }}º</span>
+        <p>
+          Quem está na mesa já fechou a conta e está pagando. Quando liberar, sua comanda abre sozinha e
+          você recebe um aviso.
+        </p>
+      </div>
+
+      <button type="button" class="botao-sair-fila" [disabled]="mexendoNaFila()" (click)="sairDaFila()">
+        {{ mexendoNaFila() ? 'Saindo...' : 'Sair da fila' }}
+      </button>
+      <p class="na-fila-ajuda">Pode fechar o app: o aviso chega mesmo assim.</p>
+
+      @if (mensagem()) {
+        <p class="mensagem-erro" role="alert">{{ mensagem() }}</p>
+      }
+    </section>
+    } @else {
     <section class="intro-section" aria-labelledby="titulo-local">
       <h2 id="titulo-local">Onde você está?</h2>
     </section>
@@ -102,7 +160,73 @@
     @if (mensagem()) {
       <p class="mensagem-erro" role="alert">{{ mensagem() }}</p>
     }
+    }
   </main>
+
+  @if (pergunta(); as situacao) {
+    <div class="comanda-aberta-fundo">
+      <section class="comanda-aberta pergunta-mesa" role="dialog" aria-modal="true" aria-labelledby="titulo-pergunta-mesa">
+        <span class="comanda-aberta-icone" [class.liberando]="situacao === 'liberando'" aria-hidden="true">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M22 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+        </span>
+        @if (situacao === 'em_uso') {
+          <div class="comanda-aberta-texto">
+            <p id="titulo-pergunta-mesa" class="comanda-aberta-chamada">A mesa {{ numeroMesa.trim() }} já está em uso</p>
+            <p class="comanda-aberta-explicacao">
+              Tem gente com comanda aberta nela. Se você está com esse grupo, pode abrir a sua: o atendente
+              confirma.
+            </p>
+          </div>
+          <button type="button" class="primary-button" [disabled]="salvando()" (click)="estouComOGrupo()">
+            {{ salvando() ? 'Abrindo...' : 'Estou com esse grupo' }}
+          </button>
+        } @else {
+          <div class="comanda-aberta-texto">
+            <p id="titulo-pergunta-mesa" class="comanda-aberta-chamada">A mesa {{ numeroMesa.trim() }} está sendo liberada</p>
+            <p class="comanda-aberta-explicacao">
+              Quem está nela já fechou a conta e está pagando. Entre na fila: quando liberar, sua comanda abre
+              e você recebe um aviso.
+            </p>
+          </div>
+          <button type="button" class="primary-button" [disabled]="mexendoNaFila()" (click)="entrarNaFila()">
+            {{ mexendoNaFila() ? 'Entrando...' : 'Entrar na fila' }}
+          </button>
+        }
+        <button type="button" class="botao-outra-mesa" (click)="escolherOutraMesa()">Escolher outra mesa</button>
+      </section>
+    </div>
+  }
+
+  @if (comandaAberta(); as aberta) {
+    <div class="comanda-aberta-fundo">
+      <section class="comanda-aberta" role="dialog" aria-modal="true" aria-labelledby="titulo-comanda-aberta">
+        <span class="comanda-aberta-icone" aria-hidden="true">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"></rect><path d="M3 9h18"></path><path d="M8 4v5"></path></svg>
+        </span>
+        <div class="comanda-aberta-texto">
+          @if (aberta.veio_da_fila && aberta.status === 'aguardando_liberacao') {
+            <p id="titulo-comanda-aberta" class="comanda-aberta-chamada">Sua mesa liberou!</p>
+            <p class="comanda-aberta-explicacao">
+              A mesa {{ aberta.mesa }} do {{ aberta.estabelecimento }} está livre e sua comanda já foi aberta.
+              Chame um atendente para confirmar.
+            </p>
+          } @else {
+            <p id="titulo-comanda-aberta" class="comanda-aberta-chamada">Sua comanda já foi aberta</p>
+            <p class="comanda-aberta-explicacao">
+              Ela foi aberta antes, em outra aba ou em outro aparelho. Cada pessoa pode ter uma comanda por vez.
+            </p>
+          }
+        </div>
+        <div class="comanda-aberta-resumo">
+          <span class="comanda-aberta-bar">{{ aberta.estabelecimento }} · {{ aberta.mesa ? 'Mesa ' + aberta.mesa : 'Balcão' }}</span>
+          <span class="comanda-aberta-status" [class.liberada]="aberta.status === 'aberta'">
+            {{ aberta.status === 'aberta' ? 'Aberta' : 'Aguardando liberação' }}
+          </span>
+        </div>
+        <button type="button" class="primary-button" (click)="verComanda(aberta.id)">Ver minha comanda</button>
+      </section>
+    </div>
+  }
 }
 
 <app-nav-cliente class="apenas-desktop" />

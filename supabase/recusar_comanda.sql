@@ -1,6 +1,9 @@
 -- =====================================================================
 -- +party — Atendente recusa a comanda que espera liberação
 -- =====================================================================
+-- ATENÇÃO: substituído por comanda_regras.sql (status e transições).
+-- Se rodar este arquivo de novo, rode comanda_regras.sql logo depois.
+-- ---------------------------------------------------------------------
 -- A liberação existe para confirmar que o cliente está no bar. Quando ele
 -- não está (ou pediu por engano), o atendente precisa de uma saída além de
 -- "liberar". Marcar como 'paga' sujaria os resultados do gerente com

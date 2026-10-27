@@ -1,5 +1,5 @@
 import { Injectable, inject, signal } from '@angular/core';
-import { ComandaAtendente, ItemConsumido, StatusComanda } from '../models';
+import { ComandaAtendente, HistoricoNaoPaga, ItemConsumido, StatusComanda } from '../models';
 import { SupabaseService } from './supabase.service';
 
 type StatusNaLista = ComandaAtendente['status'];
@@ -18,8 +18,13 @@ export interface LinhaComandaAtendente {
   id: string;
   status: StatusNaLista;
   mesa: string | null;
+  usuario_id: string;
   criada_em: string;
+  fechada_em: string | null;
+  liberada_em: string | null;
+  veio_da_fila?: boolean;
   cliente: { nome: string } | null;
+  liberador: { nome: string } | null;
   pedidos: {
     pedido_itens: { quantidade: number; preco_unitario: number; item: { nome: string } | null }[];
   }[];
@@ -60,7 +65,8 @@ export class ComandasAtendenteService {
     const { data, error } = await this.supabase.client
       .from('comandas')
       .select(
-        'id, status, mesa, criada_em, cliente:perfis!comandas_usuario_id_fkey(nome), ' +
+        'id, status, mesa, usuario_id, criada_em, fechada_em, liberada_em, veio_da_fila, ' +
+          'cliente:perfis!comandas_usuario_id_fkey(nome), liberador:perfis!comandas_liberada_por_fkey(nome), ' +
           'pedidos(pedido_itens(quantidade, preco_unitario, item:itens(nome)))',
       )
       .eq('estabelecimento_id', estabelecimentoId)
@@ -88,8 +94,9 @@ export class ComandasAtendenteService {
     this.totalPendencias.set(count ?? 0);
   }
 
-  async liberar(comandaId: string): Promise<void> {
-    await this.mudarStatus(comandaId, 'aguardando_liberacao', 'aberta');
+  /** Libera a comanda; com `mesa`, corrige o número que o cliente digitou. */
+  async liberar(comandaId: string, mesa?: string): Promise<void> {
+    await this.mudarStatus(comandaId, 'aguardando_liberacao', 'aberta', mesa ? { mesa } : {});
   }
 
   /** Precisa do status 'recusada' no banco (supabase/recusar_comanda.sql). */
@@ -101,6 +108,20 @@ export class ComandasAtendenteService {
     await this.mudarStatus(comandaId, 'aguardando_pagamento', 'paga');
   }
 
+  /**
+   * A última vez que o cliente saiu sem pagar, em qualquer bar
+   * (supabase/comanda_regras.sql). Null se nunca aconteceu.
+   */
+  async historicoNaoPaga(usuarioId: string): Promise<HistoricoNaoPaga | null> {
+    const { data, error } = await this.supabase.client.rpc('historico_nao_paga', {
+      p_usuario: usuarioId,
+    });
+
+    if (error) throw error;
+    const linha = ((data ?? []) as HistoricoNaoPaga[])[0];
+    return linha ? { ...linha, valor: Number(linha.valor) } : null;
+  }
+
   paraComanda(linha: LinhaComandaAtendente): ComandaAtendente {
     const itens = this.juntarItens(linha);
 
@@ -108,8 +129,13 @@ export class ComandasAtendenteService {
       id: linha.id,
       status: linha.status,
       mesa: linha.mesa,
+      usuario_id: linha.usuario_id,
       cliente: linha.cliente?.nome.trim() || 'Cliente',
       criada_em: linha.criada_em,
+      fechada_em: linha.fechada_em,
+      liberada_em: linha.liberada_em,
+      liberada_por: linha.liberador?.nome.trim() || null,
+      veio_da_fila: linha.veio_da_fila ?? false,
       total: itens.reduce((soma, item) => soma + item.quantidade * item.preco_unitario, 0),
       itens,
     };
@@ -158,10 +184,11 @@ export class ComandasAtendenteService {
     comandaId: string,
     de: StatusComanda,
     para: StatusComanda,
+    outrosCampos: Record<string, unknown> = {},
   ): Promise<void> {
     const { data, error } = await this.supabase.client
       .from('comandas')
-      .update({ status: para })
+      .update({ ...outrosCampos, status: para })
       .eq('id', comandaId)
       .eq('status', de)
       .select('id');
