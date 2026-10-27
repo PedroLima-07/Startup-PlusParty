@@ -1,7 +1,21 @@
 import { CurrencyPipe, DatePipe } from '@angular/common';
-import { Component, DestroyRef, OnInit, computed, inject, signal } from '@angular/core';
+import {
+  Component,
+  DestroyRef,
+  OnInit,
+  computed,
+  effect,
+  inject,
+  signal,
+  untracked,
+} from '@angular/core';
 import { Router } from '@angular/router';
-import { ComandaAtendente, HistoricoNaoPaga, MINUTOS_ALERTA_PAGAMENTO } from '../../models';
+import {
+  ComandaAtendente,
+  HistoricoNaoPaga,
+  MINUTOS_ALERTA_LIBERACAO,
+  MINUTOS_ALERTA_PAGAMENTO,
+} from '../../models';
 import { AuthService } from '../../services/auth.service';
 import { SupabaseService } from '../../services/supabase.service';
 import {
@@ -10,25 +24,47 @@ import {
 } from '../../services/comandas-atendente.service';
 import { Carregando } from '../../components/carregando/carregando';
 import { NavAtendente } from '../../components/nav-atendente/nav-atendente';
+import { telaDesktop } from '../../tela';
 import { minutosDesde, relogio } from '../../tempo';
 
 type Acao = 'liberar' | 'recusar' | 'pagar';
 
-type Filtro = 'todas' | ComandaAtendente['status'];
+type TipoLista = ComandaAtendente['status'];
 
-/** Filtros da lista no desktop, com o nome curto de cada situação. */
-const FILTROS: { valor: Filtro; rotulo: string }[] = [
-  { valor: 'todas', rotulo: 'Todas' },
-  { valor: 'aguardando_liberacao', rotulo: 'Liberar' },
-  { valor: 'aguardando_pagamento', rotulo: 'Receber' },
-  { valor: 'aberta', rotulo: 'Abertas' },
+/** Os três cartões, na ordem em que aparecem: quem espera na porta vem primeiro. */
+const TIPOS: { tipo: TipoLista; rotulo: string; curto: string; titulo: string; vazio: string }[] = [
+  {
+    tipo: 'aguardando_liberacao',
+    rotulo: 'Liberar entrada',
+    curto: 'Liberar',
+    titulo: 'Liberar entrada',
+    vazio: 'Nada para liberar',
+  },
+  {
+    tipo: 'aguardando_pagamento',
+    rotulo: 'Receber',
+    curto: 'Receber',
+    titulo: 'Receber pagamento',
+    vazio: 'Nada para receber',
+  },
+  { tipo: 'aberta', rotulo: 'Abertas', curto: 'Abertas', titulo: 'Comandas abertas', vazio: 'Nenhuma aberta' },
 ];
 
-const ROTULOS_STATUS: Record<ComandaAtendente['status'], string> = {
-  aguardando_liberacao: 'Aguardando liberação',
-  aguardando_pagamento: 'Aguardando pagamento',
-  aberta: 'Aberta',
+/** A partir de quantos minutos a mais antiga deixa o cartão (e a linha) em vermelho. */
+const LIMITE_URGENTE: Partial<Record<TipoLista, number>> = {
+  aguardando_liberacao: MINUTOS_ALERTA_LIBERACAO,
+  aguardando_pagamento: MINUTOS_ALERTA_PAGAMENTO,
 };
+
+/** Quanto tempo o número do cartão pisca quando chega comanda nova. */
+const DURACAO_PISCADA_MS = 1200;
+
+/** De quando conta a espera: a chegada para liberar, o fechamento da conta para receber. */
+function inicioDaEspera(comanda: ComandaAtendente): string {
+  return comanda.status === 'aguardando_pagamento' && comanda.fechada_em
+    ? comanda.fechada_em
+    : comanda.criada_em;
+}
 
 const TITULOS_DETALHE: Record<ComandaAtendente['status'], string> = {
   aguardando_liberacao: 'Liberar comanda',
@@ -47,6 +83,7 @@ const DURACAO_AVISO_MS = 3000;
     './atendente-comandas.scss',
     './atendente-comandas.desktop.scss',
     './atendente-comandas.conta.scss',
+    './atendente-comandas.cartoes.scss',
   ],
 })
 export class AtendenteComandas implements OnInit {
@@ -56,6 +93,7 @@ export class AtendenteComandas implements OnInit {
   private authService = inject(AuthService);
   private router = inject(Router);
   private agora = relogio();
+  private desktop = telaDesktop();
 
   /** Tudo o que a tela mostra sai daqui, já na ordem em que aparece. */
   protected readonly comandas = signal<ComandaAtendente[]>([]);
@@ -71,24 +109,54 @@ export class AtendenteComandas implements OnInit {
 
   private readonly selecionadaId = signal<string | null>(null);
 
-  /** Filtro da lista (só aparece no desktop; no celular fica em "Todas"). */
-  protected readonly filtro = signal<Filtro>('todas');
+  /** Cartão escolhido. No desktop, null é a tela inicial com os três cartões. */
+  private readonly tipoEscolhido = signal<TipoLista | null>(null);
 
-  protected readonly filtros = computed(() => {
-    const comandas = this.comandas();
-    return FILTROS.map((opcao) => ({
-      ...opcao,
-      quantidade:
-        opcao.valor === 'todas'
-          ? comandas.length
-          : comandas.filter((comanda) => comanda.status === opcao.valor).length,
-    }));
+  /** Cartões cujo número acabou de subir: piscam uma vez. */
+  protected readonly pulsando = signal<ReadonlySet<TipoLista>>(new Set());
+
+  /** Os três cartões com o número, o valor, a espera da mais antiga e a urgência. */
+  protected readonly cartoes = computed(() =>
+    TIPOS.map((definicao) => {
+      const lista = this.doTipo(definicao.tipo);
+      const maisAntiga = lista[0];
+      const minutos = maisAntiga ? minutosDesde(inicioDaEspera(maisAntiga), this.agora()) : null;
+      const limite = LIMITE_URGENTE[definicao.tipo];
+
+      return {
+        ...definicao,
+        quantidade: lista.length,
+        valor: lista.reduce((soma, comanda) => soma + comanda.total, 0),
+        minutos,
+        urgente: limite !== undefined && minutos !== null && minutos >= limite,
+      };
+    }),
+  );
+
+  /**
+   * A lista na tela. No celular sempre há uma: sem escolha, a do primeiro
+   * cartão com alguém esperando.
+   */
+  protected readonly tipoAtivo = computed(() => {
+    const escolhido = this.tipoEscolhido();
+    if (escolhido || this.desktop()) return escolhido;
+    return this.cartoes().find((cartao) => cartao.quantidade > 0)?.tipo ?? 'aguardando_liberacao';
   });
 
-  protected readonly comandasVisiveis = computed(() => {
-    const filtro = this.filtro();
-    const comandas = this.comandas();
-    return filtro === 'todas' ? comandas : comandas.filter((comanda) => comanda.status === filtro);
+  protected readonly cartaoAtivo = computed(
+    () => this.cartoes().find((cartao) => cartao.tipo === this.tipoAtivo()) ?? null,
+  );
+
+  /** As comandas do cartão ativo, da que espera há mais tempo para a mais nova. */
+  protected readonly lista = computed(() => {
+    const tipo = this.tipoAtivo();
+    if (!tipo) return [];
+
+    const limite = LIMITE_URGENTE[tipo];
+    return this.doTipo(tipo).map((comanda) => {
+      const minutos = minutosDesde(inicioDaEspera(comanda), this.agora());
+      return { comanda, minutos, urgente: limite !== undefined && minutos >= limite };
+    });
   });
 
   /** Subtítulo do desktop: quantas esperam o atendente e por quê. */
@@ -109,10 +177,20 @@ export class AtendenteComandas implements OnInit {
   /**
    * Comanda aberta na tela de detalhe. Sai sempre da lista atual: se o total
    * mudar ou a comanda sumir enquanto a tela está aberta, ela acompanha.
+   * No desktop, sem escolha, é a primeira da lista: entrar num cartão já
+   * mostra a mais antiga, e depois de cada ação entra a próxima.
    */
-  protected readonly selecionada = computed(
-    () => this.comandas().find((comanda) => comanda.id === this.selecionadaId()) ?? null,
-  );
+  protected readonly selecionada = computed(() => {
+    const escolhida = this.comandas().find((comanda) => comanda.id === this.selecionadaId());
+    if (escolhida) return escolhida;
+    return this.desktop() && this.tipoAtivo() ? (this.lista()[0]?.comanda ?? null) : null;
+  });
+
+  /** Muda só quando muda a comanda a liberar no detalhe, não a cada recarga da lista. */
+  private readonly comandaParaHistorico = computed(() => {
+    const comanda = this.selecionada();
+    return comanda?.status === 'aguardando_liberacao' ? comanda.id : null;
+  });
 
   /** Minutos desde que o cliente da comanda aberta no detalhe fechou a conta. */
   protected readonly minutosEsperandoPagamento = computed(() => {
@@ -130,6 +208,19 @@ export class AtendenteComandas implements OnInit {
   protected readonly historicoNaoPaga = signal<HistoricoNaoPaga | null>(null);
 
   private esperaDoAviso: ReturnType<typeof setTimeout> | undefined;
+  private esperaDaPiscada: ReturnType<typeof setTimeout> | undefined;
+  private quantidadesAnteriores: ReadonlyMap<TipoLista, number> | null = null;
+
+  constructor() {
+    effect(() => {
+      const id = this.comandaParaHistorico();
+      untracked(() => {
+        this.historicoNaoPaga.set(null);
+        const comanda = this.comandas().find((c) => c.id === id);
+        if (comanda) void this.buscarHistorico(comanda);
+      });
+    });
+  }
 
   async ngOnInit(): Promise<void> {
     // Comanda aberta ou fechada pelo cliente aparece sozinha; itens mudam o total.
@@ -140,6 +231,7 @@ export class AtendenteComandas implements OnInit {
     this.destroyRef.onDestroy(() => {
       pararDeEscutar();
       clearTimeout(this.esperaDoAviso);
+      clearTimeout(this.esperaDaPiscada);
     });
 
     await this.atualizarLista();
@@ -161,7 +253,9 @@ export class AtendenteComandas implements OnInit {
         return;
       }
 
-      this.comandas.set(await this.comandasService.listar(estabelecimentoId));
+      const comandas = await this.comandasService.listar(estabelecimentoId);
+      this.comandas.set(comandas);
+      this.piscarOsQueSubiram(comandas);
       this.erroLista.set(null);
     } catch {
       this.erroLista.set(
@@ -176,10 +270,6 @@ export class AtendenteComandas implements OnInit {
     return comanda.mesa ? `Mesa ${comanda.mesa}` : 'Balcão';
   }
 
-  protected rotuloStatus(comanda: ComandaAtendente): string {
-    return ROTULOS_STATUS[comanda.status];
-  }
-
   protected tituloDetalhe(comanda: ComandaAtendente): string {
     return TITULOS_DETALHE[comanda.status];
   }
@@ -192,8 +282,59 @@ export class AtendenteComandas implements OnInit {
   protected abrir(comanda: ComandaAtendente): void {
     this.erro.set(null);
     this.selecionadaId.set(comanda.id);
-    this.historicoNaoPaga.set(null);
-    if (comanda.status === 'aguardando_liberacao') void this.buscarHistorico(comanda);
+  }
+
+  /** Entra no cartão (ou troca de cartão pelas abas). */
+  protected escolher(tipo: TipoLista): void {
+    if (this.processando()) return;
+    this.erro.set(null);
+    this.selecionadaId.set(null);
+    this.tipoEscolhido.set(tipo);
+  }
+
+  /** Desktop: volta para os três cartões. */
+  protected voltarAosCartoes(): void {
+    if (this.processando()) return;
+    this.erro.set(null);
+    this.selecionadaId.set(null);
+    this.tipoEscolhido.set(null);
+  }
+
+  /** "esperando há 7 min", "fechou há 34 min" ou "aberta às 21:10". */
+  protected textoDaEspera(comanda: ComandaAtendente, minutos: number): string {
+    if (comanda.status === 'aguardando_liberacao') return `esperando há ${minutos} min`;
+    if (comanda.status === 'aguardando_pagamento') return `fechou há ${minutos} min`;
+    const abertura = new Date(comanda.liberada_em ?? comanda.criada_em);
+    const hora = String(abertura.getHours()).padStart(2, '0');
+    const minuto = String(abertura.getMinutes()).padStart(2, '0');
+    return `aberta às ${hora}:${minuto}`;
+  }
+
+  private doTipo(tipo: TipoLista): ComandaAtendente[] {
+    return this.comandas()
+      .filter((comanda) => comanda.status === tipo)
+      .sort(
+        (a, b) => new Date(inicioDaEspera(a)).getTime() - new Date(inicioDaEspera(b)).getTime(),
+      );
+  }
+
+  /** O número do cartão subiu (chegou comanda nova): ele pisca uma vez. */
+  private piscarOsQueSubiram(comandas: ComandaAtendente[]): void {
+    const quantidades = new Map(
+      TIPOS.map(({ tipo }) => [tipo, comandas.filter((comanda) => comanda.status === tipo).length]),
+    );
+    const anteriores = this.quantidadesAnteriores;
+    this.quantidadesAnteriores = quantidades;
+    if (!anteriores) return;
+
+    const subiram = TIPOS.map(({ tipo }) => tipo).filter(
+      (tipo) => (quantidades.get(tipo) ?? 0) > (anteriores.get(tipo) ?? 0),
+    );
+    if (subiram.length === 0) return;
+
+    clearTimeout(this.esperaDaPiscada);
+    this.pulsando.set(new Set(subiram));
+    this.esperaDaPiscada = setTimeout(() => this.pulsando.set(new Set()), DURACAO_PISCADA_MS);
   }
 
   /** Sem o histórico a liberação segue normal: ele só avisa, não decide. */
@@ -201,7 +342,7 @@ export class AtendenteComandas implements OnInit {
     try {
       const historico = await this.comandasService.historicoNaoPaga(comanda.usuario_id);
       // Só mostra se o atendente ainda está na mesma comanda.
-      if (this.selecionadaId() === comanda.id) this.historicoNaoPaga.set(historico);
+      if (this.selecionada()?.id === comanda.id) this.historicoNaoPaga.set(historico);
     } catch {
       // Segue sem o aviso.
     }

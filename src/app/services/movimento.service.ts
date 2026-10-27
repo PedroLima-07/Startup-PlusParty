@@ -4,6 +4,7 @@ import {
   ComandaResumo,
   ItemVendido,
   LotacaoPorHora,
+  MINUTOS_ALERTA_LIBERACAO,
   MINUTOS_ALERTA_PAGAMENTO,
   SetorItem,
   StatusComanda,
@@ -24,7 +25,7 @@ const TOP_MAIS_VENDIDOS = 5;
 const MINUTOS_ALERTA = {
   pagamento: MINUTOS_ALERTA_PAGAMENTO,
   pedido_parado: 15,
-  liberacao: 5,
+  liberacao: MINUTOS_ALERTA_LIBERACAO,
   sem_pedido: 180,
 } as const;
 
