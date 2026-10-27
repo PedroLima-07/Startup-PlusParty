@@ -1,0 +1,86 @@
+// Detalhe da comanda: histórico de conta não paga, espera do pagamento e quem fez o quê.
+.aviso-historico,
+.espera-pagamento {
+  border-radius: 14px;
+  padding: 14px 16px;
+}
+
+.aviso-historico {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  color: #7f1d1d;
+
+  svg {
+    flex-shrink: 0;
+    margin-top: 1px;
+    color: #b91c1c;
+  }
+
+  div {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  strong {
+    color: #991b1b;
+    font-size: 0.95rem;
+  }
+
+  span {
+    font-size: 0.85rem;
+    line-height: 1.5;
+  }
+}
+
+.espera-pagamento {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  background: #ffedd5;
+  color: #9a3412;
+
+  strong {
+    font-size: 1rem;
+  }
+
+  span {
+    font-size: 0.85rem;
+  }
+
+  &.atrasado {
+    background: #fef2f2;
+    border: 1px solid #fecaca;
+    color: #7f1d1d;
+
+    strong {
+      color: #b91c1c;
+    }
+  }
+}
+
+.linha-do-tempo {
+  list-style: none;
+  margin: 0;
+  padding: 2px 0 2px 14px;
+  border-left: 2px solid #e1e5ee;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+
+  li {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    color: #5b6475;
+    font-size: 0.9rem;
+  }
+
+  strong {
+    color: #0f1f4b;
+    font-weight: 600;
+  }
+}

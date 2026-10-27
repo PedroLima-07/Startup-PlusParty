@@ -1,3 +1,5 @@
+import { DestroyRef, Signal, inject, signal } from '@angular/core';
+
 const MINUTO = 60_000;
 const HORA = 60 * MINUTO;
 const DIA = 24 * HORA;
@@ -14,4 +16,20 @@ export function haQuantoTempo(data: string, agora = new Date()): string {
 
   const quando = new Date(data);
   return `${String(quando.getDate()).padStart(2, '0')}/${String(quando.getMonth() + 1).padStart(2, '0')}`;
+}
+
+/** Minutos inteiros desde `data` (nunca negativo). */
+export function minutosDesde(data: string, agora = Date.now()): number {
+  return Math.max(0, Math.floor((agora - new Date(data).getTime()) / MINUTO));
+}
+
+/**
+ * Hora atual que se atualiza sozinha, para "há X min" andar na tela sem
+ * recarregar. Chame no construtor (precisa do contexto de injeção).
+ */
+export function relogio(intervaloMs = 30_000): Signal<number> {
+  const agora = signal(Date.now());
+  const timer = setInterval(() => agora.set(Date.now()), intervaloMs);
+  inject(DestroyRef).onDestroy(() => clearInterval(timer));
+  return agora.asReadonly();
 }

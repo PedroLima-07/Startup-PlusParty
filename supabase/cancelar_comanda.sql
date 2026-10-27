@@ -1,6 +1,9 @@
 -- =====================================================================
 -- +party — Cliente cancela a comanda que ainda espera liberação
 -- =====================================================================
+-- ATENÇÃO: substituído por comanda_regras.sql, onde cancelar virou o
+-- status 'cancelada' (a comanda não é mais apagada). Não rode este arquivo.
+-- ---------------------------------------------------------------------
 -- O cliente abre a comanda e fica aguardando o atendente liberar. Se
 -- desistir (errou de bar, mudou de ideia), precisa conseguir cancelar
 -- sozinho; sem isso a comanda ficava presa e ele não abria outra.

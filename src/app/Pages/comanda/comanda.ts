@@ -1,13 +1,19 @@
-import { CurrencyPipe } from '@angular/common';
+import { CurrencyPipe, DatePipe } from '@angular/common';
 import { Component, DestroyRef, OnInit, computed, inject, input, signal } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
-import { ComandaDetalhada, PedidoItemDetalhado, StatusPedidoItem } from '../../models';
+import {
+  ComandaDetalhada,
+  MINUTOS_ALERTA_PAGAMENTO,
+  PedidoItemDetalhado,
+  StatusPedidoItem,
+} from '../../models';
 import { ComandaService } from '../../services/comanda.service';
 import { SupabaseService } from '../../services/supabase.service';
 import { NavCliente } from '../../components/nav-cliente/nav-cliente';
 import { Carregando } from '../../components/carregando/carregando';
 import { ErroCarregar } from '../../components/erro-carregar/erro-carregar';
 import { AtivarAvisos } from '../../components/ativar-avisos/ativar-avisos';
+import { minutosDesde, relogio } from '../../tempo';
 
 const ROTULOS_STATUS_ITEM: Record<StatusPedidoItem, string> = {
   novo: 'Enviado',
@@ -17,15 +23,16 @@ const ROTULOS_STATUS_ITEM: Record<StatusPedidoItem, string> = {
 
 @Component({
   selector: 'app-comanda',
-  imports: [AtivarAvisos, Carregando, CurrencyPipe, ErroCarregar, NavCliente, RouterLink],
+  imports: [AtivarAvisos, Carregando, CurrencyPipe, DatePipe, ErroCarregar, NavCliente, RouterLink],
   templateUrl: './comanda.html',
-  styleUrl: './comanda.scss',
+  styleUrls: ['./comanda.scss', './comanda.conta.scss'],
 })
 export class ComandaPage implements OnInit {
   private comandaService = inject(ComandaService);
   private supabase = inject(SupabaseService);
   private destroyRef = inject(DestroyRef);
   private router = inject(Router);
+  private agora = relogio();
 
   id = input.required<string>();
 
@@ -44,10 +51,28 @@ export class ComandaPage implements OnInit {
 
   protected readonly total = computed(() => this.comandaService.calcularTotal(this.itens()));
 
+  /** Conta fechada (esperando pagamento), paga ou registrada como não paga. */
   protected readonly comandaEncerrada = computed(() => {
     const status = this.comanda()?.status;
-    return status === 'aguardando_pagamento' || status === 'paga';
+    return status === 'aguardando_pagamento' || status === 'paga' || status === 'nao_paga';
   });
+
+  protected readonly esperandoPagamento = computed(
+    () => this.comanda()?.status === 'aguardando_pagamento',
+  );
+
+  /** Minutos desde que o cliente fechou a conta; null se ela não está fechada. */
+  protected readonly minutosEsperandoPagamento = computed(() => {
+    const fechadaEm = this.comanda()?.fechada_em;
+    return this.esperandoPagamento() && fechadaEm ? minutosDesde(fechadaEm, this.agora()) : null;
+  });
+
+  /** Passou do prazo: o atendente e o gerente já receberam o alerta. */
+  protected readonly pagamentoAtrasado = computed(
+    () => (this.minutosEsperandoPagamento() ?? 0) >= MINUTOS_ALERTA_PAGAMENTO,
+  );
+
+  protected readonly cancelada = computed(() => this.comanda()?.status === 'cancelada');
 
   /** O atendente não confirmou a presença: esta comanda acabou, mas dá para abrir outra. */
   protected readonly recusada = computed(() => this.comanda()?.status === 'recusada');
@@ -61,7 +86,7 @@ export class ComandaPage implements OnInit {
     const pararDeEscutar = this.supabase.escutarMudancas(
       [{ tabela: 'comandas', filtro: `id=eq.${this.id()}` }, { tabela: 'pedido_itens' }],
       () => {
-        // Durante o cancelamento a comanda some do banco; recarregar daria erro.
+        // Durante o cancelamento a tela já vai sair; recarregar só piscaria.
         if (!this.cancelando()) void this.carregarDados(true);
       },
     );

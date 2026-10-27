@@ -1,7 +1,7 @@
 import { CurrencyPipe, DatePipe } from '@angular/common';
 import { Component, DestroyRef, OnInit, computed, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
-import { ComandaAtendente } from '../../models';
+import { ComandaAtendente, HistoricoNaoPaga, MINUTOS_ALERTA_PAGAMENTO } from '../../models';
 import { AuthService } from '../../services/auth.service';
 import { SupabaseService } from '../../services/supabase.service';
 import {
@@ -10,6 +10,7 @@ import {
 } from '../../services/comandas-atendente.service';
 import { Carregando } from '../../components/carregando/carregando';
 import { NavAtendente } from '../../components/nav-atendente/nav-atendente';
+import { minutosDesde, relogio } from '../../tempo';
 
 type Acao = 'liberar' | 'recusar' | 'pagar';
 
@@ -42,7 +43,11 @@ const DURACAO_AVISO_MS = 3000;
   selector: 'app-atendente-comandas',
   imports: [Carregando, CurrencyPipe, DatePipe, NavAtendente],
   templateUrl: './atendente-comandas.html',
-  styleUrls: ['./atendente-comandas.scss', './atendente-comandas.desktop.scss'],
+  styleUrls: [
+    './atendente-comandas.scss',
+    './atendente-comandas.desktop.scss',
+    './atendente-comandas.conta.scss',
+  ],
 })
 export class AtendenteComandas implements OnInit {
   private comandasService = inject(ComandasAtendenteService);
@@ -50,6 +55,7 @@ export class AtendenteComandas implements OnInit {
   private destroyRef = inject(DestroyRef);
   private authService = inject(AuthService);
   private router = inject(Router);
+  private agora = relogio();
 
   /** Tudo o que a tela mostra sai daqui, já na ordem em que aparece. */
   protected readonly comandas = signal<ComandaAtendente[]>([]);
@@ -107,6 +113,21 @@ export class AtendenteComandas implements OnInit {
   protected readonly selecionada = computed(
     () => this.comandas().find((comanda) => comanda.id === this.selecionadaId()) ?? null,
   );
+
+  /** Minutos desde que o cliente da comanda aberta no detalhe fechou a conta. */
+  protected readonly minutosEsperandoPagamento = computed(() => {
+    const comanda = this.selecionada();
+    if (comanda?.status !== 'aguardando_pagamento' || !comanda.fechada_em) return null;
+    return minutosDesde(comanda.fechada_em, this.agora());
+  });
+
+  /** Passou do prazo: o gerente também já recebeu o alerta. */
+  protected readonly pagamentoAtrasado = computed(
+    () => (this.minutosEsperandoPagamento() ?? 0) >= MINUTOS_ALERTA_PAGAMENTO,
+  );
+
+  /** Se o cliente da comanda a liberar já saiu sem pagar alguma vez. */
+  protected readonly historicoNaoPaga = signal<HistoricoNaoPaga | null>(null);
 
   private esperaDoAviso: ReturnType<typeof setTimeout> | undefined;
 
@@ -171,6 +192,19 @@ export class AtendenteComandas implements OnInit {
   protected abrir(comanda: ComandaAtendente): void {
     this.erro.set(null);
     this.selecionadaId.set(comanda.id);
+    this.historicoNaoPaga.set(null);
+    if (comanda.status === 'aguardando_liberacao') void this.buscarHistorico(comanda);
+  }
+
+  /** Sem o histórico a liberação segue normal: ele só avisa, não decide. */
+  private async buscarHistorico(comanda: ComandaAtendente): Promise<void> {
+    try {
+      const historico = await this.comandasService.historicoNaoPaga(comanda.usuario_id);
+      // Só mostra se o atendente ainda está na mesma comanda.
+      if (this.selecionadaId() === comanda.id) this.historicoNaoPaga.set(historico);
+    } catch {
+      // Segue sem o aviso.
+    }
   }
 
   protected fechar(): void {

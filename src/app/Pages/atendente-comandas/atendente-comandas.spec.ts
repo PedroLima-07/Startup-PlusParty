@@ -18,8 +18,12 @@ function comanda(
   return {
     status: 'aguardando_liberacao',
     mesa: '12',
+    usuario_id: 'u1',
     cliente: 'Carlos',
     criada_em: '2026-09-25T22:00:00Z',
+    fechada_em: null,
+    liberada_em: null,
+    liberada_por: null,
     total: 0,
     itens: [],
     ...dados,
@@ -56,6 +60,7 @@ describe('AtendenteComandas', () => {
     liberar: ReturnType<typeof vi.fn>;
     recusar: ReturnType<typeof vi.fn>;
     confirmarPagamento: ReturnType<typeof vi.fn>;
+    historicoNaoPaga: ReturnType<typeof vi.fn>;
     ordenar: (lista: ComandaAtendente[]) => ComandaAtendente[];
     pendencias: WritableSignal<number>;
     atualizarPendencias: ReturnType<typeof vi.fn>;
@@ -117,6 +122,7 @@ describe('AtendenteComandas', () => {
       liberar: vi.fn().mockResolvedValue(undefined),
       recusar: vi.fn().mockResolvedValue(undefined),
       confirmarPagamento: vi.fn().mockResolvedValue(undefined),
+      historicoNaoPaga: vi.fn().mockResolvedValue(null),
       ordenar: (lista) => lista,
       pendencias: signal(2),
       atualizarPendencias: vi.fn().mockResolvedValue(undefined),
@@ -145,6 +151,67 @@ describe('AtendenteComandas', () => {
     fixture.detectChanges();
     await fixture.whenStable();
     fixture.detectChanges();
+  });
+
+  describe('conta e histórico', () => {
+    const minutosAtras = (minutos: number) => new Date(Date.now() - minutos * 60_000).toISOString();
+
+    async function listarSo(comanda: ComandaAtendente): Promise<void> {
+      service.listar.mockResolvedValue([comanda]);
+      await atualizar();
+    }
+
+    it('ao liberar, avisa se o cliente já saiu sem pagar', async () => {
+      service.historicoNaoPaga.mockResolvedValue({
+        estabelecimento: 'Neon Club',
+        valor: 86,
+        quando: '2026-10-18T23:00:00Z',
+        vezes: 1,
+      });
+
+      abrir('Carlos');
+      await assentar();
+
+      expect(service.historicoNaoPaga).toHaveBeenCalledWith('u1');
+      const aviso = tela().querySelector('.aviso-historico');
+      expect(aviso?.textContent).toContain('Já saiu sem pagar uma vez');
+      expect(aviso?.textContent).toContain('Neon Club');
+    });
+
+    it('cliente sem histórico: nenhum aviso', async () => {
+      abrir('Carlos');
+      await assentar();
+
+      expect(tela().querySelector('.aviso-historico')).toBeNull();
+    });
+
+    it('esperando pagamento: mostra há quanto tempo, quem liberou e quando fechou', async () => {
+      await listarSo({
+        ...PAGAMENTO,
+        fechada_em: minutosAtras(12),
+        liberada_em: '2026-10-23T20:45:00Z',
+        liberada_por: 'Ana Lima',
+      });
+
+      abrir('Mariana');
+
+      const espera = tela().querySelector('.espera-pagamento');
+      // O relógio da tela começou um pouco antes do fechamento simulado: 11 ou 12.
+      expect(espera?.textContent).toMatch(/Esperando pagamento há 1[12] min/);
+      expect(espera?.classList.contains('atrasado')).toBe(false);
+      expect(tela().querySelector('.linha-do-tempo')?.textContent).toContain('Liberada por Ana Lima');
+      expect(tela().querySelector('.linha-do-tempo')?.textContent).toContain('Conta fechada pelo cliente');
+    });
+
+    it('depois de 30 min, a espera fica vermelha e avisa que o gerente sabe', async () => {
+      await listarSo({ ...PAGAMENTO, fechada_em: minutosAtras(34) });
+
+      abrir('Mariana');
+
+      const espera = tela().querySelector('.espera-pagamento');
+      expect(espera?.classList.contains('atrasado')).toBe(true);
+      expect(espera?.textContent).toContain('O gerente também foi avisado');
+    });
   });
 
   describe('lista', () => {

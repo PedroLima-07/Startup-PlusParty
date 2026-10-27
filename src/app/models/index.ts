@@ -6,7 +6,20 @@ export type StatusComanda =
   | 'aguardando_pagamento'
   | 'paga'
   /** O atendente não confirmou a presença do cliente. Final, como 'paga'. */
-  | 'recusada';
+  | 'recusada'
+  /** O cliente desistiu antes da liberação. Final. */
+  | 'cancelada'
+  /** O gerente registrou que o cliente foi embora sem pagar. Final. */
+  | 'nao_paga';
+
+/**
+ * Status em que a comanda ainda prende o cliente: o banco só deixa ter uma
+ * assim por vez (supabase/comanda_regras.sql).
+ */
+export const STATUS_ATIVOS: StatusComanda[] = ['aguardando_liberacao', 'aberta', 'aguardando_pagamento'];
+
+/** Quantos minutos depois de fechar a conta o pagamento vira alerta (atendente e gerente). */
+export const MINUTOS_ALERTA_PAGAMENTO = 30;
 
 export type StatusPedidoItem = 'novo' | 'em_andamento' | 'pronto';
 
@@ -61,7 +74,25 @@ export interface Comanda {
   mesa: string | null;
   status: StatusComanda;
   criada_em: string;
+  /** Quando o cliente fechou a conta; gravado pelo banco. */
   fechada_em: string | null;
+}
+
+/** Conta fechada que ainda espera pagamento: impede o cliente de abrir outra comanda. */
+export interface ContaPendente {
+  id: string;
+  estabelecimento: string;
+  mesa: string | null;
+  fechada_em: string | null;
+  total: number;
+}
+
+/** A última vez que o cliente saiu sem pagar (historico_nao_paga), para quem libera. */
+export interface HistoricoNaoPaga {
+  estabelecimento: string;
+  valor: number;
+  quando: string;
+  vezes: number;
 }
 
 export interface Pedido {
@@ -129,8 +160,14 @@ export interface ComandaAtendente {
   id: string;
   status: Extract<StatusComanda, 'aguardando_liberacao' | 'aguardando_pagamento' | 'aberta'>;
   mesa: string | null;
+  /** Id do cliente, para consultar o histórico de contas não pagas. */
+  usuario_id: string;
   cliente: string;
   criada_em: string;
+  fechada_em: string | null;
+  liberada_em: string | null;
+  /** Nome de quem liberou a comanda; null enquanto não foi liberada. */
+  liberada_por: string | null;
   /** Soma de quantidade × preço de tudo o que foi pedido até agora. */
   total: number;
   itens: ItemConsumido[];
@@ -258,7 +295,7 @@ export interface ComandaResumo {
   mesa: string;
   horario: string;
   valor: number;
-  status: 'aberta' | 'aguardando_pagamento' | 'paga';
+  status: 'aberta' | 'aguardando_pagamento' | 'paga' | 'nao_paga';
 }
 
 export type TipoAlertaGerente = 'pagamento' | 'pedido_parado' | 'liberacao' | 'sem_pedido';

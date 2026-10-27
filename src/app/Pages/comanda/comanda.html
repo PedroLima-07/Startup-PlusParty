@@ -13,11 +13,73 @@
       </header>
 
       <div class="conteudo-fechamento">
-        <div class="icone-sucesso">✓</div>
+        @if (c.status === 'nao_paga') {
+          <div class="icone-sucesso icone-recusa">✕</div>
+        } @else {
+          <div class="icone-sucesso">✓</div>
+        }
         <p class="rotulo">Total da comanda</p>
         <p class="valor">{{ total() | currency: 'BRL' }}</p>
-        <p class="instrucao">Passe no caixa para concluir o pagamento</p>
+
+        @if (esperandoPagamento() && c.fechada_em) {
+          <p class="selo-fechada">
+            Conta fechada às {{ c.fechada_em | date: 'HH:mm' }} · há {{ minutosEsperandoPagamento() }} min
+          </p>
+        }
+
+        @switch (c.status) {
+          @case ('paga') {
+            <p class="instrucao">Pagamento confirmado. Obrigado pela visita!</p>
+          }
+          @case ('nao_paga') {
+            <p class="instrucao">
+              O {{ c.estabelecimento.nome }} registrou esta conta como não paga. Se for um engano, fale
+              com a equipe do bar.
+            </p>
+          }
+          @default {
+            <p class="instrucao">Passe no caixa para concluir o pagamento</p>
+          }
+        }
+
+        @if (pagamentoAtrasado()) {
+          <section class="aviso-atraso" role="status">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 9v4"></path><path d="M12 17h.01"></path><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"></path></svg>
+            <div>
+              <strong>Seu pagamento ainda não foi confirmado</strong>
+              <span>Procure o caixa do {{ c.estabelecimento.nome }}. O atendente já foi avisado.</span>
+            </div>
+          </section>
+        }
+
+        @if (esperandoPagamento()) {
+          <p class="nota-bloqueio">
+            Enquanto o pagamento não for confirmado, você não consegue abrir outra comanda.
+          </p>
+        }
+
         <button class="botao-primario" type="button" routerLink="/cliente/home">Voltar ao início</button>
+      </div>
+    </div>
+  } @else if (cancelada()) {
+    <div class="tela tela-fechamento">
+      <header class="cabecalho">
+        <h1>Solicitação cancelada</h1>
+      </header>
+
+      <div class="conteudo-fechamento">
+        <div class="icone-sucesso icone-recusa">✕</div>
+        <p class="rotulo">Você cancelou a comanda em<br /><strong>{{ c.estabelecimento.nome }}</strong></p>
+        <button
+          class="botao-primario"
+          type="button"
+          [routerLink]="['/cliente/abrir-comanda', c.estabelecimento_id]"
+        >
+          Abrir comanda de novo
+        </button>
+        <button class="botao-voltar-inicio" type="button" routerLink="/cliente/home">
+          Voltar ao início
+        </button>
       </div>
     </div>
   } @else if (recusada()) {

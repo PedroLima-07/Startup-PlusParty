@@ -70,6 +70,8 @@ describe('Movimento (gerente)', () => {
         mesa: '12',
         criada_em: new Date(2026, 9, 9, 21, 10).toISOString(),
         fechada_em: new Date(2026, 9, 9, 22, 30).toISOString(),
+        liberada_em: new Date(2026, 9, 9, 21, 14).toISOString(),
+        liberador: { nome: 'Ana Lima' },
         cliente: { nome: 'Carlos Souza' },
         pedidos: [
           {
@@ -225,5 +227,68 @@ describe('Movimento (gerente)', () => {
 
     expect(tela().querySelector('.mensagem-erro')?.textContent).toContain('Não foi possível');
     expect(movimento.atualizar).toHaveBeenCalledTimes(chamadasAntes + 1);
+  });
+
+  describe('conta não paga', () => {
+    function abrirDetalhe07(): void {
+      botao('Ver detalhes').click();
+      tela();
+    }
+
+    it('o detalhe mostra quem liberou, quando fechou e há quanto tempo espera', () => {
+      abrirDetalhe07();
+
+      const responsaveis = tela().querySelector('.detalhe-responsaveis')?.textContent ?? '';
+      expect(responsaveis).toContain('Ana Lima · 21:14');
+      expect(responsaveis).toContain('22:30');
+      expect(tela().querySelector('.selo-atraso')?.textContent).toContain('Sem pagamento há 77 min');
+    });
+
+    it('marcar como não paga pede confirmação antes de gravar', async () => {
+      const marcar = vi.spyOn(movimento, 'marcarNaoPaga').mockResolvedValue();
+      abrirDetalhe07();
+
+      botao('Marcar como não paga').click();
+      const confirmacao = tela().querySelector('.confirmar');
+      expect(confirmacao?.textContent).toContain('Marcar a conta de Carlos Souza como não paga?');
+      expect(marcar).not.toHaveBeenCalled();
+
+      confirmacao!.querySelector<HTMLButtonElement>('.botao-confirmar')!.click();
+      await fixture.whenStable();
+
+      expect(marcar).toHaveBeenCalledWith('c07');
+      expect(tela().querySelector('.confirmar')).toBeNull();
+    });
+
+    it('se o banco recusar, a confirmação fica aberta com o erro', async () => {
+      vi.spyOn(movimento, 'marcarNaoPaga').mockRejectedValue(new Error('rls'));
+      abrirDetalhe07();
+
+      botao('Marcar como não paga').click();
+      tela().querySelector<HTMLButtonElement>('.botao-confirmar')!.click();
+      await fixture.whenStable();
+
+      expect(tela().querySelector('.confirmar-erro')?.textContent).toContain('Não foi possível marcar');
+    });
+
+    it('Esc fecha primeiro a confirmação e depois o detalhe', () => {
+      abrirDetalhe07();
+      botao('Marcar como não paga').click();
+      tela();
+
+      document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }));
+      expect(tela().querySelector('.confirmar')).toBeNull();
+      expect(tela().querySelector('.detalhe')).not.toBeNull();
+
+      document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }));
+      expect(tela().querySelector('.detalhe')).toBeNull();
+    });
+
+    it('comanda que não espera pagamento não tem o botão', () => {
+      movimento.linhas.update((linhas) => linhas.map((l) => ({ ...l, status: 'aberta' as const })));
+      abrirDetalhe07();
+
+      expect(tela().querySelector('.botao-nao-paga')).toBeNull();
+    });
   });
 });
