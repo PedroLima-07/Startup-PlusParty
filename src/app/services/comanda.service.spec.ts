@@ -26,10 +26,12 @@ describe('ComandaService', () => {
   let respostas: { data?: unknown; error: unknown }[];
   /** Cada passo de cada consulta: ['from', 'comandas'], ['update', {...}], ... */
   let passos: unknown[][];
+  let rpc: ReturnType<typeof vi.fn>;
 
   beforeEach(() => {
     respostas = [];
     passos = [];
+    rpc = vi.fn().mockResolvedValue({ data: null, error: null });
 
     const novaConsulta = () => {
       const resposta = respostas.shift() ?? { data: null, error: null };
@@ -52,6 +54,7 @@ describe('ComandaService', () => {
           provide: SupabaseService,
           useValue: {
             client: {
+              rpc,
               from: (tabela: string) => {
                 passos.push(['from', tabela]);
                 return novaConsulta();
@@ -149,5 +152,32 @@ describe('ComandaService', () => {
     await service.fecharConta('c1');
 
     expect(passos).toContainEqual(['update', { status: 'aguardando_pagamento' }]);
+  });
+
+  describe('mesa e fila', () => {
+    it('pergunta a situação da mesa ao banco', async () => {
+      rpc.mockResolvedValueOnce({ data: 'liberando', error: null });
+
+      expect(await service.situacaoMesa('bar-1', '4')).toBe('liberando');
+      expect(rpc).toHaveBeenCalledWith('situacao_mesa', { p_estabelecimento: 'bar-1', p_mesa: '4' });
+    });
+
+    it('entrar na fila devolve a posição', async () => {
+      rpc.mockResolvedValueOnce({ data: 2, error: null });
+
+      expect(await service.entrarNaFila('bar-1', '4')).toBe(2);
+      expect(rpc).toHaveBeenCalledWith('entrar_na_fila_da_mesa', { p_estabelecimento: 'bar-1', p_mesa: '4' });
+    });
+
+    it('a recusa do banco ao entrar na fila vira erro', async () => {
+      rpc.mockResolvedValueOnce({ data: null, error: { message: 'Esta mesa não está sendo liberada.' } });
+
+      await expect(service.entrarNaFila('bar-1', '4')).rejects.toBeTruthy();
+    });
+
+    it('sem fila, minhaFila devolve null', async () => {
+      rpc.mockResolvedValueOnce({ data: [], error: null });
+      expect(await service.minhaFila()).toBeNull();
+    });
   });
 });

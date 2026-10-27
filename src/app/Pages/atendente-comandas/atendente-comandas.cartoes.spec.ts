@@ -22,6 +22,7 @@ function comanda(dados: Partial<ComandaAtendente> & Pick<ComandaAtendente, 'id' 
     fechada_em: null,
     liberada_em: null,
     liberada_por: null,
+    veio_da_fila: false,
     total: 0,
     itens: [],
     ...dados,

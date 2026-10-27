@@ -3,8 +3,10 @@ import {
   Comanda,
   ComandaDetalhada,
   ContaPendente,
+  EsperaNaFila,
   PedidoItemDetalhado,
   STATUS_ATIVOS,
+  SituacaoMesa,
   StatusComanda,
 } from '../models';
 import { AuthService } from './auth.service';
@@ -32,6 +34,8 @@ export interface ComandaAtiva {
   status: StatusComanda;
   fechada_em: string | null;
   total: number;
+  /** Aberta pelo banco quando a mesa da fila liberou. */
+  veio_da_fila: boolean;
 }
 
 interface LinhaComandaAtiva {
@@ -40,6 +44,7 @@ interface LinhaComandaAtiva {
   mesa: string | null;
   status: StatusComanda;
   fechada_em: string | null;
+  veio_da_fila?: boolean;
   estabelecimento: { nome: string } | null;
   pedidos: { pedido_itens: { quantidade: number; preco_unitario: number }[] }[];
 }
@@ -99,7 +104,7 @@ export class ComandaService {
     const { data, error } = await this.supabase.client
       .from('comandas')
       .select(
-        'id, estabelecimento_id, mesa, status, fechada_em, estabelecimento:estabelecimentos(nome), ' +
+        'id, estabelecimento_id, mesa, status, fechada_em, veio_da_fila, estabelecimento:estabelecimentos(nome), ' +
           'pedidos(pedido_itens(quantidade, preco_unitario))',
       )
       .eq('usuario_id', user.id)
@@ -119,10 +124,43 @@ export class ComandaService {
       mesa: linha.mesa,
       status: linha.status,
       fechada_em: linha.fechada_em,
+      veio_da_fila: linha.veio_da_fila ?? false,
       total: linha.pedidos
         .flatMap((pedido) => pedido.pedido_itens)
         .reduce((soma, item) => soma + item.quantidade * item.preco_unitario, 0),
     };
+  }
+
+  /** Como a mesa está: livre, em uso (comanda aberta) ou liberando (só contas fechadas). */
+  async situacaoMesa(estabelecimentoId: string, mesa: string): Promise<SituacaoMesa> {
+    const { data, error } = await this.supabase.client.rpc('situacao_mesa', {
+      p_estabelecimento: estabelecimentoId,
+      p_mesa: mesa,
+    });
+    if (error) throw error;
+    return (data as SituacaoMesa | null) ?? 'livre';
+  }
+
+  /** Entra na fila da mesa que está sendo liberada; devolve a posição (1 = o próximo). */
+  async entrarNaFila(estabelecimentoId: string, mesa: string): Promise<number> {
+    const { data, error } = await this.supabase.client.rpc('entrar_na_fila_da_mesa', {
+      p_estabelecimento: estabelecimentoId,
+      p_mesa: mesa,
+    });
+    if (error) throw error;
+    return Number(data);
+  }
+
+  async sairDaFila(): Promise<void> {
+    const { error } = await this.supabase.client.rpc('sair_da_fila_da_mesa');
+    if (error) throw error;
+  }
+
+  /** A fila em que o cliente está esperando; null se não está em nenhuma. */
+  async minhaFila(): Promise<EsperaNaFila | null> {
+    const { data, error } = await this.supabase.client.rpc('minha_fila');
+    if (error) throw error;
+    return ((data ?? []) as EsperaNaFila[])[0] ?? null;
   }
 
   /** A conta fechada que o cliente ainda não pagou; null se não há. */

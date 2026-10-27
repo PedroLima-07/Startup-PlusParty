@@ -35,6 +35,7 @@ function comanda(
     fechada_em: null,
     liberada_em: null,
     liberada_por: null,
+    veio_da_fila: false,
     total: 0,
     itens: [],
     ...dados,
@@ -261,5 +262,14 @@ describe('ComandasAtendenteService', () => {
 
       await expect(service.recusar('c1')).rejects.toEqual({ code: 'P0001' });
     });
+  });
+
+  it('liberar com mesa corrige o número junto com o status', async () => {
+    resposta = { data: [{ id: 'c1' }], error: null };
+
+    await service.liberar('c1', '14');
+
+    expect(passos).toContainEqual(['update', { mesa: '14', status: 'aberta' }]);
+    expect(passos).toContainEqual(['eq', 'status', 'aguardando_liberacao']);
   });
 });

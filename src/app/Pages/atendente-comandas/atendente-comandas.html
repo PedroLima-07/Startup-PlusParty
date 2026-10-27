@@ -157,6 +157,9 @@
       <main class="detalhe">
         @if (comanda.status === 'aguardando_liberacao') {
           <section class="bloco bloco-cliente">
+            @if (comanda.veio_da_fila) {
+              <span class="selo-fila">Veio da fila da mesa</span>
+            }
             <p class="rotulo">Cliente</p>
             <p class="cliente-destaque">{{ comanda.cliente }}</p>
           </section>
@@ -182,6 +185,45 @@
                   {{ historico.quando | date: 'dd/MM' }}, marcada como não paga pelo gerente. Combine o
                   pagamento antes, se achar necessário.
                 </span>
+              </div>
+            </section>
+          }
+
+          @if (nestaMesa().length > 0) {
+            <section class="nesta-mesa" aria-labelledby="titulo-nesta-mesa">
+              <h2 id="titulo-nesta-mesa">Nesta mesa agora</h2>
+              <ul>
+                @for (outra of nestaMesa(); track outra.id) {
+                  <li>
+                    <span>{{ outra.cliente }}</span>
+                    <span class="situacao" [class.fechando]="outra.fechando">{{ outra.situacao }}</span>
+                  </li>
+                }
+              </ul>
+              <p>Se a mesa não está livre, libere em outra com "Trocar mesa".</p>
+            </section>
+          }
+
+          @if (trocandoMesa()) {
+            <section class="trocar-mesa">
+              <label for="nova-mesa">Liberar em qual mesa?</label>
+              <input
+                id="nova-mesa"
+                type="text"
+                inputmode="numeric"
+                autocomplete="off"
+                maxlength="4"
+                placeholder="Ex: 14"
+                [value]="novaMesa()"
+                (input)="novaMesa.set($any($event.target).value)"
+              />
+              <div class="trocar-mesa-acoes">
+                <button type="button" class="btn-cancelar-troca" (click)="cancelarTrocaDeMesa()" [disabled]="processando() !== null">
+                  Cancelar
+                </button>
+                <button type="button" class="btn-liberar-troca" (click)="liberar()" [disabled]="processando() !== null || !novaMesa().trim()">
+                  {{ processando() === 'liberar' ? 'Liberando...' : novaMesa().trim() ? 'Liberar na mesa ' + novaMesa().trim() : 'Liberar na nova mesa' }}
+                </button>
               </div>
             </section>
           }
@@ -256,10 +298,13 @@
         }
       </main>
 
-      @if (comanda.status === 'aguardando_liberacao') {
+      @if (comanda.status === 'aguardando_liberacao' && !trocandoMesa()) {
         <footer class="acoes">
           <button class="btn-recusar" type="button" (click)="recusar()" [disabled]="processando() !== null">
             {{ processando() === 'recusar' ? 'Recusando...' : 'Recusar' }}
+          </button>
+          <button class="btn-trocar" type="button" (click)="comecarTrocaDeMesa()" [disabled]="processando() !== null">
+            Trocar mesa
           </button>
           <button class="btn-principal" type="button" (click)="liberar()" [disabled]="processando() !== null">
             {{ processando() === 'liberar' ? 'Liberando...' : 'Liberar comanda' }}

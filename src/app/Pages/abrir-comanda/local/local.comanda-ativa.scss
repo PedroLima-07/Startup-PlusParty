@@ -158,6 +158,93 @@
   }
 }
 
+// Mesa ocupada ou sendo liberada: a pergunta antes de abrir.
+.comanda-aberta-icone.liberando {
+  background: #ffedd5;
+  color: #c2410c;
+}
+
+.botao-outra-mesa,
+.botao-sair-fila {
+  min-height: 44px;
+  border-radius: 12px;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.botao-outra-mesa {
+  border: 0;
+  background: transparent;
+  color: #5b6475;
+}
+
+// Na fila de uma mesa.
+.na-fila {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  padding-top: 12px;
+}
+
+.na-fila-titulo {
+  margin: 0;
+  font-size: 26px;
+  font-weight: 800;
+  line-height: 1.2;
+}
+
+.na-fila-cartao {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 22px 20px;
+  border: 1px solid #e1e5ee;
+  border-radius: 16px;
+  background: #fff;
+
+  p {
+    margin: 0;
+    color: #5b6475;
+    font-size: 14px;
+    line-height: 1.5;
+  }
+}
+
+.na-fila-rotulo {
+  color: #5b6475;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.na-fila-posicao {
+  font-size: 56px;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.botao-sair-fila {
+  min-height: 48px;
+  border: 1px solid #fecaca;
+  background: #fff;
+  color: #b91c1c;
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: wait;
+  }
+}
+
+.na-fila-ajuda {
+  margin: 0;
+  color: #5b6475;
+  font-size: 13px;
+}
+
 @keyframes aparecer {
   from { opacity: 0; }
 }
