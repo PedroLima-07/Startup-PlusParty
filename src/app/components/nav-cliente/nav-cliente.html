@@ -28,9 +28,9 @@
         <path d="m21.854 2.147-10.94 10.939" />
       </svg>
     </span>
-    <span class="rotulo">Discovery</span>
+    <span class="rotulo">Descobrir</span>
   </a>
-  <a class="item-nav" routerLink="/cliente/feed" [class.ativo]="posicao() === 2">
+  <a class="item-nav" routerLink="/cliente/novidades" [class.ativo]="posicao() === 2">
     <span class="icone">
       <svg viewBox="0 0 24 24" aria-hidden="true">
         <path d="M15 18h-5" />
@@ -39,7 +39,7 @@
         <rect width="8" height="4" x="10" y="6" rx="1" />
       </svg>
     </span>
-    <span class="rotulo">Feed</span>
+    <span class="rotulo">Novidades</span>
   </a>
   <a
     class="item-nav"
@@ -58,4 +58,18 @@
     </span>
     <span class="rotulo">Notificações</span>
   </a>
+
+  <!-- Só no desktop: no celular a conta fica na foto do topo do Início. -->
+  @if (conta(); as c) {
+    <div class="conta">
+      <span class="conta-avatar" aria-hidden="true">{{ c.inicial }}</span>
+      <span class="conta-texto">
+        <strong>{{ c.nome }}</strong>
+        <span>Cliente</span>
+      </span>
+      <button type="button" class="conta-sair" [disabled]="saindo()" (click)="sair()">Sair</button>
+    </div>
+  } @else {
+    <a class="conta conta-entrar" routerLink="/login">Entrar ou criar conta</a>
+  }
 </nav>

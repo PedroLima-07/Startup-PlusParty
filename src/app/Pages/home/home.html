@@ -13,7 +13,38 @@
         <p class="subtitulo">O rolê de hoje começa agora.</p>
       </div>
       @if (logado()) {
-        <button class="botao-conta" type="button" (click)="sair()">Sair</button>
+        <div class="conta">
+          <button
+            class="conta-foto"
+            type="button"
+            aria-label="Sua conta"
+            aria-haspopup="menu"
+            [attr.aria-expanded]="menuConta()"
+            (click)="menuConta.set(!menuConta())"
+          >
+            {{ inicial(nome()) }}
+          </button>
+          @if (menuConta()) {
+            <button class="conta-fundo" type="button" tabindex="-1" aria-hidden="true" (click)="menuConta.set(false)"></button>
+            <div class="conta-menu" role="menu" aria-label="Sua conta">
+              <div class="conta-quem">
+                <span class="conta-avatar" aria-hidden="true">{{ inicial(nome()) }}</span>
+                <span>
+                  <strong>{{ nome() }}</strong>
+                  <small>Cliente</small>
+                </span>
+              </div>
+              <button class="conta-sair" type="button" role="menuitem" (click)="sair()">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+                  <path d="m16 17 5-5-5-5" />
+                  <path d="M21 12H9" />
+                </svg>
+                Sair da conta
+              </button>
+            </div>
+          }
+        </div>
       } @else {
         <a class="botao-conta" routerLink="/login">Entrar</a>
       }
@@ -35,7 +66,7 @@
             <a class="card-estabelecimento" [routerLink]="['/cliente/estabelecimento', estabelecimento.id]">
               <span class="avatar">{{ inicial(estabelecimento.nome) }}</span>
               <span class="nome">{{ estabelecimento.nome }}</span>
-              <span class="avaliacao">⭐ {{ estabelecimento.avaliacao ?? '—' }}</span>
+              <app-nota-bar [media]="estabelecimento.nota_media" [total]="estabelecimento.total_avaliacoes" />
             </a>
           }
         </div>

@@ -1,6 +1,7 @@
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { NavCliente } from '../../components/nav-cliente/nav-cliente';
+import { NotaBar } from '../../components/nota-bar/nota-bar';
 import { Comanda, Estabelecimento } from '../../models';
 import { AuthService } from '../../services/auth.service';
 import { HomeService } from '../../services/home.service';
@@ -13,9 +14,10 @@ interface EstabelecimentoComLotacao extends Estabelecimento {
 
 @Component({
   selector: 'app-home',
-  imports: [Carregando, ErroCarregar, RouterLink, NavCliente],
+  imports: [Carregando, ErroCarregar, RouterLink, NavCliente, NotaBar],
   templateUrl: './home.html',
-  styleUrl: './home.scss',
+  styleUrls: ['./home.scss', './home.conta.scss'],
+  host: { '(document:keydown.escape)': 'menuConta.set(false)' },
 })
 export class HomePage implements OnInit {
   private authService = inject(AuthService);
@@ -27,6 +29,8 @@ export class HomePage implements OnInit {
   protected readonly logado = signal(false);
   protected readonly nome = signal('');
   protected readonly comandaAtiva = signal<Comanda | null>(null);
+  /** Menu da foto do topo (só no celular; no desktop a conta fica no menu lateral). */
+  protected readonly menuConta = signal(false);
   protected readonly estabelecimentos = signal<EstabelecimentoComLotacao[]>([]);
 
   protected readonly favoritos = computed(() => this.estabelecimentos().slice(0, 2));
@@ -100,6 +104,7 @@ export class HomePage implements OnInit {
   }
 
   protected async sair(): Promise<void> {
+    this.menuConta.set(false);
     await this.authService.sair();
     await this.router.navigateByUrl('/login');
   }

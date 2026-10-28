@@ -20,7 +20,7 @@
   flex-direction: column;
   justify-content: center;
   min-height: 58px;
-  max-width: 760px;
+  max-width: 600px;
   margin: 0 auto;
   padding: 10px 16px;
 
@@ -40,17 +40,21 @@
 }
 
 .page-content {
-  max-width: 760px;
+  max-width: 600px;
   margin: 0 auto;
   padding: 16px 16px 116px;
 }
 
-// Os filtros rolam de lado no celular, sem quebrar a página.
+// Filtro discreto: um controle segmentado que rola de lado se não couber.
 .filtros {
   display: flex;
-  gap: 8px;
-  margin: 0 -16px 16px;
-  padding: 0 16px 2px;
+  gap: 2px;
+  width: fit-content;
+  max-width: 100%;
+  margin: 0 0 16px;
+  padding: 4px;
+  border-radius: 999px;
+  background: #e8ecf5;
   overflow-x: auto;
   scrollbar-width: none;
 
@@ -61,22 +65,23 @@
 
 .filtro {
   flex-shrink: 0;
-  min-height: 36px;
-  padding: 7px 14px;
-  border: 1px solid #dfe3eb;
+  min-height: 34px;
+  padding: 6px 14px;
+  border: 0;
   border-radius: 999px;
-  background: #fff;
-  color: #0f1f4b;
+  background: transparent;
+  color: #4d5565;
   font: inherit;
   font-size: 13px;
-  font-weight: 700;
+  font-weight: 600;
   cursor: pointer;
-  transition: background 120ms ease, color 120ms ease, border-color 120ms ease;
+  transition: background 120ms ease, color 120ms ease;
 
   &.ativo {
-    border-color: #0f1f4b;
-    background: #0f1f4b;
-    color: #fff;
+    background: #fff;
+    color: #0f1f4b;
+    font-weight: 800;
+    box-shadow: 0 1px 3px rgba(15, 31, 75, 0.12);
   }
 }
 
@@ -109,7 +114,7 @@
 }
 
 // ---------------------------------------------------------------------
-// Desktop: menu lateral, título claro e postagens em grade
+// Desktop: menu lateral, título claro e postagens numa coluna central
 // ---------------------------------------------------------------------
 @include d.desktop {
   :host {
@@ -122,9 +127,9 @@
   }
 
   .header-content {
-    max-width: 1240px;
+    max-width: 600px;
     min-height: 0;
-    padding: 44px 40px 0;
+    padding: 44px 0 0;
 
     h1 {
       color: #0f1f4b;
@@ -140,43 +145,29 @@
   }
 
   .page-content {
-    max-width: 1240px;
-    padding: 24px 40px 56px;
+    max-width: 600px;
+    padding: 24px 0 56px;
   }
 
   .filtros {
-    flex-wrap: wrap;
-    margin: 0 0 26px;
-    padding: 0;
+    margin-bottom: 24px;
 
     .filtro:not(.ativo):hover {
-      border-color: #2f6bff;
       color: #2f6bff;
     }
   }
 
   .lista {
-    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
     gap: 24px;
   }
 
   .vazio {
-    grid-column: 1 / -1;
     padding: 56px 18px;
   }
 }
 
 @include d.desktop-compacto {
   .header-content {
-    padding: 36px 28px 0;
-  }
-
-  .page-content {
-    padding: 20px 28px 48px;
-  }
-
-  .lista {
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    gap: 20px;
+    padding-top: 36px;
   }
 }

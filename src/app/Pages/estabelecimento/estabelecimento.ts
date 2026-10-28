@@ -1,6 +1,6 @@
 import { Component, OnInit, computed, inject, input, signal } from '@angular/core';
 import { Router } from '@angular/router';
-import { NotaBar } from '../../components/nota-bar/nota-bar';
+import { MINIMO_AVALIACOES, NotaBar } from '../../components/nota-bar/nota-bar';
 import { formatarHora, resumirDias, statusHorario } from '../../horario-funcionamento';
 import { Estabelecimento } from '../../models';
 import { EstabelecimentosService } from '../../services/estabelecimentos.service';
@@ -40,7 +40,9 @@ export class EstabelecimentoPage implements OnInit {
   });
 
   protected readonly bemAvaliado = computed(
-    () => (this.estabelecimento()?.avaliacao ?? 0) >= NOTA_BEM_AVALIADO,
+    () =>
+      (this.estabelecimento()?.total_avaliacoes ?? 0) >= MINIMO_AVALIACOES &&
+      (this.estabelecimento()?.nota_media ?? 0) >= NOTA_BEM_AVALIADO,
   );
 
   async ngOnInit(): Promise<void> {

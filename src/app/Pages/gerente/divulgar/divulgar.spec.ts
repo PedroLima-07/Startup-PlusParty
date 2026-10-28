@@ -69,14 +69,26 @@ describe('Divulgar meu bar', () => {
       arquivo = this.download;
     });
 
-    botao('Baixar imagem').click();
+    botao('Baixar imagem do Story').click();
 
     expect(arquivo).toBe('story-bar-dze.png');
     clique.mockRestore();
   });
 
-  it('os textos prontos citam o bar e o link, e o botão copia', async () => {
-    const whatsapp = tela().querySelectorAll('.texto-pronto')[0].textContent ?? '';
+  it('abre no Story e troca a prévia ao escolher outro lugar', () => {
+    expect(botao('Story do Instagram').getAttribute('aria-pressed')).toBe('true');
+    expect(tela().querySelector('.previa-story')).not.toBeNull();
+
+    botao('Post no feed do Instagram').click();
+
+    expect(tela().querySelector('.previa-story')).toBeNull();
+    expect(tela().querySelector('.texto-pronto')?.textContent).toContain("Novidade no Bar D'Zé");
+    expect(botao('Post no feed do Instagram').getAttribute('aria-pressed')).toBe('true');
+  });
+
+  it('a mensagem do WhatsApp cita o bar e o link, e o botão copia', async () => {
+    botao('WhatsApp').click();
+    const whatsapp = tela().querySelector('.texto-pronto')?.textContent ?? '';
     expect(whatsapp).toContain("no Bar D'Zé");
     expect(whatsapp).toContain('/cliente/estabelecimento/b1');
 
@@ -88,7 +100,12 @@ describe('Divulgar meu bar', () => {
   });
 
   it('copia o link do bar para a bio', async () => {
-    botao('Copiar').click();
+    botao('Link na bio').click();
+    expect(tela().querySelector('.link')?.textContent).toBe(
+      `${location.host}/cliente/estabelecimento/b1`,
+    );
+
+    botao('Copiar link').click();
     await fixture.whenStable();
 
     expect(escrever).toHaveBeenCalledWith(`${location.origin}/cliente/estabelecimento/b1`);
@@ -103,7 +120,7 @@ describe('Divulgar meu bar', () => {
     await new Promise((pronto) => setTimeout(pronto));
 
     expect(tela().textContent).toContain('Não foi possível gerar a imagem');
-    expect(botao('Baixar imagem').disabled).toBe(true);
+    expect(botao('Baixar imagem do Story').disabled).toBe(true);
   });
 
   it('o link na imagem aparece sem o https://', () => {

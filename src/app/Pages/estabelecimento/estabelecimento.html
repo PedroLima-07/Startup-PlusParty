@@ -21,7 +21,7 @@
     }
 
     <div class="destaques">
-      <app-nota-bar [nota]="e.avaliacao" />
+      <app-nota-bar [media]="e.nota_media" [total]="e.total_avaliacoes" />
       @if (bemAvaliado()) {
         <span class="indicado">Bem avaliado pelos clientes</span>
       }

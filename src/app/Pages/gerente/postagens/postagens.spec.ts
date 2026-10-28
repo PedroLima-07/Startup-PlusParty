@@ -105,7 +105,7 @@ describe('Postagens (gerente)', () => {
       (d) =>
         `${d.querySelector('dt')?.textContent?.replace('?', '').trim()} ${d.querySelector('dd')?.textContent}`,
     );
-    expect(numeros).toEqual(['ativas 1', 'encerradas 1', 'recebem os avisos 42']);
+    expect(numeros).toEqual(['ativas no Feed 1', 'encerradas 1', 'clientes recebem os avisos 42']);
   });
 
   it('a grade separa as ativas das encerradas pelas abas', () => {
@@ -120,7 +120,7 @@ describe('Postagens (gerente)', () => {
 
   it('as abas e os botões de ícone têm nome e balão', () => {
     const aba = botao('Ativas');
-    expect(aba.getAttribute('data-balao')).toBe('Ativas');
+    expect(aba.textContent).toContain('Ativas');
     expect(aba.getAttribute('aria-selected')).toBe('true');
     expect(botao('Editar Roda de samba').getAttribute('data-balao')).toBe('Editar');
   });

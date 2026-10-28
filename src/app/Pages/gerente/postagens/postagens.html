@@ -10,7 +10,7 @@
       <h1>{{ resumo()?.nome ?? 'Postagens' }}</h1>
       <dl class="numeros">
         <div>
-          <dt>ativas</dt>
+          <dt>ativas no Feed</dt>
           <dd>{{ carregando() ? '–' : ativas().length }}</dd>
         </div>
         <div>
@@ -19,7 +19,7 @@
         </div>
         <div>
           <dt>
-            recebem os avisos
+            clientes recebem os avisos
             <span
               class="ajuda"
               tabindex="0"
@@ -49,11 +49,13 @@
         class="aba"
         [class.ativa]="aba() === a.valor"
         [attr.aria-selected]="aba() === a.valor"
-        [attr.aria-label]="a.nome"
-        [attr.data-balao]="a.nome"
         (click)="aba.set(a.valor)"
       >
         <app-icone [nome]="a.icone" />
+        <span>{{ a.nome }}</span>
+        @if (!carregando()) {
+          <span class="aba-total">{{ a.valor === 'ativas' ? ativas().length : encerradas().length }}</span>
+        }
       </button>
     }
   </div>
@@ -133,7 +135,7 @@
           @if (aba() === 'ativas') {
             Nenhuma postagem ativa. Toque em "Nova postagem" para publicar no Feed.
           } @else {
-            Nenhuma postagem encerrada ainda.
+            Nenhuma postagem encerrada ainda. Quando uma postagem passa da validade, ela sai do Feed e fica guardada aqui.
           }
         </li>
       }

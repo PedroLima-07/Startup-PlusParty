@@ -2,8 +2,11 @@
   <header>
     <h1>Divulgar meu bar</h1>
     <p class="explicacao">
-      Conte aos clientes que dá para pedir pelo +party. Quanto mais gente abre a comanda pelo app,
-      mais clientes recebem as suas postagens.
+      @if (nome()) {
+        Onde você quer avisar que o {{ nome() }} está no +party?
+      } @else {
+        Onde você quer avisar que o seu bar está no +party?
+      }
     </p>
   </header>
 
@@ -13,53 +16,87 @@
     <p class="mensagem-erro" role="alert">{{ mensagem }}</p>
   } @else {
     <div class="colunas">
-      <section class="cartao story" aria-labelledby="titulo-story">
-        <h2 id="titulo-story" class="rotulo">Imagem para o Story</h2>
-        <div class="previa-story">
-          @if (previaStory(); as url) {
-            <img [src]="url" alt="Imagem do Story com a foto do bar e o texto Peça pelo +party" />
-          } @else if (erroStory()) {
-            <p class="vazio">Não foi possível gerar a imagem neste navegador.</p>
-          } @else {
-            <p class="vazio">Gerando a imagem...</p>
+      <div class="canais">
+        <div class="lista-canais" role="group" aria-label="Onde divulgar">
+          @for (c of canais; track c.valor) {
+            <button
+              type="button"
+              class="canal"
+              [class.ativo]="canal() === c.valor"
+              [attr.aria-pressed]="canal() === c.valor"
+              (click)="canal.set(c.valor)"
+            >
+              <span class="canal-icone" aria-hidden="true"><app-icone [nome]="c.icone" /></span>
+              <span class="canal-texto">
+                <strong>{{ c.titulo }}</strong>
+                <span>{{ c.descricao }}</span>
+              </span>
+            </button>
           }
         </div>
-        <p class="dica">1080 × 1920, o tamanho do Story. Baixe e publique no Instagram do bar.</p>
-        <button type="button" class="botao-azul" [disabled]="!previaStory()" (click)="baixarStory()">
-          <app-icone nome="baixar" /> Baixar imagem
-        </button>
-      </section>
-
-      <div class="textos">
-        <section class="cartao" aria-labelledby="titulo-link">
-          <h2 id="titulo-link" class="rotulo">Link do bar para a bio</h2>
-          <div class="linha-copiar">
-            <code class="link">{{ link() }}</code>
-            <button type="button" class="botao-contorno" (click)="copiar('link')">
-              <app-icone [nome]="copiado() === 'link' ? 'check' : 'copiar'" />
-              {{ copiado() === 'link' ? 'Copiado!' : 'Copiar' }}
-            </button>
-          </div>
-        </section>
-
-        <section class="cartao" aria-labelledby="titulo-whatsapp">
-          <h2 id="titulo-whatsapp" class="rotulo">Texto para o WhatsApp</h2>
-          <p class="texto-pronto">{{ textoWhatsapp() }}</p>
-          <button type="button" class="botao-contorno" (click)="copiar('whatsapp')">
-            <app-icone [nome]="copiado() === 'whatsapp' ? 'check' : 'copiar'" />
-            {{ copiado() === 'whatsapp' ? 'Copiado!' : 'Copiar texto' }}
-          </button>
-        </section>
-
-        <section class="cartao" aria-labelledby="titulo-instagram">
-          <h2 id="titulo-instagram" class="rotulo">Legenda para o Instagram</h2>
-          <p class="texto-pronto">{{ textoInstagram() }}</p>
-          <button type="button" class="botao-contorno" (click)="copiar('instagram')">
-            <app-icone [nome]="copiado() === 'instagram' ? 'check' : 'copiar'" />
-            {{ copiado() === 'instagram' ? 'Copiado!' : 'Copiar texto' }}
-          </button>
-        </section>
+        <p class="dica-canais">
+          Quem abre a comanda pelo app passa a receber as suas postagens. Quanto mais gente souber,
+          mais longe elas chegam.
+        </p>
       </div>
+
+      <section class="cartao previa" aria-labelledby="titulo-previa" aria-live="polite">
+        <h2 id="titulo-previa" class="rotulo">Como vai aparecer</h2>
+
+        @switch (canal()) {
+          @case ('story') {
+            <div class="previa-story">
+              @if (previaStory(); as url) {
+                <img [src]="url" alt="Imagem do Story com a foto do bar e o texto Peça pelo +party" />
+              } @else if (erroStory()) {
+                <p class="vazio">Não foi possível gerar a imagem neste navegador.</p>
+              } @else {
+                <p class="vazio">Gerando a imagem...</p>
+              }
+            </div>
+            <button type="button" class="botao-azul" [disabled]="!previaStory()" (click)="baixarStory()">
+              <app-icone nome="baixar" /> Baixar imagem do Story
+            </button>
+            <p class="dica">
+              Poste no Story do bar e adicione o adesivo de link com o endereço abaixo:
+              <span class="link-inline">{{ linkCurto() }}</span>
+            </p>
+          }
+          @case ('link') {
+            <div class="perfil-instagram" aria-hidden="true">
+              <span class="perfil-foto"></span>
+              <strong>{{ nome() }}</strong>
+              <span class="perfil-link">{{ linkCurto() }}</span>
+            </div>
+            <div class="linha-copiar">
+              <code class="link">{{ linkCurto() }}</code>
+              <button type="button" class="botao-azul" (click)="copiar('link')">
+                <app-icone [nome]="copiado() === 'link' ? 'check' : 'copiar'" />
+                {{ copiado() === 'link' ? 'Copiado!' : 'Copiar link' }}
+              </button>
+            </div>
+            <p class="dica">No Instagram: Editar perfil → Links → Adicionar link externo.</p>
+          }
+          @case ('whatsapp') {
+            <div class="conversa">
+              <p class="texto-pronto balao">{{ textoWhatsapp() }}</p>
+            </div>
+            <button type="button" class="botao-azul" (click)="copiar('whatsapp')">
+              <app-icone [nome]="copiado() === 'whatsapp' ? 'check' : 'copiar'" />
+              {{ copiado() === 'whatsapp' ? 'Copiado!' : 'Copiar texto' }}
+            </button>
+            <p class="dica">Mande na lista de transmissão ou no status do WhatsApp do bar.</p>
+          }
+          @case ('instagram') {
+            <p class="texto-pronto">{{ textoInstagram() }}</p>
+            <button type="button" class="botao-azul" (click)="copiar('instagram')">
+              <app-icone [nome]="copiado() === 'instagram' ? 'check' : 'copiar'" />
+              {{ copiado() === 'instagram' ? 'Copiado!' : 'Copiar legenda' }}
+            </button>
+            <p class="dica">Use numa foto do bar cheio ou do cardápio. O link fica na bio.</p>
+          }
+        }
+      </section>
     </div>
   }
 </div>

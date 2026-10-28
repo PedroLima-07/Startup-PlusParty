@@ -11,6 +11,8 @@ function bar(id: string, nome: string): Estabelecimento {
     endereco: null,
     capacidade: 100,
     avaliacao: 4.5,
+    nota_media: 4.5,
+    total_avaliacoes: 12,
     criado_em: '2026-01-01',
     foto_url: null,
     sobre: null,

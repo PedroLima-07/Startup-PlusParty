@@ -117,6 +117,6 @@ describe('FeedPage', () => {
     listarFeed.mockRejectedValue(new Error('sem rede'));
     await abrir();
 
-    expect(tela().textContent).toContain('Não foi possível carregar o Feed');
+    expect(tela().textContent).toContain('Não foi possível carregar as novidades');
   });
 });
