@@ -52,7 +52,7 @@ describe('CartaoPostagem', () => {
     const el = montar(postagem());
 
     expect(el.querySelector('.selo-desconto')?.textContent?.trim()).toBe('-25%');
-    expect(el.querySelector('.etiqueta')?.textContent).toBe('Promoção · Bebida');
+    expect(el.querySelector('.etiqueta')).toBeNull();
     expect(el.querySelector('.precos strong')?.textContent).toContain('9,00');
     expect(el.querySelector('.precos s')?.textContent).toContain('12,00');
     expect(texto(el)).toContain("Bar D'Zé");
@@ -65,7 +65,6 @@ describe('CartaoPostagem', () => {
 
     expect(el.querySelector('.precos')).toBeNull();
     expect(el.querySelector('.selo-desconto')).toBeNull();
-    expect(el.querySelector('.etiqueta')?.textContent).toBe('Evento');
     expect(el.querySelector('.acao')?.getAttribute('href')).toBe('/cliente/estabelecimento/b1');
   });
 
@@ -76,15 +75,28 @@ describe('CartaoPostagem', () => {
     ).toBe('img/estabelecimentos/bar-dze.jpg');
   });
 
-  it('mostra até quando vale, e "Encerrada" depois do prazo', () => {
-    const amanha = new Date(Date.now() + 24 * 3_600_000);
+  it('na prévia do gerente, mostra a etiqueta, até quando vale e "Encerrada" depois do prazo', () => {
+    const amanha = new Date(Date.now() + 48 * 3_600_000);
     const dia = `${String(amanha.getDate()).padStart(2, '0')}/${String(amanha.getMonth() + 1).padStart(2, '0')}`;
 
-    expect(montar(postagem({ valida_ate: amanha.toISOString() })).querySelector('.validade')?.textContent).toBe(`Até ${dia}`);
+    const previa = montar(postagem({ valida_ate: amanha.toISOString() }), false);
+    expect(previa.querySelector('.etiqueta')?.textContent).toBe('Promoção · Bebida');
+    expect(previa.querySelector('.validade')?.textContent).toBe(`Até ${dia}`);
     expect(
-      montar(postagem({ valida_ate: new Date(Date.now() - 60_000).toISOString() })).querySelector('.validade')
+      montar(postagem({ valida_ate: new Date(Date.now() - 60_000).toISOString() }), false).querySelector('.validade')
         ?.textContent,
     ).toBe('Encerrada');
+  });
+
+  it('nas Novidades, a validade só aparece quando termina hoje', () => {
+    const daquiA3Horas = new Date(Date.now() + 3 * 3_600_000).toISOString();
+    const daquiA3Dias = new Date(Date.now() + 72 * 3_600_000).toISOString();
+
+    expect(montar(postagem({ valida_ate: daquiA3Horas })).querySelector('.termina-hoje')?.textContent).toBe(
+      'Termina hoje',
+    );
+    expect(montar(postagem({ valida_ate: daquiA3Dias })).querySelector('.termina-hoje')).toBeNull();
+    expect(montar(postagem({ valida_ate: daquiA3Dias })).querySelector('.validade')).toBeNull();
   });
 
   it('sem o bar (prévia do gerente), não tem botão para o cliente e mostra quando foi publicada', () => {

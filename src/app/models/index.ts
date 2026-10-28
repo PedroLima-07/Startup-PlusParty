@@ -38,7 +38,11 @@ export interface Estabelecimento {
   descricao: string | null;
   endereco: string | null;
   capacidade: number | null;
+  /** Nota antiga, fixa no cadastro. As telas usam `nota_media`. */
   avaliacao: number | null;
+  /** Média das avaliações dos clientes, calculada pelo banco (supabase/avaliacoes.sql). */
+  nota_media: number | null;
+  total_avaliacoes: number;
   criado_em: string;
   foto_url: string | null;
   sobre: string | null;

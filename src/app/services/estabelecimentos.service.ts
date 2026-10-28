@@ -49,6 +49,13 @@ export class EstabelecimentosService {
     return data as Estabelecimento | null;
   }
 
+  /** Ids dos bares com evento hoje (o dia do bar vira às 6h). */
+  async baresComEventoHoje(): Promise<Set<string>> {
+    const { data, error } = await this.supabase.client.rpc('bares_com_evento_hoje');
+    if (error) throw error;
+    return new Set((data ?? []) as string[]);
+  }
+
   private listaGuardada(): Promise<Estabelecimento[]> | null {
     if (!this.guardada || Date.now() - this.guardada.buscadaEm > VALIDADE_MS) return null;
     return this.guardada.lista;

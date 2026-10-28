@@ -1,28 +1,67 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { NavCliente } from '../../components/nav-cliente/nav-cliente';
 import { NotaBar } from '../../components/nota-bar/nota-bar';
+import { formatarHora, statusHorario } from '../../horario-funcionamento';
 import { Estabelecimento } from '../../models';
 import { EstabelecimentosService } from '../../services/estabelecimentos.service';
+import { HomeService } from '../../services/home.service';
 import { Carregando } from '../../components/carregando/carregando';
 import { ErroCarregar } from '../../components/erro-carregar/erro-carregar';
 
+type Filtro = 'aberto' | 'evento' | 'quente';
+
+const FILTROS: { valor: Filtro; rotulo: string }[] = [
+  { valor: 'aberto', rotulo: 'Aberto agora' },
+  { valor: 'evento', rotulo: 'Evento hoje' },
+  { valor: 'quente', rotulo: 'Quente agora' },
+];
+
+/** Um bar como o cartão do Descobrir mostra. */
+interface BarDescoberto extends Estabelecimento {
+  aberto: boolean;
+  /** "Aberto até 2h", "Fechado · abre hoje às 18h"... null sem horário cadastrado. */
+  horario: string | null;
+  eventoHoje: boolean;
+  quente: boolean;
+}
+
+/**
+ * Descobrir: os bares do +party, com busca pelo nome e filtros rápidos.
+ * Ordem: abertos primeiro, depois os com evento hoje, depois a nota.
+ */
 @Component({
   selector: 'app-discovery',
   standalone: true,
   imports: [Carregando, ErroCarregar, FormsModule, NavCliente, NotaBar],
   templateUrl: './discovery.html',
-  styleUrl: './discovery.scss',
+  styleUrls: ['./discovery.scss', './discovery.filtros.scss'],
 })
 export class DiscoveryPage implements OnInit {
   private readonly router = inject(Router);
   private readonly estabelecimentosService = inject(EstabelecimentosService);
+  private readonly homeService = inject(HomeService);
 
+  protected readonly filtros = FILTROS;
   protected readonly carregando = signal(true);
   protected readonly erroCarregar = signal(false);
-  protected readonly estabelecimentos = signal<Estabelecimento[]>([]);
-  busca = '';
+  protected readonly bares = signal<BarDescoberto[]>([]);
+  protected readonly ativos = signal<ReadonlySet<Filtro>>(new Set());
+  protected readonly busca = signal('');
+
+  protected readonly visiveis = computed(() => {
+    const termo = this.busca().trim().toLocaleLowerCase();
+    const ativos = this.ativos();
+
+    return this.bares().filter(
+      (bar) =>
+        (!termo || bar.nome.toLocaleLowerCase().includes(termo)) &&
+        (!ativos.has('aberto') || bar.aberto) &&
+        (!ativos.has('evento') || bar.eventoHoje) &&
+        (!ativos.has('quente') || bar.quente),
+    );
+  });
 
   async ngOnInit(): Promise<void> {
     await this.carregar();
@@ -33,7 +72,13 @@ export class DiscoveryPage implements OnInit {
     this.erroCarregar.set(false);
 
     try {
-      this.estabelecimentos.set(await this.estabelecimentosService.listar());
+      // Evento hoje e lotação são detalhes: se falharem, a lista abre sem os selos.
+      const [lista, eventos, lotacao] = await Promise.all([
+        this.estabelecimentosService.listar(),
+        this.estabelecimentosService.baresComEventoHoje().catch(() => new Set<string>()),
+        this.homeService.contarComandasAbertasPorBar().catch(() => new Map<string, number>()),
+      ]);
+      this.bares.set(ordenar(lista.map((bar) => this.descobrir(bar, eventos, lotacao))));
     } catch {
       this.erroCarregar.set(true);
     } finally {
@@ -41,17 +86,12 @@ export class DiscoveryPage implements OnInit {
     }
   }
 
-  get estabelecimentosFiltrados(): Estabelecimento[] {
-    const termo = this.busca.trim().toLocaleLowerCase();
-    const lista = this.estabelecimentos();
-
-    if (!termo) {
-      return lista;
-    }
-
-    return lista.filter((estabelecimento) =>
-      estabelecimento.nome.toLocaleLowerCase().includes(termo),
-    );
+  protected alternar(filtro: Filtro): void {
+    this.ativos.update((ativos) => {
+      const novos = new Set(ativos);
+      if (!novos.delete(filtro)) novos.add(filtro);
+      return novos;
+    });
   }
 
   protected abrirPerfil(estabelecimento: Estabelecimento): void {
@@ -67,4 +107,35 @@ export class DiscoveryPage implements OnInit {
 
     return `${palavras[0].charAt(0)}${palavras[palavras.length - 1].charAt(0)}`.toUpperCase();
   }
+
+  private descobrir(bar: Estabelecimento, eventos: Set<string>, lotacao: Map<string, number>): BarDescoberto {
+    const status = statusHorario(bar);
+    const aberto = status?.aberto ?? false;
+    const lotado =
+      this.homeService.calcularLotacao(lotacao.get(bar.id) ?? 0, bar.capacidade) === 'quente';
+
+    return {
+      ...bar,
+      aberto,
+      horario:
+        aberto && bar.horario_fecha
+          ? `Aberto até ${formatarHora(bar.horario_fecha)}`
+          : (status?.texto ?? null),
+      eventoHoje: eventos.has(bar.id),
+      quente: aberto && lotado,
+    };
+  }
+}
+
+/** Abertos primeiro, depois quem tem evento hoje, depois a maior nota; empate pelo nome. */
+export function ordenar<T extends Pick<BarDescoberto, 'aberto' | 'eventoHoje' | 'nota_media' | 'nome'>>(
+  bares: T[],
+): T[] {
+  return [...bares].sort(
+    (a, b) =>
+      Number(b.aberto) - Number(a.aberto) ||
+      Number(b.eventoHoje) - Number(a.eventoHoje) ||
+      (b.nota_media ?? 0) - (a.nota_media ?? 0) ||
+      a.nome.localeCompare(b.nome),
+  );
 }

@@ -10,16 +10,17 @@ type Filtro = 'tudo' | TipoPostagem;
 
 const FILTROS: { valor: Filtro; rotulo: string }[] = [
   { valor: 'tudo', rotulo: 'Tudo' },
-  { valor: 'bebida', rotulo: '🍹 Bebidas' },
-  { valor: 'comida', rotulo: '🍔 Comidas' },
-  { valor: 'evento', rotulo: '🎶 Eventos' },
-  { valor: 'novidade', rotulo: '✨ Novidades' },
+  { valor: 'bebida', rotulo: 'Bebidas' },
+  { valor: 'comida', rotulo: 'Comidas' },
+  { valor: 'evento', rotulo: 'Eventos' },
+  { valor: 'novidade', rotulo: 'Avisos' },
 ];
 
 /**
- * Feed: promoções de bebida e comida, eventos e novidades de todos os bares,
- * das mais novas para as mais antigas. Aberto sem login, como o Discovery.
- * Uma postagem nova do gerente aparece aqui na hora.
+ * Novidades: promoções de bebida e comida, eventos e avisos de todos os bares,
+ * numa coluna só, das mais novas para as mais antigas. Aberto sem login, como
+ * o Descobrir. Uma postagem nova do gerente aparece aqui na hora.
+ * (O endereço antigo, /cliente/feed, leva para cá.)
  */
 @Component({
   selector: 'app-feed',

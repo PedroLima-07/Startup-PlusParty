@@ -37,9 +37,11 @@ export const routes: Routes = [
   },
   // Promoções e eventos dos bares: aberto sem login, como o Discovery.
   {
-    path: 'cliente/feed',
+    path: 'cliente/novidades',
     loadComponent: () => import('./Pages/feed/feed').then((m) => m.FeedPage),
   },
+  // Endereço antigo da aba: links e notificações já enviadas continuam funcionando.
+  { path: 'cliente/feed', redirectTo: 'cliente/novidades' },
   {
     path: 'cliente/notificacoes',
     loadComponent: () =>

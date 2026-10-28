@@ -6,31 +6,26 @@
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  color: #4d5565;
-  font-size: 12px;
-  font-weight: 700;
-}
+  color: #6b7280;
+  font-size: 13px;
 
-.estrela {
-  color: #f0a51a;
-}
-
-.nota.maxima {
-  padding: 3px 10px;
-  border-radius: 999px;
-  background: linear-gradient(135deg, #ffd34d, #f5a300);
-  color: #5a3a00;
-  box-shadow: 0 2px 8px rgba(245, 163, 0, 0.35);
-
-  .estrela {
-    color: #fff;
-    text-shadow: 0 0 6px rgba(255, 255, 255, 0.9);
+  strong {
+    color: #0f1f4b;
+    font-weight: 800;
   }
 }
 
-.selo {
-  margin-left: 2px;
-  font-size: 11px;
-  text-transform: uppercase;
-  letter-spacing: 0.03em;
+.estrela {
+  width: 14px;
+  height: 14px;
+  fill: #f0a51a;
+}
+
+.novo {
+  padding: 2px 9px;
+  border-radius: 999px;
+  background: #eaf0ff;
+  color: #2f6bff;
+  font-size: 12px;
+  font-weight: 700;
 }
