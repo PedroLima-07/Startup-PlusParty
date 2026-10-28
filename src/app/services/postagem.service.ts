@@ -79,6 +79,21 @@ export class PostagemService {
     return ((data ?? []) as unknown as PostagemFeed[]).map(comPrecos);
   }
 
+  /** Postagens em vigor de um bar, para a aba Novidades do perfil dele. */
+  async listarDoBar(estabelecimentoId: string): Promise<PostagemFeed[]> {
+    const agora = new Date().toISOString();
+    const { data, error } = await this.supabase.client
+      .from('postagens')
+      .select(`${COLUNAS}, estabelecimento:estabelecimentos(id, nome, foto_url)`)
+      .eq('estabelecimento_id', estabelecimentoId)
+      .or(`valida_ate.is.null,valida_ate.gt.${agora}`)
+      .order('criada_em', { ascending: false })
+      .limit(20);
+
+    if (error) throw error;
+    return ((data ?? []) as unknown as PostagemFeed[]).map(comPrecos);
+  }
+
   /** Todas as postagens do bar do gerente, inclusive as que já venceram. */
   async listarDoMeuBar(): Promise<Postagem[]> {
     const { data, error } = await this.supabase.client

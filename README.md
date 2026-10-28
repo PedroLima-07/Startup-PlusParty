@@ -160,6 +160,22 @@ Os scripts ficam versionados na pasta [`supabase/`](supabase/) e são aplicados 
 - **Regras validadas no banco**, não só na tela: um cliente não consegue liberar a própria comanda, marcá-la como paga, mudar o próprio perfil para gerente nem definir o preço do item que pede
 - **Rotas protegidas**: as telas do atendente e do gerente só abrem para a equipe do bar, e usar uma comanda exige login
 
+### Google Maps
+
+O mapa do Descobrir e o ponto do bar nas Configurações do gerente usam a **Maps JavaScript API**. Sem chave, o app mostra "Mapa indisponível" e todo o resto funciona, inclusive o "Como chegar", que é só um link para o app do Google Maps e não usa a chave.
+
+Para ligar o mapa:
+
+1. No [Google Cloud Console](https://console.cloud.google.com/), crie um projeto (ou use um existente) e ative o **faturamento**. O uso de um app pequeno fica dentro da cota gratuita mensal, mas o Google exige o cartão cadastrado.
+2. Em **APIs e serviços → Biblioteca**, ative a **Maps JavaScript API**.
+3. Em **APIs e serviços → Credenciais**, crie uma **chave de API** e restrinja:
+   - **Restrições de aplicativo:** *Sites*, com os domínios do app (ex.: `https://seu-dominio.com/*` e `http://localhost:4200/*`);
+   - **Restrições de API:** só a *Maps JavaScript API*.
+4. Em **Faturamento → Orçamentos e alertas**, crie um alerta de orçamento (ex.: R$ 10) para ser avisado de qualquer uso inesperado.
+5. Cole a chave em `googleMapsKey` nos dois arquivos de `src/environments/`. Com as restrições do passo 3 ela pode ficar no código: só funciona nos domínios liberados.
+
+Depois, cada gerente marca o ponto do bar em **Configurações → Redes e localização**, e o bar aparece no mapa do Descobrir.
+
 ### Estrutura de pastas
 
 ```

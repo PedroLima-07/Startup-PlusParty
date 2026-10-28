@@ -43,6 +43,13 @@ export interface Estabelecimento {
   /** Média das avaliações dos clientes, calculada pelo banco (supabase/avaliacoes.sql). */
   nota_media: number | null;
   total_avaliacoes: number;
+  /** Usuário sem @ (supabase/bar_redes_localizacao.sql). */
+  instagram: string | null;
+  tiktok: string | null;
+  /** Só dígitos, com 55 e DDD. */
+  whatsapp: string | null;
+  latitude: number | null;
+  longitude: number | null;
   criado_em: string;
   foto_url: string | null;
   sobre: string | null;
@@ -366,3 +373,29 @@ export interface PerfilBar {
 
 export type StatusMovimento = 'normal' | 'quente';
 
+/** Uma vez de um evento na agenda do bar (agenda_do_bar; eventos semanais aparecem uma vez por semana). */
+export interface EventoAgenda {
+  evento_id: string;
+  titulo: string;
+  descricao: string | null;
+  inicio: string;
+  fim: string | null;
+  capa_url: string | null;
+  /** Valor da entrada; null ou 0 = grátis. */
+  entrada: number | null;
+  repete_semanal: boolean;
+  cancelado: boolean;
+  interessados: number;
+  tenho_interesse: boolean;
+}
+
+/** Avaliação mostrada no perfil do bar (avaliacoes_do_bar: só o primeiro nome do autor). */
+export interface AvaliacaoDoBar {
+  id: string;
+  autor: string;
+  nota: number;
+  comentario: string | null;
+  criada_em: string;
+  resposta: string | null;
+  respondida_em: string | null;
+}
