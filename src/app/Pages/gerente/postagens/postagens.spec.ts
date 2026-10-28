@@ -9,7 +9,7 @@ import { Postagens } from './postagens';
 
 registerLocaleData(localePt);
 
-const ANTIGA: Postagem = {
+const SAMBA: Postagem = {
   id: 'p0',
   estabelecimento_id: 'b1',
   tipo: 'evento',
@@ -22,9 +22,20 @@ const ANTIGA: Postagem = {
   criada_em: new Date().toISOString(),
 };
 
+const VENCIDA: Postagem = {
+  ...SAMBA,
+  id: 'p9',
+  tipo: 'bebida',
+  titulo: 'Chope em dobro',
+  preco: 9,
+  preco_antigo: 12,
+  valida_ate: new Date(Date.now() - 86_400_000).toISOString(),
+};
+
 describe('Postagens (gerente)', () => {
   let fixture: ComponentFixture<Postagens>;
   let publicar: ReturnType<typeof vi.fn>;
+  let editar: ReturnType<typeof vi.fn>;
   let apagar: ReturnType<typeof vi.fn>;
 
   function tela(): HTMLElement {
@@ -37,7 +48,9 @@ describe('Postagens (gerente)', () => {
   }
 
   function botao(rotulo: string): HTMLButtonElement {
-    return Array.from(tela().querySelectorAll('button')).find((b) => b.textContent?.trim().includes(rotulo))!;
+    return Array.from(tela().querySelectorAll('button')).find(
+      (b) => b.textContent?.trim().includes(rotulo) || b.getAttribute('aria-label') === rotulo,
+    )!;
   }
 
   function preencher(seletor: string, valor: string, indice = 0): void {
@@ -46,13 +59,19 @@ describe('Postagens (gerente)', () => {
     campo.dispatchEvent(new Event('input'));
   }
 
-  async function publicarAgora(): Promise<void> {
-    botao('Publicar no Feed').click();
-    await fixture.whenStable();
+  function titulosNaGrade(): string[] {
+    return Array.from(tela().querySelectorAll('.grade .titulo')).map((h) => h.textContent ?? '');
+  }
+
+  /** Abre a janela e vai até os detalhes, sem foto. */
+  function irParaDetalhes(): void {
+    botao('Nova postagem').click();
+    botao('Usar fundo do tipo').click();
   }
 
   beforeEach(async () => {
-    publicar = vi.fn((nova) => Promise.resolve({ ...ANTIGA, ...nova, id: 'p1' }));
+    publicar = vi.fn((nova) => Promise.resolve({ ...SAMBA, ...nova, id: 'p1' }));
+    editar = vi.fn((original, dados) => Promise.resolve({ ...original, ...dados }));
     apagar = vi.fn().mockResolvedValue(undefined);
 
     await TestBed.configureTestingModule({
@@ -62,7 +81,15 @@ describe('Postagens (gerente)', () => {
         { provide: LOCALE_ID, useValue: 'pt-BR' },
         {
           provide: PostagemService,
-          useValue: { listarDoMeuBar: vi.fn().mockResolvedValue([ANTIGA]), publicar, apagar },
+          useValue: {
+            listarDoMeuBar: vi.fn().mockResolvedValue([SAMBA, VENCIDA]),
+            resumoDoMeuBar: vi
+              .fn()
+              .mockResolvedValue({ nome: "Bar D'Zé", foto_url: null, clientes: 42 }),
+            publicar,
+            editar,
+            apagar,
+          },
         },
       ],
     }).compileComponents();
@@ -72,12 +99,43 @@ describe('Postagens (gerente)', () => {
     await fixture.whenStable();
   });
 
-  it('publica a promoção com os preços e ela entra no topo da lista', async () => {
-    preencher('input[type=text]', 'Happy hour: chope a R$ 9');
-    preencher('input[inputmode=decimal]', '9,00', 0);
-    preencher('input[inputmode=decimal]', 'R$ 12', 1);
+  it('mostra o bar no topo com as ativas, as encerradas e quem recebe os avisos', () => {
+    expect(tela().querySelector('h1')?.textContent).toContain("Bar D'Zé");
+    const numeros = Array.from(tela().querySelectorAll('.numeros div')).map(
+      (d) =>
+        `${d.querySelector('dt')?.textContent?.replace('?', '').trim()} ${d.querySelector('dd')?.textContent}`,
+    );
+    expect(numeros).toEqual(['ativas 1', 'encerradas 1', 'recebem os avisos 42']);
+  });
 
-    await publicarAgora();
+  it('a grade separa as ativas das encerradas pelas abas', () => {
+    expect(titulosNaGrade()).toEqual(['Roda de samba']);
+
+    botao('Encerradas').click();
+
+    expect(titulosNaGrade()).toEqual(['Chope em dobro']);
+    expect(tela().querySelector('.grade .info')?.textContent).toContain('-25%');
+    expect(texto()).toContain('Encerrada');
+  });
+
+  it('as abas e os botões de ícone têm nome e balão', () => {
+    const aba = botao('Ativas');
+    expect(aba.getAttribute('data-balao')).toBe('Ativas');
+    expect(aba.getAttribute('aria-selected')).toBe('true');
+    expect(botao('Editar Roda de samba').getAttribute('data-balao')).toBe('Editar');
+  });
+
+  it('publica em três etapas e a nova entra no topo da grade', async () => {
+    irParaDetalhes();
+    preencher('.janela input[type=text]', 'Happy hour: chope a R$ 9');
+    preencher('.janela input[inputmode=decimal]', '9,00', 0);
+    preencher('.janela input[inputmode=decimal]', 'R$ 12', 1);
+
+    botao('Continuar').click();
+    expect(tela().querySelector('.janela .selo-desconto')?.textContent?.trim()).toBe('-25%');
+
+    botao('Publicar').click();
+    await fixture.whenStable();
 
     expect(publicar).toHaveBeenCalledWith(
       {
@@ -90,53 +148,81 @@ describe('Postagens (gerente)', () => {
       },
       null,
     );
+    expect(tela().querySelector('.janela')).toBeNull();
     expect(texto()).toContain('Publicada!');
-    const titulos = Array.from(tela().querySelectorAll('.lista h3')).map((h) => h.textContent);
-    expect(titulos).toEqual(['Happy hour: chope a R$ 9', 'Roda de samba']);
+    expect(titulosNaGrade()).toEqual(['Happy hour: chope a R$ 9', 'Roda de samba']);
   });
 
-  it('a prévia acompanha o que o gerente escreve', () => {
-    preencher('input[type=text]', 'Combo batata');
-    preencher('input[inputmode=decimal]', '49', 0);
-    preencher('input[inputmode=decimal]', '58', 1);
+  it('não passa dos detalhes sem título', () => {
+    irParaDetalhes();
+    botao('Continuar').click();
 
-    const previa = tela().querySelector('.previa')!;
-    expect(previa.querySelector('h3')?.textContent).toBe('Combo batata');
-    expect(previa.querySelector('.selo-desconto')?.textContent?.trim()).toBe('-16%');
-  });
-
-  it('não publica sem título', async () => {
-    await publicarAgora();
-
-    expect(publicar).not.toHaveBeenCalled();
     expect(texto()).toContain('Dê um título para a postagem.');
+    expect(tela().querySelector('.janela app-cartao-postagem')).toBeNull();
   });
 
-  it('não aceita preço normal menor que o da promoção', async () => {
-    preencher('input[type=text]', 'Promo');
-    preencher('input[inputmode=decimal]', '12', 0);
-    preencher('input[inputmode=decimal]', '9', 1);
+  it('não aceita preço normal menor que o da promoção', () => {
+    irParaDetalhes();
+    preencher('.janela input[type=text]', 'Promo');
+    preencher('.janela input[inputmode=decimal]', '12', 0);
+    preencher('.janela input[inputmode=decimal]', '9', 1);
 
-    await publicarAgora();
+    botao('Continuar').click();
 
-    expect(publicar).not.toHaveBeenCalled();
+    expect(tela().querySelector('.janela app-cartao-postagem')).toBeNull();
     expect(texto()).toContain('O preço normal precisa ser maior que o da promoção.');
   });
 
   it('evento não pede preço', () => {
+    irParaDetalhes();
     botao('Evento').click();
 
-    expect(tela().querySelector('input[inputmode=decimal]')).toBeNull();
+    expect(tela().querySelector('.janela input[inputmode=decimal]')).toBeNull();
   });
 
-  it('apagar pede confirmação antes', async () => {
-    botao('Apagar postagem').click();
-    expect(apagar).not.toHaveBeenCalled();
+  it('editar abre a mesma janela preenchida e atualiza o quadro', async () => {
+    botao('Editar Roda de samba').click();
 
-    tela().querySelector<HTMLButtonElement>('.apagar')!.click();
+    expect(texto()).toContain('Editar postagem');
+    botao('Usar fundo do tipo').click();
+    const titulo = tela().querySelector<HTMLInputElement>('.janela input[type=text]')!;
+    expect(titulo.value).toBe('Roda de samba');
+
+    preencher('.janela input[type=text]', 'Roda de samba ao vivo');
+    botao('Continuar').click();
+    botao('Salvar alterações').click();
     await fixture.whenStable();
 
-    expect(apagar).toHaveBeenCalledWith(ANTIGA);
-    expect(texto()).toContain('Nenhuma postagem ainda.');
+    expect(editar).toHaveBeenCalledWith(
+      SAMBA,
+      expect.objectContaining({ titulo: 'Roda de samba ao vivo', tipo: 'evento' }),
+      'manter',
+    );
+    expect(titulosNaGrade()).toEqual(['Roda de samba ao vivo']);
+    expect(texto()).toContain('Alterações salvas.');
+  });
+
+  it('apagar pede confirmação numa janela antes', async () => {
+    botao('Apagar Roda de samba').click();
+    expect(apagar).not.toHaveBeenCalled();
+    expect(tela().querySelector('[role=alertdialog]')?.textContent).toContain('Roda de samba');
+
+    tela().querySelector<HTMLButtonElement>('[role=alertdialog] .botao-perigo')!.click();
+    await fixture.whenStable();
+
+    expect(apagar).toHaveBeenCalledWith(SAMBA);
+    expect(texto()).toContain('Nenhuma postagem ativa.');
+  });
+
+  it('no toque, o "⋯" abre o menu com editar e apagar', () => {
+    botao('Opções de Roda de samba').click();
+
+    const itens = Array.from(tela().querySelectorAll('[role=menuitem]')).map((b) =>
+      b.textContent?.trim(),
+    );
+    expect(itens).toEqual(['Editar', 'Apagar']);
+
+    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }));
+    expect(tela().querySelector('[role=menu]')).toBeNull();
   });
 });

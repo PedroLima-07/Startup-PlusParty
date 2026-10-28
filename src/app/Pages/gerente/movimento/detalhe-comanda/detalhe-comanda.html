@@ -1,0 +1,117 @@
+@let d = detalhe();
+<div class="detalhe-fundo" (click)="pedirParaFechar()">
+  <section
+    class="detalhe"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="titulo-detalhe"
+    (click)="$event.stopPropagation()"
+  >
+    <header class="detalhe-topo">
+      <div>
+        <h2 id="titulo-detalhe">Comanda {{ d.numero }}</h2>
+        <p class="detalhe-sub">{{ d.cliente }} · {{ d.local }} · aberta às {{ d.aberturaEm }}</p>
+      </div>
+      <button type="button" class="fechar" aria-label="Fechar" (click)="pedirParaFechar()">
+        <app-icone nome="fechar" />
+      </button>
+    </header>
+
+    <div class="detalhe-selos">
+      <span class="selo-status" [class]="d.status">{{ rotuloStatus(d.status) }}</span>
+      @if (d.minutosSemPagamento !== null && d.minutosSemPagamento >= limitePagamento) {
+        <span class="selo-atraso">Sem pagamento há {{ d.minutosSemPagamento }} min</span>
+      }
+    </div>
+
+    @if (d.liberadaPor || d.fechadaEm) {
+      <dl class="detalhe-responsaveis">
+        @if (d.liberadaPor) {
+          <div>
+            <dt>Liberada por</dt>
+            <dd>{{ d.liberadaPor }}@if (d.liberadaEm) { · {{ d.liberadaEm }}}</dd>
+          </div>
+        }
+        @if (d.fechadaEm) {
+          <div>
+            <dt>Conta fechada</dt>
+            <dd>{{ d.fechadaEm }}</dd>
+          </div>
+        }
+      </dl>
+    }
+
+    <div class="detalhe-pedidos">
+      @for (pedido of d.pedidos; track pedido.id; let i = $index) {
+        <div class="pedido">
+          <div class="pedido-topo">
+            <strong>Pedido {{ i + 1 }}</strong>
+            <span>{{ pedido.horario }} · {{ pedido.total | currency: 'BRL' }}</span>
+          </div>
+          <ul>
+            @for (item of pedido.itens; track $index) {
+              <li>
+                <span class="item-nome">{{ item.quantidade }}× {{ item.nome }}</span>
+                <span class="item-status" [class]="item.status">{{ rotuloItem(item.status) }}</span>
+                <span class="item-valor">{{ item.valor | currency: 'BRL' }}</span>
+              </li>
+            }
+          </ul>
+        </div>
+      } @empty {
+        <p class="vazio">Nenhum pedido nesta comanda ainda.</p>
+      }
+    </div>
+
+    <footer class="detalhe-total">
+      <span>Total da comanda</span>
+      <strong>{{ d.total | currency: 'BRL' }}</strong>
+    </footer>
+
+    @if (d.status === 'aguardando_pagamento') {
+      <div class="nao-paga-acao">
+        <button type="button" class="botao-nao-paga" (click)="pedirConfirmacaoNaoPaga()">
+          Marcar como não paga
+        </button>
+        <span>
+          Use quando o cliente foi embora sem pagar. Ele volta a poder abrir comandas, e a conta fica
+          registrada como não paga.
+        </span>
+      </div>
+    }
+  </section>
+
+  @if (confirmandoNaoPaga()) {
+    <div class="confirmar-fundo" (click)="$event.stopPropagation(); cancelarNaoPaga()">
+      <section
+        class="confirmar"
+        role="alertdialog"
+        aria-modal="true"
+        aria-labelledby="titulo-nao-paga"
+        aria-describedby="texto-nao-paga"
+        (click)="$event.stopPropagation()"
+      >
+        <span class="confirmar-icone" aria-hidden="true">
+          <app-icone nome="alerta" />
+        </span>
+        <h3 id="titulo-nao-paga">Marcar a conta de {{ d.cliente }} como não paga?</h3>
+        <p id="texto-nao-paga">
+          Os {{ d.total | currency: 'BRL' }} saem de "aguardando pagamento" e ficam registrados como
+          não pagos. O cliente volta a poder abrir comandas, e o atendente verá um aviso quando ele
+          pedir uma nova.
+        </p>
+        @if (erroNaoPaga(); as mensagem) {
+          <p class="confirmar-erro" role="alert">{{ mensagem }}</p>
+        }
+        <div class="confirmar-botoes">
+          <button type="button" class="botao-cancelar" [disabled]="marcandoNaoPaga()" (click)="cancelarNaoPaga()">
+            Cancelar
+          </button>
+          <button type="button" class="botao-confirmar" [disabled]="marcandoNaoPaga()" (click)="confirmarNaoPaga()">
+            {{ marcandoNaoPaga() ? 'Marcando...' : 'Marcar como não paga' }}
+          </button>
+        </div>
+      </section>
+    </div>
+  }
+</div>

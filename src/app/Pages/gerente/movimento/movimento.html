@@ -19,6 +19,7 @@
       }
     </p>
 
+    <div class="topo-numeros">
     <dl class="numeros">
       <div>
         <dt>comandas abertas</dt>
@@ -42,6 +43,12 @@
         </dd>
       </div>
     </dl>
+
+    <!-- Desktop: o faturamento fica ao lado dos números, na mesma seção. -->
+    @if (desktop() && !carregandoPrimeiraVez()) {
+      <ng-container [ngTemplateOutlet]="cartaoFaturamento" />
+    }
+    </div>
   </div>
 </section>
 
@@ -93,6 +100,8 @@
     }
   </section>
 
+  <app-cartao-divulgar />
+
   <section class="cartao cartao-status">
     <h2 class="rotulo">
       Status do movimento
@@ -109,72 +118,9 @@
     </div>
   </section>
 
-  <section class="cartao faturamento">
-    <div class="cartao-topo">
-      <h2 class="rotulo">Faturamento da noite</h2>
-      <button
-        type="button"
-        class="olho"
-        [attr.aria-label]="valoresOcultos() ? 'Mostrar valores' : 'Esconder valores'"
-        [attr.aria-pressed]="valoresOcultos()"
-        (click)="alternarValores()"
-      >
-        <app-icone [nome]="valoresOcultos() ? 'olho-fechado' : 'olho'" />
-      </button>
-    </div>
-
-    <p class="total">
-      {{ valoresOcultos() ? 'R$ ••••' : (movimento.faturamento() | currency: 'BRL') }}
-    </p>
-
-    <dl class="detalhes">
-      <div>
-        <dt>Comandas pagas</dt>
-        <dd>{{ movimento.comandasPagas() }}</dd>
-      </div>
-      <div>
-        <dt>
-          Ticket médio
-          <span class="ajuda" title="Faturamento dividido pelo número de comandas pagas.">?</span>
-        </dt>
-        <dd>{{ valoresOcultos() ? 'R$ ••••' : (movimento.ticketMedio() | currency: 'BRL') }}</dd>
-      </div>
-    </dl>
-
-    @if (!valoresOcultos() && movimento.metaFaturamento(); as meta) {
-      <div class="meta">
-        <span>
-          <strong>{{ movimento.faturamento() | currency: 'BRL' : 'symbol' : '1.0-0' }}</strong>
-          de {{ meta | currency: 'BRL' : 'symbol' : '1.0-0' }}
-        </span>
-        <strong class="percentual">{{ movimento.percentualDaMeta() }}%</strong>
-      </div>
-      <div
-        class="progresso"
-        role="progressbar"
-        aria-label="Meta de faturamento"
-        aria-valuemin="0"
-        aria-valuemax="100"
-        [attr.aria-valuenow]="movimento.percentualDaMeta()"
-      >
-        <span [style.width.%]="movimento.percentualDaMeta()"></span>
-      </div>
-    }
-
-    <p class="nota">
-      Soma apenas as comandas já pagas. As comandas em aberto aparecem separadas porque o valor
-      ainda pode mudar.
-    </p>
-    <p class="em-aberto">
-      Em aberto:
-      <strong>{{ valoresOcultos() ? 'R$ ••••' : (movimento.valorEmAberto() | currency: 'BRL') }}</strong>
-      em {{ movimento.comandasAbertas() }} comandas
-    </p>
-
-    <a class="botao-contorno" routerLink="/gerente/movimento/resumo">
-      Ver resumo completo da noite <app-icone nome="seta" />
-    </a>
-  </section>
+  @if (!desktop()) {
+    <ng-container [ngTemplateOutlet]="cartaoFaturamento" />
+  }
 
   <section class="comandas" aria-labelledby="titulo-comandas">
     <h2 id="titulo-comandas" class="rotulo">Comandas do dia</h2>
@@ -230,120 +176,52 @@
 </div>
 
 @if (detalhe(); as d) {
-  <div class="detalhe-fundo" (click)="fecharDetalhe()">
-    <section
-      class="detalhe"
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="titulo-detalhe"
-      (click)="$event.stopPropagation()"
-    >
-      <header class="detalhe-topo">
-        <div>
-          <h2 id="titulo-detalhe">Comanda {{ d.numero }}</h2>
-          <p class="detalhe-sub">{{ d.cliente }} · {{ d.local }} · aberta às {{ d.aberturaEm }}</p>
-        </div>
-        <button type="button" class="fechar" aria-label="Fechar" (click)="fecharDetalhe()">
-          <app-icone nome="fechar" />
-        </button>
-      </header>
-
-      <div class="detalhe-selos">
-        <span class="selo-status" [class]="d.status">{{ rotuloStatusDetalhe(d.status) }}</span>
-        @if (d.minutosSemPagamento !== null && d.minutosSemPagamento >= limitePagamento) {
-          <span class="selo-atraso">Sem pagamento há {{ d.minutosSemPagamento }} min</span>
-        }
-      </div>
-
-      @if (d.liberadaPor || d.fechadaEm) {
-        <dl class="detalhe-responsaveis">
-          @if (d.liberadaPor) {
-            <div>
-              <dt>Liberada por</dt>
-              <dd>{{ d.liberadaPor }}@if (d.liberadaEm) { · {{ d.liberadaEm }}}</dd>
-            </div>
-          }
-          @if (d.fechadaEm) {
-            <div>
-              <dt>Conta fechada</dt>
-              <dd>{{ d.fechadaEm }}</dd>
-            </div>
-          }
-        </dl>
-      }
-
-      <div class="detalhe-pedidos">
-        @for (pedido of d.pedidos; track pedido.id; let i = $index) {
-          <div class="pedido">
-            <div class="pedido-topo">
-              <strong>Pedido {{ i + 1 }}</strong>
-              <span>{{ pedido.horario }} · {{ pedido.total | currency: 'BRL' }}</span>
-            </div>
-            <ul>
-              @for (item of pedido.itens; track $index) {
-                <li>
-                  <span class="item-nome">{{ item.quantidade }}× {{ item.nome }}</span>
-                  <span class="item-status" [class]="item.status">{{ rotuloItem(item.status) }}</span>
-                  <span class="item-valor">{{ item.valor | currency: 'BRL' }}</span>
-                </li>
-              }
-            </ul>
-          </div>
-        } @empty {
-          <p class="vazio">Nenhum pedido nesta comanda ainda.</p>
-        }
-      </div>
-
-      <footer class="detalhe-total">
-        <span>Total da comanda</span>
-        <strong>{{ d.total | currency: 'BRL' }}</strong>
-      </footer>
-
-      @if (d.status === 'aguardando_pagamento') {
-        <div class="nao-paga-acao">
-          <button type="button" class="botao-nao-paga" (click)="pedirConfirmacaoNaoPaga()">
-            Marcar como não paga
-          </button>
-          <span>
-            Use quando o cliente foi embora sem pagar. Ele volta a poder abrir comandas, e a conta fica
-            registrada como não paga.
-          </span>
-        </div>
-      }
-    </section>
-
-    @if (confirmandoNaoPaga()) {
-      <div class="confirmar-fundo" (click)="$event.stopPropagation(); cancelarNaoPaga()">
-        <section
-          class="confirmar"
-          role="alertdialog"
-          aria-modal="true"
-          aria-labelledby="titulo-nao-paga"
-          aria-describedby="texto-nao-paga"
-          (click)="$event.stopPropagation()"
-        >
-          <span class="confirmar-icone" aria-hidden="true">
-            <app-icone nome="alerta" />
-          </span>
-          <h3 id="titulo-nao-paga">Marcar a conta de {{ d.cliente }} como não paga?</h3>
-          <p id="texto-nao-paga">
-            Os {{ d.total | currency: 'BRL' }} saem de "aguardando pagamento" e ficam registrados como
-            não pagos. O cliente volta a poder abrir comandas, e o atendente verá um aviso quando ele
-            pedir uma nova.
-          </p>
-          @if (erroNaoPaga(); as mensagem) {
-            <p class="confirmar-erro" role="alert">{{ mensagem }}</p>
-          }
-          <div class="confirmar-botoes">
-            <button type="button" class="botao-cancelar" [disabled]="marcandoNaoPaga()" (click)="cancelarNaoPaga()">
-              Cancelar
-            </button>
-            <button type="button" class="botao-confirmar" [disabled]="marcandoNaoPaga()" (click)="confirmarNaoPaga()">
-              {{ marcandoNaoPaga() ? 'Marcando...' : 'Marcar como não paga' }}
-            </button>
-          </div>
-        </section>
-      </div>
-    }
-  </div>
+  <app-detalhe-comanda [detalhe]="d" (fechar)="fecharDetalhe()" />
 }
+
+<ng-template #cartaoFaturamento>
+  <section class="cartao faturamento">
+    <div class="cartao-topo">
+      <h2 class="rotulo">
+        Faturamento da noite
+        <span
+          class="ajuda"
+          tabindex="0"
+          title="Soma apenas as comandas já pagas. As comandas em aberto aparecem separadas porque o valor ainda pode mudar."
+          >?</span
+        >
+      </h2>
+      <button
+        type="button"
+        class="olho"
+        [attr.aria-label]="valoresOcultos() ? 'Mostrar valores' : 'Esconder valores'"
+        [attr.aria-pressed]="valoresOcultos()"
+        (click)="alternarValores()"
+      >
+        <app-icone [nome]="valoresOcultos() ? 'olho-fechado' : 'olho'" />
+      </button>
+    </div>
+
+    <p class="total">
+      {{ valoresOcultos() ? 'R$ ••••' : (movimento.faturamento() | currency: 'BRL') }}
+    </p>
+
+    <dl class="detalhes">
+      <div>
+        <dt>
+          Ticket médio
+          <span class="ajuda" tabindex="0" title="Faturamento dividido pelo número de comandas pagas.">?</span>
+        </dt>
+        <dd>{{ valoresOcultos() ? 'R$ ••••' : (movimento.ticketMedio() | currency: 'BRL') }}</dd>
+      </div>
+      <div>
+        <dt>Em aberto</dt>
+        <dd>{{ valoresOcultos() ? 'R$ ••••' : (movimento.valorEmAberto() | currency: 'BRL') }}</dd>
+      </div>
+    </dl>
+
+    <a class="botao-contorno" routerLink="/gerente/movimento/resumo">
+      Ver resumo completo da noite <app-icone nome="seta" />
+    </a>
+  </section>
+</ng-template>

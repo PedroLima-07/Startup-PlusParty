@@ -1,0 +1,158 @@
+<div class="fundo" (click)="fechar.emit()">
+  <section
+    class="janela"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="titulo-editor"
+    (click)="$event.stopPropagation()"
+  >
+    <header class="topo">
+      <h2 id="titulo-editor">{{ editando() ? 'Editar postagem' : 'Nova postagem' }}</h2>
+      <button type="button" class="fechar" aria-label="Fechar" (click)="fechar.emit()">
+        <app-icone nome="fechar" />
+      </button>
+    </header>
+
+    <ol class="etapas" aria-label="Etapas">
+      @for (e of etapas; track e.numero) {
+        <li
+          [class.atual]="etapa() === e.numero"
+          [class.feita]="etapa() > e.numero"
+          [attr.aria-current]="etapa() === e.numero ? 'step' : null"
+        >
+          <span class="numero">{{ e.numero }}</span> {{ e.nome }}
+        </li>
+      }
+    </ol>
+
+    @switch (etapa()) {
+      @case (1) {
+        <div class="passo" data-etapa="1">
+          <div class="foto" [attr.data-tipo]="tipo()">
+            @if (fotoPrevia(); as foto) {
+              <img [src]="foto" alt="Foto da postagem" />
+            } @else {
+              <span class="arte" aria-hidden="true">{{ emoji() }}</span>
+            }
+          </div>
+
+          <div class="botoes-foto">
+            <label class="botao-contorno escolher">
+              <app-icone nome="camera" /> {{ fotoPrevia() ? 'Trocar foto' : 'Escolher foto' }}
+              <input type="file" accept="image/*" hidden (change)="escolherFoto($event)" />
+            </label>
+            @if (fotoPrevia()) {
+              <button type="button" class="botao-texto" (click)="removerFoto()">Remover foto</button>
+            }
+          </div>
+          @if (!fotoPrevia()) {
+            <p class="dica">Sem foto, a postagem usa o fundo colorido do tipo, como acima.</p>
+          }
+        </div>
+      }
+
+      @case (2) {
+        <div class="passo" data-etapa="2">
+          <div class="tipos" role="radiogroup" aria-label="Tipo da postagem">
+            @for (t of tipos; track t.valor) {
+              <button
+                type="button"
+                role="radio"
+                class="tipo"
+                [class.ativo]="tipo() === t.valor"
+                [attr.aria-checked]="tipo() === t.valor"
+                (click)="tipo.set(t.valor)"
+              >
+                {{ t.rotulo }}
+              </button>
+            }
+          </div>
+
+          <label class="campo">
+            <span>Título</span>
+            <input
+              type="text"
+              maxlength="80"
+              placeholder="Ex.: Happy hour: chope a R$ 9"
+              [value]="titulo()"
+              (input)="titulo.set(campo($event))"
+            />
+          </label>
+
+          <label class="campo">
+            <span>Descrição <small>(opcional)</small></span>
+            <textarea
+              rows="3"
+              maxlength="500"
+              placeholder="Conte os detalhes: horário, o que vem, condições."
+              [value]="texto()"
+              (input)="texto.set(campo($event))"
+            ></textarea>
+          </label>
+
+          @if (temPreco()) {
+            <div class="linha">
+              <label class="campo">
+                <span>{{ temPrecoAntigo() ? 'Preço na promoção' : 'Preço' }} <small>(opcional)</small></span>
+                <input
+                  type="text"
+                  inputmode="decimal"
+                  placeholder="9,00"
+                  [value]="preco()"
+                  (input)="preco.set(campo($event))"
+                />
+              </label>
+              @if (temPrecoAntigo()) {
+                <label class="campo">
+                  <span>Preço normal <small>(opcional)</small></span>
+                  <input
+                    type="text"
+                    inputmode="decimal"
+                    placeholder="12,00"
+                    [value]="precoAntigo()"
+                    (input)="precoAntigo.set(campo($event))"
+                  />
+                </label>
+              }
+            </div>
+          }
+
+          <label class="campo">
+            <span>Válida até <small>(opcional)</small></span>
+            <input type="date" [min]="hoje" [value]="validaAte()" (input)="validaAte.set(campo($event))" />
+          </label>
+        </div>
+      }
+
+      @case (3) {
+        <div class="passo previa" data-etapa="3" aria-label="Prévia no Feed">
+          <p class="dica">É assim que a postagem aparece no Feed dos clientes.</p>
+          <app-cartao-postagem [postagem]="previa()" />
+        </div>
+      }
+    }
+
+    @if (erro(); as mensagem) {
+      <p class="mensagem-erro" role="alert">{{ mensagem }}</p>
+    }
+
+    <footer class="rodape">
+      @if (etapa() > 1) {
+        <button type="button" class="botao-contorno" (click)="voltar()">Voltar</button>
+      }
+      @if (etapa() < 3) {
+        <button type="button" class="botao-azul" (click)="avancar()">
+          {{ etapa() === 1 && !fotoPrevia() ? 'Usar fundo do tipo' : 'Continuar' }}
+        </button>
+      } @else {
+        <button type="button" class="botao-azul" [disabled]="salvando()" (click)="salvar()">
+          @if (editando()) {
+            {{ salvando() ? 'Salvando...' : 'Salvar alterações' }}
+          } @else {
+            {{ salvando() ? 'Publicando...' : 'Publicar' }}
+          }
+        </button>
+      }
+    </footer>
+  </section>
+</div>
