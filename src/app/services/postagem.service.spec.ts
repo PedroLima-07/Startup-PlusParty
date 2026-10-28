@@ -1,5 +1,5 @@
 import { TestBed } from '@angular/core/testing';
-import { NovaPostagem } from '../models';
+import { NovaPostagem, Postagem } from '../models';
 import { AuthService } from './auth.service';
 import { PostagemService, descontoPercentual, emVigor } from './postagem.service';
 import { SupabaseService } from './supabase.service';
@@ -100,6 +100,99 @@ describe('PostagemService.publicar', () => {
     respostaInsert = { data: null, error: { message: 'sem permissão' } };
 
     await expect(service.publicar(NOVA, new Blob(['foto']))).rejects.toBeTruthy();
+    expect(remove).toHaveBeenCalledWith([upload.mock.calls[0][0]]);
+  });
+});
+
+describe('PostagemService.editar', () => {
+  const FOTO_ANTIGA = 'https://x.supabase.co/storage/v1/object/public/postagens/bar1/1.jpg';
+  const ORIGINAL: Postagem = {
+    id: 'p1',
+    estabelecimento_id: 'bar1',
+    ...NOVA,
+    imagem_url: FOTO_ANTIGA,
+    criada_em: '2026-10-20T20:00:00Z',
+  };
+
+  let service: PostagemService;
+  let alterado: unknown;
+  let filtro: unknown;
+  let resposta: { data: unknown; error: unknown };
+  let upload: ReturnType<typeof vi.fn>;
+  let remove: ReturnType<typeof vi.fn>;
+
+  beforeEach(() => {
+    alterado = null;
+    resposta = { data: { ...ORIGINAL, titulo: 'Novo' }, error: null };
+    upload = vi.fn().mockResolvedValue({ error: null });
+    remove = vi.fn().mockResolvedValue({ error: null });
+
+    const consulta = {
+      update: (linha: unknown) => {
+        alterado = linha;
+        return consulta;
+      },
+      eq: (coluna: string, valor: unknown) => {
+        filtro = [coluna, valor];
+        return consulta;
+      },
+      select: () => consulta,
+      single: () => Promise.resolve(resposta),
+    };
+
+    TestBed.configureTestingModule({
+      providers: [
+        {
+          provide: SupabaseService,
+          useValue: {
+            client: {
+              from: () => consulta,
+              storage: {
+                from: () => ({
+                  upload,
+                  remove,
+                  getPublicUrl: (caminho: string) => ({ data: { publicUrl: `https://fotos/${caminho}` } }),
+                }),
+              },
+            },
+          },
+        },
+        { provide: AuthService, useValue: {} },
+      ],
+    });
+    service = TestBed.inject(PostagemService);
+  });
+
+  it('mantendo a foto, grava só os dados naquela postagem', async () => {
+    await service.editar(ORIGINAL, { ...NOVA, titulo: 'Novo' }, 'manter');
+
+    expect(filtro).toEqual(['id', 'p1']);
+    expect(alterado).toEqual({ ...NOVA, titulo: 'Novo', imagem_url: FOTO_ANTIGA });
+    expect(upload).not.toHaveBeenCalled();
+    expect(remove).not.toHaveBeenCalled();
+  });
+
+  it('trocando a foto, envia a nova e apaga a antiga depois de gravar', async () => {
+    await service.editar(ORIGINAL, NOVA, new Blob(['nova']));
+
+    const caminho = upload.mock.calls[0][0] as string;
+    expect(caminho).toMatch(/^bar1\/\d+\.jpg$/);
+    expect(alterado).toMatchObject({ imagem_url: `https://fotos/${caminho}` });
+    expect(remove).toHaveBeenCalledWith(['bar1/1.jpg']);
+  });
+
+  it('removendo a foto, a postagem fica sem imagem e o arquivo sai', async () => {
+    await service.editar(ORIGINAL, NOVA, 'remover');
+
+    expect(alterado).toMatchObject({ imagem_url: null });
+    expect(remove).toHaveBeenCalledWith(['bar1/1.jpg']);
+  });
+
+  it('se não gravar, apaga a foto nova e mantém a antiga', async () => {
+    resposta = { data: null, error: { message: 'sem permissão' } };
+
+    await expect(service.editar(ORIGINAL, NOVA, new Blob(['nova']))).rejects.toBeTruthy();
+    expect(remove).toHaveBeenCalledTimes(1);
     expect(remove).toHaveBeenCalledWith([upload.mock.calls[0][0]]);
   });
 });

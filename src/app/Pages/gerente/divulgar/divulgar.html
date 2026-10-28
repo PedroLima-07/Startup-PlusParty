@@ -1,0 +1,65 @@
+<div class="pagina">
+  <header>
+    <h1>Divulgar meu bar</h1>
+    <p class="explicacao">
+      Conte aos clientes que dá para pedir pelo +party. Quanto mais gente abre a comanda pelo app,
+      mais clientes recebem as suas postagens.
+    </p>
+  </header>
+
+  @if (carregando()) {
+    <p class="vazio">Carregando...</p>
+  } @else if (erro(); as mensagem) {
+    <p class="mensagem-erro" role="alert">{{ mensagem }}</p>
+  } @else {
+    <div class="colunas">
+      <section class="cartao story" aria-labelledby="titulo-story">
+        <h2 id="titulo-story" class="rotulo">Imagem para o Story</h2>
+        <div class="previa-story">
+          @if (previaStory(); as url) {
+            <img [src]="url" alt="Imagem do Story com a foto do bar e o texto Peça pelo +party" />
+          } @else if (erroStory()) {
+            <p class="vazio">Não foi possível gerar a imagem neste navegador.</p>
+          } @else {
+            <p class="vazio">Gerando a imagem...</p>
+          }
+        </div>
+        <p class="dica">1080 × 1920, o tamanho do Story. Baixe e publique no Instagram do bar.</p>
+        <button type="button" class="botao-azul" [disabled]="!previaStory()" (click)="baixarStory()">
+          <app-icone nome="baixar" /> Baixar imagem
+        </button>
+      </section>
+
+      <div class="textos">
+        <section class="cartao" aria-labelledby="titulo-link">
+          <h2 id="titulo-link" class="rotulo">Link do bar para a bio</h2>
+          <div class="linha-copiar">
+            <code class="link">{{ link() }}</code>
+            <button type="button" class="botao-contorno" (click)="copiar('link')">
+              <app-icone [nome]="copiado() === 'link' ? 'check' : 'copiar'" />
+              {{ copiado() === 'link' ? 'Copiado!' : 'Copiar' }}
+            </button>
+          </div>
+        </section>
+
+        <section class="cartao" aria-labelledby="titulo-whatsapp">
+          <h2 id="titulo-whatsapp" class="rotulo">Texto para o WhatsApp</h2>
+          <p class="texto-pronto">{{ textoWhatsapp() }}</p>
+          <button type="button" class="botao-contorno" (click)="copiar('whatsapp')">
+            <app-icone [nome]="copiado() === 'whatsapp' ? 'check' : 'copiar'" />
+            {{ copiado() === 'whatsapp' ? 'Copiado!' : 'Copiar texto' }}
+          </button>
+        </section>
+
+        <section class="cartao" aria-labelledby="titulo-instagram">
+          <h2 id="titulo-instagram" class="rotulo">Legenda para o Instagram</h2>
+          <p class="texto-pronto">{{ textoInstagram() }}</p>
+          <button type="button" class="botao-contorno" (click)="copiar('instagram')">
+            <app-icone [nome]="copiado() === 'instagram' ? 'check' : 'copiar'" />
+            {{ copiado() === 'instagram' ? 'Copiado!' : 'Copiar texto' }}
+          </button>
+        </section>
+      </div>
+    </div>
+  }
+</div>

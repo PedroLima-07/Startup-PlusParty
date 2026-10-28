@@ -8,8 +8,8 @@
 }
 
 // ---------------------------------------------------------------------
-// Desktop: números em cartões no topo; comandas do dia à esquerda e
-// "Precisa de atenção" com o faturamento numa coluna à direita.
+// Desktop: números em 2×2 com o faturamento ao lado, no topo; comandas do
+// dia à esquerda e "Precisa de atenção" sozinho na coluna da direita.
 // ---------------------------------------------------------------------
 @include d.desktop {
   .saudacao {
@@ -48,8 +48,15 @@
     font-size: 15px;
   }
 
+  // Os 4 números em 2×2 e o faturamento ao lado, numa seção só.
+  .topo-numeros {
+    display: grid;
+    grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
+    gap: 16px;
+  }
+
   .numeros {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 16px;
 
     div,
@@ -110,7 +117,7 @@
     grid-template-areas:
       'erro erro'
       'comandas atencao'
-      'comandas faturamento';
+      'comandas divulgar';
     align-items: start;
     gap: 0 24px;
     max-width: 1240px;
@@ -124,6 +131,10 @@
   .mensagem-erro {
     grid-area: erro;
     margin-bottom: 16px;
+  }
+
+  app-cartao-divulgar {
+    grid-area: divulgar;
   }
 
   // O cartão de status subiu para a linha dos números.
@@ -150,9 +161,18 @@
   }
 
   .faturamento {
-    grid-area: faturamento;
+    display: flex;
+    flex-direction: column;
     padding: 22px;
     border-radius: 20px;
+
+    .total {
+      font-size: 40px;
+    }
+
+    .botao-contorno {
+      margin-top: auto;
+    }
   }
 
   // Comandas do dia: um painel, cada comanda uma linha.
