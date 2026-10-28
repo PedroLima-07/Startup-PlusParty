@@ -10,6 +10,9 @@ import {
 } from '../../services/postagem.service';
 import { haQuantoTempo } from '../../tempo';
 
+/** Faltando menos que isso, a postagem ganha o aviso "Termina hoje" nas Novidades. */
+const AVISAR_FIM_MS = 24 * 60 * 60 * 1000;
+
 const NOME_DO_TIPO: Record<TipoPostagem, string> = {
   bebida: 'Bebida',
   comida: 'Comida',
@@ -18,8 +21,10 @@ const NOME_DO_TIPO: Record<TipoPostagem, string> = {
 };
 
 /**
- * Uma postagem do bar, como no Feed. Com `bar`, mostra quem publicou e o
- * botão para o bar ou o cardápio; sem, é a prévia da área do gerente.
+ * Uma postagem do bar. Com `bar`, é o cartão das Novidades do cliente: quem
+ * publicou, a foto, o título, o preço e uma ação só (a validade só aparece
+ * quando termina hoje). Sem `bar`, é a prévia da área do gerente, com a
+ * etiqueta do tipo e até quando vale.
  */
 @Component({
   selector: 'app-cartao-postagem',
@@ -37,6 +42,11 @@ export class CartaoPostagem {
   protected readonly desconto = computed(() => descontoPercentual(this.postagem()));
   protected readonly publicada = computed(() => haQuantoTempo(this.postagem().criada_em));
   protected readonly vigente = computed(() => emVigor(this.postagem()));
+
+  protected readonly terminaHoje = computed(() => {
+    const ate = this.postagem().valida_ate;
+    return !!ate && this.vigente() && new Date(ate).getTime() - Date.now() < AVISAR_FIM_MS;
+  });
 
   protected readonly etiqueta = computed(() => {
     const postagem = this.postagem();

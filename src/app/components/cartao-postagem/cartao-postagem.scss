@@ -43,9 +43,20 @@
 
   time {
     flex-shrink: 0;
-    color: #8a93a6;
+    margin-right: auto;
+    color: #6b7280;
     font-size: 12px;
   }
+}
+
+.termina-hoje {
+  flex-shrink: 0;
+  padding: 3px 9px;
+  border-radius: 999px;
+  background: #fff4e0;
+  color: #9a4a00;
+  font-size: 12px;
+  font-weight: 700;
 }
 
 .bar {
@@ -110,14 +121,14 @@
 
 .selo-desconto {
   position: absolute;
-  top: 12px;
-  right: 12px;
-  padding: 6px 11px;
+  bottom: 12px;
+  left: 12px;
+  padding: 4px 10px;
   border-radius: 999px;
   background: #fff;
   color: var(--cor);
-  font-size: 14px;
-  font-weight: 900;
+  font-size: 13px;
+  font-weight: 800;
   box-shadow: 0 6px 14px rgba(0, 0, 0, 0.18);
 }
 
@@ -157,11 +168,11 @@
   display: flex;
   align-items: baseline;
   gap: 8px;
-  margin: 4px 0 0;
+  margin: 0;
 
   strong {
     color: var(--cor);
-    font-size: 22px;
+    font-size: 20px;
     font-weight: 900;
     letter-spacing: -0.02em;
   }

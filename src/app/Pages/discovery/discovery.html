@@ -10,12 +10,27 @@
     <input
       id="busca-bar"
       type="search"
-      [(ngModel)]="busca"
+      [ngModel]="busca()"
+      (ngModelChange)="busca.set($event)"
       placeholder="Buscar bar pelo nome"
       autocomplete="off"
       enterkeyhint="search"
     />
   </label>
+
+  <div class="filtros" role="group" aria-label="Filtrar bares">
+    @for (f of filtros; track f.valor) {
+      <button
+        type="button"
+        class="filtro"
+        [class.ativo]="ativos().has(f.valor)"
+        [attr.aria-pressed]="ativos().has(f.valor)"
+        (click)="alternar(f.valor)"
+      >
+        {{ f.rotulo }}
+      </button>
+    }
+  </div>
 
   @if (carregando()) {
     <app-carregando texto="Carregando bares" />
@@ -26,24 +41,37 @@
     />
   } @else {
     <div class="bars-list">
-      @for (estabelecimento of estabelecimentosFiltrados; track estabelecimento.id) {
-        @let foto = estabelecimento.foto_url;
-        <button
-          type="button"
-          class="bar-card"
-          [class.com-foto]="foto"
-          (click)="abrirPerfil(estabelecimento)"
-        >
+      @for (bar of visiveis(); track bar.id) {
+        @let foto = bar.foto_url;
+        <button type="button" class="bar-card" [class.com-foto]="foto" (click)="abrirPerfil(bar)">
           @if (foto) {
-            <img class="bar-foto" [src]="foto" alt="" loading="lazy" />
+            <span class="capa">
+              <img class="bar-foto" [src]="foto" alt="" loading="lazy" />
+              @if (bar.eventoHoje) {
+                <span class="selo selo-evento">Evento hoje</span>
+              } @else if (bar.quente) {
+                <span class="selo selo-quente">Quente agora</span>
+              }
+            </span>
           } @else {
-            <span class="bar-avatar" aria-hidden="true">{{ iniciais(estabelecimento.nome) }}</span>
+            <span class="bar-avatar" aria-hidden="true">{{ iniciais(bar.nome) }}</span>
           }
 
           <span class="bar-info">
-            <span class="bar-name">{{ estabelecimento.nome }}</span>
-            <span class="bar-description">{{ estabelecimento.descricao }}</span>
-            <app-nota-bar [nota]="estabelecimento.avaliacao" />
+            <span class="bar-name">{{ bar.nome }}</span>
+            <span class="bar-description">{{ bar.descricao }}</span>
+            <span class="bar-linha">
+              <app-nota-bar [media]="bar.nota_media" [total]="bar.total_avaliacoes" />
+              @if (bar.horario; as h) {
+                <span aria-hidden="true">·</span>
+                <span class="horario" [class.aberto]="bar.aberto">{{ h }}</span>
+              }
+              @if (!foto && bar.eventoHoje) {
+                <span class="selo selo-evento">Evento hoje</span>
+              } @else if (!foto && bar.quente) {
+                <span class="selo selo-quente">Quente agora</span>
+              }
+            </span>
           </span>
 
           @if (!foto) {
@@ -53,8 +81,13 @@
       } @empty {
         <div class="empty-state">
           <span class="empty-icon" aria-hidden="true">⌕</span>
-          <p>Nenhum bar encontrado.</p>
-          <small>Tente buscar por outro nome.</small>
+          @if (ativos().size > 0) {
+            <p>Nenhum bar com esses filtros agora.</p>
+            <small>Tire um filtro para ver mais bares.</small>
+          } @else {
+            <p>Nenhum bar encontrado.</p>
+            <small>Tente buscar por outro nome.</small>
+          }
         </div>
       }
     </div>

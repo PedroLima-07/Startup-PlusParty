@@ -11,6 +11,9 @@
         <span class="bar-nome">{{ b.nome }}</span>
       </a>
       <time [attr.datetime]="p.criada_em">{{ publicada() }}</time>
+      @if (terminaHoje()) {
+        <span class="termina-hoje">Termina hoje</span>
+      }
     </header>
   }
 
@@ -26,27 +29,28 @@
   </div>
 
   <div class="corpo">
-    <span class="etiqueta">{{ etiqueta() }}</span>
+    @if (!bar()) {
+      <span class="etiqueta">{{ etiqueta() }}</span>
+    }
     @if (p.titulo) {
       <h3>{{ p.titulo }}</h3>
     }
     @if (p.texto) {
       <p class="texto">{{ p.texto }}</p>
     }
-    @if (p.preco !== null) {
-      <p class="precos">
-        <strong>{{ p.preco | currency: 'BRL' }}</strong>
-        @if (p.preco_antigo !== null) {
-          <s aria-label="Preço normal">{{ p.preco_antigo | currency: 'BRL' }}</s>
-        }
-      </p>
-    }
-
     <footer class="rodape">
-      @if (validade(); as v) {
-        <span class="validade" [class.encerrada]="!vigente()">{{ v }}</span>
+      @if (p.preco !== null) {
+        <p class="precos">
+          <strong>{{ p.preco | currency: 'BRL' }}</strong>
+          @if (p.preco_antigo !== null) {
+            <s aria-label="Preço normal">{{ p.preco_antigo | currency: 'BRL' }}</s>
+          }
+        </p>
       }
       @if (!bar()) {
+        @if (validade(); as v) {
+          <span class="validade" [class.encerrada]="!vigente()">{{ v }}</span>
+        }
         <time [attr.datetime]="p.criada_em">Publicada {{ publicada() }}</time>
       }
       @if (destino(); as d) {

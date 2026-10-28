@@ -1,12 +1,12 @@
 <header class="app-header">
   <div class="header-content">
-    <h1>Feed</h1>
-    <p>Promoções e novidades dos bares</p>
+    <h1>Novidades</h1>
+    <p>O que os bares estão oferecendo agora</p>
   </div>
 </header>
 
 <main class="page-content">
-  <div class="filtros" role="group" aria-label="Filtrar o Feed">
+  <div class="filtros" role="group" aria-label="Filtrar por tipo">
     @for (f of filtros; track f.valor) {
       <button
         type="button"
@@ -21,10 +21,10 @@
   </div>
 
   @if (carregando()) {
-    <app-carregando texto="Carregando o Feed" />
+    <app-carregando texto="Carregando as novidades" />
   } @else if (erroCarregar()) {
     <app-erro-carregar
-      mensagem="Não foi possível carregar o Feed. Verifique sua conexão."
+      mensagem="Não foi possível carregar as novidades. Verifique sua conexão."
       (tentarDeNovo)="carregar()"
     />
   } @else {

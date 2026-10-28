@@ -1,0 +1,93 @@
+@use '../../../styles/desktop' as d;
+
+// Filtros rápidos: liga e desliga; mais de um junto vale "e".
+.filtros {
+  display: flex;
+  gap: 8px;
+  margin: 12px -16px 16px;
+  padding: 0 16px 2px;
+  overflow-x: auto;
+  scrollbar-width: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+.filtro {
+  flex-shrink: 0;
+  min-height: 36px;
+  padding: 0 14px;
+  border: 1px solid #d5dbe8;
+  border-radius: 999px;
+  background: #fff;
+  color: #0f1f4b;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+
+  &.ativo {
+    border-color: #0f1f4b;
+    background: #0f1f4b;
+    color: #fff;
+    font-weight: 700;
+  }
+}
+
+.capa {
+  position: relative;
+  display: block;
+}
+
+.selo {
+  flex-shrink: 0;
+  padding: 3px 9px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.capa .selo {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+}
+
+.selo-evento {
+  background: rgba(15, 31, 75, 0.88);
+  color: #fff;
+}
+
+.selo-quente {
+  background: #fff4e0;
+  color: #9a4a00;
+}
+
+.bar-linha {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 8px;
+  margin-top: 2px;
+  color: #6b7280;
+  font-size: 13px;
+}
+
+.horario.aberto {
+  color: #15803d;
+  font-weight: 600;
+}
+
+@include d.desktop {
+  .filtros {
+    flex-wrap: wrap;
+    margin: 16px 0 24px;
+    padding: 0;
+  }
+
+  .filtro:not(.ativo):hover {
+    border-color: #2f6bff;
+    color: #2f6bff;
+  }
+}
