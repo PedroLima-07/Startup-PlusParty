@@ -2,17 +2,27 @@ import { Component, DestroyRef, OnInit, computed, inject, signal } from '@angula
 import { AuthService } from '../../../services/auth.service';
 import { EstabelecimentosService } from '../../../services/estabelecimentos.service';
 import { Icone } from '../componentes/icone';
-import { GeradorStory } from './story';
+import { NomeIcone } from '../componentes/icone';
+import { GeradorStory, linkSemProtocolo } from './story';
 
 type Texto = 'whatsapp' | 'instagram' | 'link';
+type Canal = 'story' | 'link' | 'whatsapp' | 'instagram';
+
+/** Onde o gerente pode divulgar, na ordem da lista. */
+const CANAIS: { valor: Canal; titulo: string; descricao: string; icone: NomeIcone }[] = [
+  { valor: 'story', titulo: 'Story do Instagram', descricao: 'Imagem pronta para postar', icone: 'camera' },
+  { valor: 'link', titulo: 'Link na bio', descricao: 'Leva direto para a página do bar', icone: 'link' },
+  { valor: 'whatsapp', titulo: 'WhatsApp', descricao: 'Mensagem para a lista de clientes', icone: 'compartilhar' },
+  { valor: 'instagram', titulo: 'Post no feed do Instagram', descricao: 'Legenda pronta para copiar', icone: 'postagens' },
+];
 
 /** Quanto tempo o "Copiado!" fica no botão. */
 const AVISO_COPIADO_MS = 2000;
 
 /**
- * Ajuda o bar a contar aos clientes que dá para pedir pelo +party: a imagem
- * pronta para o Story do Instagram, textos para WhatsApp e Instagram e o
- * link do perfil do bar para a bio.
+ * Ajuda o bar a contar aos clientes que dá para pedir pelo +party. O gerente
+ * escolhe onde quer divulgar (Story, bio, WhatsApp ou feed) e vê ao lado o
+ * material pronto daquele lugar: a imagem do Story, o link ou o texto.
  */
 @Component({
   selector: 'app-divulgar',
@@ -26,8 +36,12 @@ export class Divulgar implements OnInit {
   private readonly gerador = inject(GeradorStory);
   private readonly destroyRef = inject(DestroyRef);
 
+  protected readonly canais = CANAIS;
+  protected readonly canal = signal<Canal>('story');
   protected readonly nome = signal('');
   protected readonly link = signal('');
+  /** O link como o cliente lê, sem o https://. */
+  protected readonly linkCurto = computed(() => linkSemProtocolo(this.link()));
   protected readonly carregando = signal(true);
   protected readonly erro = signal<string | null>(null);
 

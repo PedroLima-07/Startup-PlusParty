@@ -16,7 +16,7 @@ h1 {
 .explicacao {
   margin: 4px 0 0;
   color: g.$texto-suave;
-  font-size: 14px;
+  font-size: 15px;
   line-height: 1.5;
 }
 
@@ -24,50 +24,176 @@ h1 {
   @include g.cartao;
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 14px;
 }
 
 .rotulo {
   @include g.rotulo;
 }
 
-// Story à esquerda e os textos à direita, quando cabe.
+// Canais à esquerda e a prévia à direita; no celular os canais viram uma
+// fileira que rola de lado, e a prévia vem embaixo.
 .colunas {
   display: grid;
-  gap: 16px;
+  gap: 20px;
 
   @media (min-width: 860px) {
-    grid-template-columns: 340px minmax(0, 1fr);
+    grid-template-columns: minmax(0, 1fr) 400px;
     align-items: start;
+    gap: 28px;
   }
 }
 
-.textos {
+.canais {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 12px;
+  min-width: 0;
+}
+
+.lista-canais {
+  display: flex;
+  gap: 10px;
+  overflow-x: auto;
+  scrollbar-width: none;
+
+  @media (min-width: 860px) {
+    flex-direction: column;
+    overflow: visible;
+  }
+}
+
+.canal {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 14px;
+  border: 1px solid g.$borda;
+  border-radius: 14px;
+  background: #fff;
+  color: g.$marinho;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 120ms ease, box-shadow 120ms ease;
+
+  @media (min-width: 860px) {
+    padding: 16px 18px;
+  }
+
+  &.ativo {
+    border-color: g.$azul;
+    box-shadow: 0 0 0 1px g.$azul, 0 8px 24px rgba(47, 107, 255, 0.12);
+
+    .canal-icone {
+      background: #eaf0ff;
+      color: g.$azul;
+    }
+  }
+}
+
+.canal-icone {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+  border-radius: 12px;
+  background: g.$fundo;
+  color: g.$texto-suave;
+}
+
+.canal-texto {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+
+  strong {
+    font-size: 15px;
+  }
+
+  span {
+    color: g.$texto-suave;
+    font-size: 13px;
+  }
+
+  // No celular só o título cabe na fileira.
+  @media (max-width: 859px) {
+    span {
+      display: none;
+    }
+  }
+}
+
+.dica-canais {
+  margin: 4px 0 0;
+  color: g.$texto-suave;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.previa .botao-azul {
+  @include g.botao-azul;
+  min-height: 48px;
 }
 
 .previa-story {
   display: grid;
   place-items: center;
+  align-self: center;
+  width: 100%;
+  max-width: 260px;
   aspect-ratio: 9 / 16;
-  max-height: 520px;
-  border-radius: 14px;
+  border-radius: 18px;
   background: #eef1f6;
   overflow: hidden;
 
   img {
     width: 100%;
     height: 100%;
-    object-fit: contain;
+    object-fit: cover;
   }
 }
 
 .dica {
   margin: 0;
   color: g.$texto-suave;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.link-inline {
+  color: g.$marinho;
+  font-family: g.$mono;
   font-size: 12px;
+  overflow-wrap: anywhere;
+}
+
+// Uma imitação simples do topo de um perfil, mostrando onde o link fica.
+.perfil-instagram {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 20px 16px;
+  border-radius: 14px;
+  background: #f7f8fb;
+  font-size: 14px;
+}
+
+.perfil-foto {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #feda75, #d62976 60%, #4f5bd5);
+}
+
+.perfil-link {
+  color: #00376b;
+  font-size: 13px;
+  font-weight: 600;
+  overflow-wrap: anywhere;
 }
 
 .linha-copiar {
@@ -80,7 +206,7 @@ h1 {
 .link {
   flex: 1;
   min-width: 0;
-  padding: 10px 12px;
+  padding: 12px;
   border-radius: 10px;
   background: #f1f3f8;
   font-family: g.$mono;
@@ -88,25 +214,28 @@ h1 {
   overflow-wrap: anywhere;
 }
 
+.conversa {
+  padding: 16px;
+  border-radius: 14px;
+  background: #e9e3d8;
+}
+
 .texto-pronto {
   margin: 0;
   padding: 12px 14px;
-  border-left: 3px solid g.$azul-claro;
-  border-radius: 4px;
+  border-radius: 12px;
   background: #f7f8fb;
   font-size: 14px;
   line-height: 1.55;
   white-space: pre-line;
-}
 
-.botao-azul {
-  @include g.botao-azul;
-  min-height: 44px;
-}
-
-.botao-contorno {
-  @include g.botao-contorno;
-  align-self: flex-start;
+  &.balao {
+    margin-left: auto;
+    max-width: 90%;
+    border-top-right-radius: 4px;
+    background: #d9fdd3;
+    color: #111b21;
+  }
 }
 
 .vazio {
