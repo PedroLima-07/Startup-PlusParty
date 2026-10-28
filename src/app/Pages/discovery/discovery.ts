@@ -1,6 +1,7 @@
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
+import { BarNoMapa, Mapa } from '../../components/mapa/mapa';
 import { NavCliente } from '../../components/nav-cliente/nav-cliente';
 import { NotaBar } from '../../components/nota-bar/nota-bar';
 import { formatarHora, statusHorario } from '../../horario-funcionamento';
@@ -34,7 +35,7 @@ interface BarDescoberto extends Estabelecimento {
 @Component({
   selector: 'app-discovery',
   standalone: true,
-  imports: [Carregando, ErroCarregar, FormsModule, NavCliente, NotaBar],
+  imports: [Carregando, ErroCarregar, FormsModule, Mapa, NavCliente, NotaBar],
   templateUrl: './discovery.html',
   styleUrls: ['./discovery.scss', './discovery.filtros.scss'],
 })
@@ -49,6 +50,21 @@ export class DiscoveryPage implements OnInit {
   protected readonly bares = signal<BarDescoberto[]>([]);
   protected readonly ativos = signal<ReadonlySet<Filtro>>(new Set());
   protected readonly busca = signal('');
+  protected readonly modo = signal<'lista' | 'mapa'>('lista');
+
+  /** Os bares filtrados que marcaram o ponto no mapa (Configurações do gerente). */
+  protected readonly noMapa = computed<BarNoMapa[]>(() =>
+    this.visiveis()
+      .filter((bar) => bar.latitude !== null && bar.longitude !== null)
+      .map((bar) => ({
+        id: bar.id,
+        nome: bar.nome,
+        latitude: bar.latitude!,
+        longitude: bar.longitude!,
+        foto_url: bar.foto_url,
+        detalhe: bar.horario ?? undefined,
+      })),
+  );
 
   protected readonly visiveis = computed(() => {
     const termo = this.busca().trim().toLocaleLowerCase();

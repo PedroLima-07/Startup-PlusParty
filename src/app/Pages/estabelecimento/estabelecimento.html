@@ -11,64 +11,206 @@
       <button type="button" class="back-button" (click)="voltar()" aria-label="Voltar">
         <span aria-hidden="true">‹</span>
       </button>
-      <h1>{{ e.nome }}</h1>
+      <span class="header-nome">{{ e.nome }}</span>
     </div>
   </header>
 
-  <main class="page-content">
+  <main class="page-content" [class.com-botao]="status()?.aberto">
     @if (e.foto_url) {
       <img class="foto-capa" [src]="e.foto_url" alt="" />
     }
 
-    <div class="destaques">
-      <app-nota-bar [media]="e.nota_media" [total]="e.total_avaliacoes" />
-      @if (bemAvaliado()) {
-        <span class="indicado">Bem avaliado pelos clientes</span>
+    <div class="topo">
+      <h1>{{ e.nome }}</h1>
+      <p class="linha-topo">
+        <app-nota-bar [media]="e.nota_media" [total]="e.total_avaliacoes" />
+        @if (situacao(); as s) {
+          <span aria-hidden="true">·</span>
+          <span class="status" [class.aberto]="status()?.aberto">{{ s }}</span>
+        }
+        @if (bemAvaliado()) {
+          <span class="indicado">Bem avaliado pelos clientes</span>
+        }
+      </p>
+      @if (e.tags.length > 0) {
+        <ul class="tags">
+          @for (tag of e.tags; track tag) {
+            <li>{{ tag }}</li>
+          }
+        </ul>
       }
     </div>
 
-    @if (status(); as s) {
-      <p class="status" [class.aberto]="s.aberto">
-        <span class="ponto" aria-hidden="true"></span>
-        {{ s.texto }}
-      </p>
-    }
-
-    @if (e.tags.length > 0) {
-      <ul class="tags">
-        @for (tag of e.tags; track tag) {
-          <li>{{ tag }}</li>
-        }
-      </ul>
-    }
-
-    <div class="acoes">
-      <button type="button" class="botao-primario" (click)="abrirComanda()">Abrir comanda</button>
-      <button type="button" class="botao-secundario" (click)="verCardapio()">Ver cardápio</button>
+    <div class="botoes">
+      @if (comoChegar(); as link) {
+        <a class="botao-pilula principal" [href]="link" target="_blank" rel="noopener">Como chegar</a>
+      }
+      @for (rede of redes(); track rede.nome) {
+        <a class="botao-pilula" [href]="rede.link" target="_blank" rel="noopener">{{ rede.nome }}</a>
+      }
+      <button type="button" class="botao-pilula" (click)="compartilhar(e.nome)">
+        {{ linkCopiado() ? 'Link copiado!' : 'Compartilhar' }}
+      </button>
     </div>
 
-    <section class="secao">
-      <h2>Sobre o bar</h2>
-      <p class="sobre">{{ e.sobre ?? e.descricao }}</p>
+    <div class="abas" role="tablist" aria-label="Seções do bar">
+      @for (a of abas; track a.valor) {
+        <button
+          type="button"
+          role="tab"
+          class="aba"
+          [class.ativa]="abaAtual() === a.valor"
+          [attr.aria-selected]="abaAtual() === a.valor"
+          (click)="escolherAba(a.valor)"
+        >
+          {{ a.rotulo }}
+        </button>
+      }
+    </div>
+
+    <section class="painel" role="tabpanel">
+      @switch (abaAtual()) {
+        @case ('sobre') {
+          @if (e.sobre ?? e.descricao; as sobre) {
+            <p class="sobre">{{ sobre }}</p>
+          }
+          @if (horario(); as h) {
+            <h2>Horário de funcionamento</h2>
+            <div class="linha-info">{{ h }}</div>
+          }
+          @if (e.endereco) {
+            <h2>Endereço</h2>
+            <div class="linha-info">
+              <span>{{ e.endereco }}</span>
+              <button type="button" class="botao-copiar" (click)="copiarEndereco(e.endereco)">
+                {{ enderecoCopiado() ? 'Copiado!' : 'Copiar' }}
+              </button>
+            </div>
+          }
+        }
+
+        @case ('agenda') {
+          @if (agenda() === 'erro') {
+            <p class="vazio">
+              Não foi possível carregar a agenda.
+              <button type="button" class="tentar" (click)="carregarAgenda()">Tentar de novo</button>
+            </p>
+          } @else if (lista(agenda()); as eventos) {
+            @if (erroInteresse(); as erro) {
+              <p class="erro" role="alert">{{ erro }}</p>
+            }
+            @for (ev of eventos; track ev.evento_id + ev.inicio) {
+              <article class="evento" [class.cancelado]="ev.cancelado">
+                <div class="evento-data" [class.hoje]="diaDoEvento(ev.inicio) === 'HOJE'">
+                  <span>{{ diaDoEvento(ev.inicio) }}</span>
+                  <strong>{{ ev.inicio | date: 'HH:mm' }}</strong>
+                </div>
+                <div class="evento-texto">
+                  <strong>{{ ev.titulo }}</strong>
+                  @if (ev.cancelado) {
+                    <span class="evento-cancelado">Cancelado</span>
+                  } @else {
+                    <span>
+                      @if (ev.repete_semanal) {
+                        Toda semana ·
+                      }
+                      @if (ev.entrada) {
+                        {{ ev.entrada | currency: 'BRL' }}
+                      } @else {
+                        Entrada grátis
+                      }
+                      · {{ ev.interessados }} {{ ev.interessados === 1 ? 'interessado' : 'interessados' }}
+                    </span>
+                  }
+                </div>
+                @if (!ev.cancelado) {
+                  <button
+                    type="button"
+                    class="interesse"
+                    [class.marcado]="ev.tenho_interesse"
+                    [attr.aria-pressed]="ev.tenho_interesse"
+                    [disabled]="gravandoInteresse() === ev.evento_id"
+                    (click)="alternarInteresse(ev)"
+                  >
+                    {{ ev.tenho_interesse ? 'Tenho interesse ✓' : 'Tenho interesse' }}
+                  </button>
+                }
+              </article>
+            } @empty {
+              <p class="vazio">Nenhum evento marcado nos próximos 30 dias.</p>
+            }
+            @if (eventos.length > 0) {
+              <p class="dica">Marcando interesse, você recebe um lembrete 2 horas antes.</p>
+            }
+          } @else {
+            <p class="vazio">Carregando a agenda...</p>
+          }
+        }
+
+        @case ('novidades') {
+          @if (novidades() === 'erro') {
+            <p class="vazio">
+              Não foi possível carregar as novidades.
+              <button type="button" class="tentar" (click)="carregarNovidades()">Tentar de novo</button>
+            </p>
+          } @else if (lista(novidades()); as postagens) {
+            <div class="lista-novidades">
+              @for (p of postagens; track p.id) {
+                <app-cartao-postagem [postagem]="p" [bar]="p.estabelecimento" />
+              } @empty {
+                <p class="vazio">O bar ainda não publicou novidades.</p>
+              }
+            </div>
+          } @else {
+            <p class="vazio">Carregando as novidades...</p>
+          }
+        }
+
+        @case ('avaliacoes') {
+          @if (avaliacoes() === 'erro') {
+            <p class="vazio">
+              Não foi possível carregar as avaliações.
+              <button type="button" class="tentar" (click)="carregarAvaliacoes()">Tentar de novo</button>
+            </p>
+          } @else if (lista(avaliacoes()); as lista) {
+            <div class="media">
+              @if (e.total_avaliacoes >= 5 && e.nota_media !== null) {
+                <strong>{{ e.nota_media.toFixed(1).replace('.', ',') }}</strong>
+                <span>média de {{ e.total_avaliacoes }} avaliações de quem consumiu no bar</span>
+              } @else {
+                <strong class="novo">Novo no +party</strong>
+                <span>A média aparece a partir de 5 avaliações.</span>
+              }
+            </div>
+            @for (a of lista; track a.id) {
+              <article class="avaliacao">
+                <div class="avaliacao-topo">
+                  <strong>{{ a.autor }}</strong>
+                  <span>{{ quando(a.criada_em) }}</span>
+                </div>
+                <span class="estrelas" [attr.aria-label]="a.nota + ' de 5 estrelas'">{{ estrelas(a.nota) }}</span>
+                @if (a.comentario) {
+                  <p>{{ a.comentario }}</p>
+                }
+                <span class="verificada">Avaliação verificada · consumiu no bar</span>
+                @if (a.resposta) {
+                  <div class="resposta"><strong>Resposta do bar:</strong> {{ a.resposta }}</div>
+                }
+              </article>
+            } @empty {
+              <p class="vazio">Ninguém avaliou ainda. As avaliações vêm de quem pagou uma comanda aqui.</p>
+            }
+          } @else {
+            <p class="vazio">Carregando as avaliações...</p>
+          }
+        }
+      }
     </section>
 
-    @if (horario(); as h) {
-      <section class="secao">
-        <h2>Horário de funcionamento</h2>
-        <div class="linha-info">{{ h }}</div>
-      </section>
-    }
-
-    @if (e.endereco) {
-      <section class="secao">
-        <h2>Endereço</h2>
-        <div class="linha-info">
-          <span>{{ e.endereco }}</span>
-          <button type="button" class="botao-copiar" (click)="copiarEndereco(e.endereco)">
-            {{ enderecoCopiado() ? 'Copiado!' : 'Copiar' }}
-          </button>
-        </div>
-      </section>
+    @if (status()?.aberto) {
+      <div class="rodape-comanda">
+        <button type="button" class="botao-comanda" (click)="abrirComanda()">Abrir comanda aqui</button>
+      </div>
     }
   </main>
 }

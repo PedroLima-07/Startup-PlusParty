@@ -5,11 +5,12 @@ import { PerfilBar } from '../../../models';
 import { AuthService } from '../../../services/auth.service';
 import { BarPerfilService } from '../../../services/bar-perfil.service';
 import { Icone } from '../componentes/icone';
+import { RedesLocalizacao } from './redes-localizacao';
 
 /** Tela de Configurações do gerente: os dados públicos do bar e a saída da conta. */
 @Component({
   selector: 'app-perfil-bar',
-  imports: [FormsModule, Icone],
+  imports: [FormsModule, Icone, RedesLocalizacao],
   templateUrl: './perfil-bar.html',
   styleUrl: './perfil-bar.scss',
 })

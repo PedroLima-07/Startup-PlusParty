@@ -1,0 +1,70 @@
+@use '../gerente' as g;
+
+.cartao {
+  @include g.cartao;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+h3 {
+  margin: 0 0 4px;
+  font-size: 16px;
+}
+
+.grupo {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+
+  input {
+    @include g.campo;
+  }
+}
+
+.rotulo {
+  @include g.rotulo;
+}
+
+.dica {
+  margin: 0;
+  color: g.$rotulo;
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.mapa {
+  display: block;
+  height: 300px;
+  border-radius: 14px;
+  background: #e8ecf2;
+}
+
+.tirar {
+  margin-left: 6px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: g.$perigo;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.erro {
+  @include g.mensagem-erro;
+}
+
+.aviso {
+  margin: 0;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: #e6f7ee;
+  color: #146c43;
+  font-size: 13px;
+}
+
+.botao-marinho {
+  @include g.botao-marinho;
+  min-height: 44px;
+}

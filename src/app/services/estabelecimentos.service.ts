@@ -1,5 +1,17 @@
 import { Injectable, inject } from '@angular/core';
 import { Estabelecimento } from '../models';
+
+export type RedesELocalizacao = Pick<
+  Estabelecimento,
+  'instagram' | 'tiktok' | 'whatsapp' | 'latitude' | 'longitude'
+>;
+
+/** O banco recusou um dos campos de redes ou localização (regra *_check). */
+export class RedeInvalidaError extends Error {
+  constructor(readonly campo: 'instagram' | 'tiktok' | 'whatsapp' | 'localizacao') {
+    super(`Campo inválido: ${campo}`);
+  }
+}
 import { SupabaseService } from './supabase.service';
 
 /** Por quanto tempo a lista guardada vale. Depois disso é buscada de novo. */
@@ -47,6 +59,29 @@ export class EstabelecimentosService {
 
     if (error) throw error;
     return data as Estabelecimento | null;
+  }
+
+  /**
+   * O gerente grava as redes e o ponto do bar no mapa. O banco limpa o que foi
+   * digitado ("@bardoze", "(11) 98765-4321") e devolve como ficou gravado.
+   * Recusa com `RedeInvalidaError` o que continua inválido.
+   */
+  async salvarRedesELocalizacao(id: string, dados: RedesELocalizacao): Promise<RedesELocalizacao> {
+    const { data, error } = await this.supabase.client
+      .from('estabelecimentos')
+      .update(dados)
+      .eq('id', id)
+      .select('instagram, tiktok, whatsapp, latitude, longitude')
+      .single();
+
+    if (error) {
+      const regra = /estabelecimentos_(instagram|tiktok|whatsapp|localizacao)_check/.exec(error.message ?? '');
+      if (regra) throw new RedeInvalidaError(regra[1] as RedeInvalidaError['campo']);
+      throw error;
+    }
+    // A lista guardada ficou velha para este bar.
+    this.guardada = null;
+    return data as RedesELocalizacao;
   }
 
   /** Ids dos bares com evento hoje (o dia do bar vira às 6h). */

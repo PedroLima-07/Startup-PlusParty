@@ -1,0 +1,39 @@
+<div class="mapa" [class.escolher]="modo() === 'escolher'">
+  <div #area class="area" [attr.aria-hidden]="estado() !== 'pronto'"></div>
+
+  @switch (estado()) {
+    @case ('carregando') {
+      <p class="aviso">Carregando o mapa...</p>
+    }
+    @case ('indisponivel') {
+      <div class="aviso indisponivel" role="status">
+        <strong>Mapa indisponível</strong>
+        @if (modo() === 'escolher') {
+          <span>Por enquanto não dá para marcar o bar no mapa. O "Como chegar" usa o endereço.</span>
+        } @else {
+          <span>Use a lista para ver os bares.</span>
+        }
+      </div>
+    }
+  }
+
+  @if (modo() === 'escolher' && estado() === 'pronto') {
+    <p class="dica">Arraste o alfinete (ou toque no mapa) até a porta do bar.</p>
+  }
+
+  @if (selecionado(); as bar) {
+    <div class="resumo">
+      @if (bar.foto_url) {
+        <img [src]="bar.foto_url" alt="" />
+      }
+      <span class="resumo-texto">
+        <strong>{{ bar.nome }}</strong>
+        @if (bar.detalhe) {
+          <span>{{ bar.detalhe }}</span>
+        }
+      </span>
+      <a [routerLink]="['/cliente/estabelecimento', bar.id]">Ver bar <span aria-hidden="true">→</span></a>
+      <button type="button" class="fechar" aria-label="Fechar resumo" (click)="selecionado.set(null)">×</button>
+    </div>
+  }
+</div>
