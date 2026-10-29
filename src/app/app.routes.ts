@@ -17,6 +17,17 @@ export const routes: Routes = [
     loadComponent: () =>
       import('./Pages/redefinir-senha/redefinir-senha').then((m) => m.RedefinirSenhaPage),
   },
+  // Política de Privacidade e Termos de Uso: abertos para todos, com ou sem login.
+  {
+    path: 'privacidade',
+    loadComponent: () => import('./Pages/legal/legal').then((m) => m.LegalPage),
+    data: { documento: 'privacidade' },
+  },
+  {
+    path: 'termos',
+    loadComponent: () => import('./Pages/legal/legal').then((m) => m.LegalPage),
+    data: { documento: 'termos' },
+  },
   {
     path: 'cliente/discovery',
     loadComponent: () => import('./Pages/discovery/discovery').then((m) => m.DiscoveryPage),
