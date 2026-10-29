@@ -1,0 +1,152 @@
+<div class="pagina">
+  <header class="cabecalho">
+    <div>
+      <h1>Avaliações</h1>
+      <p>Só avalia quem pagou uma comanda no bar. As respostas aparecem no perfil do bar.</p>
+    </div>
+    <div class="periodos" role="group" aria-label="Período">
+      @for (p of periodos; track p) {
+        <button type="button" [class.ativo]="dias() === p" [attr.aria-pressed]="dias() === p" (click)="escolherPeriodo(p)">
+          {{ p }} dias
+        </button>
+      }
+    </div>
+  </header>
+
+  @if (erro(); as mensagem) {
+    <p class="mensagem-erro" role="alert">
+      {{ mensagem }}
+      <button type="button" class="botao-contorno" (click)="carregar()">Tentar de novo</button>
+    </p>
+  } @else if (carregando() && !numeros()) {
+    <p class="vazio">Carregando avaliações...</p>
+  } @else {
+    <div class="colunas">
+      @if (numeros(); as n) {
+        <section class="cartao resumo">
+          <strong class="media">{{ media(n.media) }}</strong>
+          <span class="dica">
+            {{ n.total }} {{ n.total === 1 ? 'avaliação' : 'avaliações' }}
+            @if (comparacao(); as c) {
+              · {{ c }}
+            }
+          </span>
+          <ul class="distribuicao" aria-label="Quantas avaliações de cada nota">
+            @for (d of distribuicao(); track d.estrela) {
+              <li>
+                <span>{{ d.estrela }}★</span>
+                <span class="trilho"><span [style.width.%]="d.largura"></span></span>
+                <span>{{ d.total }}</span>
+              </li>
+            }
+          </ul>
+        </section>
+      }
+
+      <div class="lista">
+        <div class="filtros" role="group" aria-label="Filtrar avaliações">
+          <button type="button" [class.ativo]="filtro() === 'todas'" [attr.aria-pressed]="filtro() === 'todas'" (click)="filtro.set('todas')">
+            Todas
+          </button>
+          <button
+            type="button"
+            [class.ativo]="filtro() === 'sem_resposta'"
+            [attr.aria-pressed]="filtro() === 'sem_resposta'"
+            (click)="filtro.set('sem_resposta')"
+          >
+            Sem resposta ({{ semResposta() }})
+          </button>
+          <button type="button" [class.ativo]="filtro() === 'baixas'" [attr.aria-pressed]="filtro() === 'baixas'" (click)="filtro.set('baixas')">
+            1 e 2 ★
+          </button>
+        </div>
+
+        @for (a of visiveis(); track a.id) {
+          <article class="avaliacao" [class.baixa]="a.nota <= 2">
+            <div class="avaliacao-topo">
+              <span>
+                <strong>{{ a.autor }}</strong>
+                <span class="estrelas" [attr.aria-label]="a.nota + ' de 5 estrelas'">{{ estrelas(a.nota) }}</span>
+              </span>
+              <span class="selos">
+                @if (a.denunciada_em) {
+                  <span class="selo denunciada">Denunciada</span>
+                } @else if (!a.resposta) {
+                  <span class="selo sem-resposta">Sem resposta</span>
+                }
+                <span class="dica">{{ quando(a.criada_em) }}</span>
+              </span>
+            </div>
+
+            @if (a.comentario) {
+              <p class="comentario">{{ a.comentario }}</p>
+            } @else {
+              <p class="comentario sem-texto">Sem comentário, só a nota.</p>
+            }
+
+            @if (a.resposta) {
+              <div class="resposta"><strong>Sua resposta:</strong> {{ a.resposta }}</div>
+            } @else {
+              <label class="campo-resposta">
+                <span>Responder publicamente</span>
+                <textarea
+                  rows="2"
+                  maxlength="500"
+                  [name]="'resposta-' + a.id"
+                  [(ngModel)]="rascunhos[a.id]"
+                  placeholder="Agradeça ou explique o que o bar vai fazer"
+                ></textarea>
+              </label>
+            }
+
+            @if (erroDaAvaliacao()?.id === a.id) {
+              <p class="mensagem-erro" role="alert">{{ erroDaAvaliacao()?.texto }}</p>
+            }
+
+            @if (denunciando() === a.id) {
+              <div class="denuncia" role="group" aria-label="Denunciar avaliação">
+                <label>
+                  <span>Por que esta avaliação é ofensiva ou falsa?</span>
+                  <textarea rows="2" maxlength="300" name="motivo" [(ngModel)]="motivo"></textarea>
+                </label>
+                <p class="dica">A avaliação continua no perfil até a equipe do +party analisar.</p>
+                <div class="acoes">
+                  <button type="button" class="botao-contorno" (click)="denunciando.set(null)">Voltar</button>
+                  <button type="button" class="botao-perigo" [disabled]="enviando() === a.id" (click)="confirmarDenuncia(a)">
+                    Enviar denúncia
+                  </button>
+                </div>
+              </div>
+            } @else if (!a.resposta || !a.denunciada_em) {
+              <div class="acoes">
+                @if (!a.denunciada_em) {
+                  <button type="button" class="link-perigo" (click)="abrirDenuncia(a.id)">Denunciar</button>
+                } @else {
+                  <span></span>
+                }
+                @if (!a.resposta) {
+                  <button
+                    type="button"
+                    class="botao-marinho"
+                    [disabled]="!rascunhos[a.id]?.trim() || enviando() === a.id"
+                    (click)="responder(a)"
+                  >
+                    {{ enviando() === a.id ? 'Publicando...' : 'Publicar resposta' }}
+                  </button>
+                }
+              </div>
+            }
+          </article>
+        } @empty {
+          <p class="vazio">
+            @if (filtro() === 'todas') {
+              Nenhuma avaliação nos últimos {{ dias() }} dias.
+            } @else {
+              Nenhuma avaliação com esse filtro.
+            }
+          </p>
+        }
+      </div>
+    </div>
+  }
+</div>

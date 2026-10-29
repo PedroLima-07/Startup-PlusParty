@@ -1,5 +1,5 @@
 import { Injectable, computed, inject, signal } from '@angular/core';
-import { AvaliacaoPendente } from '../models';
+import { AvaliacaoDoBar, AvaliacaoPendente } from '../models';
 import { SupabaseService } from './supabase.service';
 
 /**
@@ -25,6 +25,16 @@ export class AvaliacaoService {
     const pendente = this.encontrada();
     return pendente && !this.adiadas().has(pendente.comanda_id) ? pendente : null;
   });
+
+  /** Avaliações de um bar para o perfil, das mais novas para as mais antigas. */
+  async doBar(estabelecimentoId: string, limite = 20): Promise<AvaliacaoDoBar[]> {
+    const { data, error } = await this.supabase.client.rpc('avaliacoes_do_bar', {
+      p_estabelecimento: estabelecimentoId,
+      p_limite: limite,
+    });
+    if (error) throw error;
+    return (data ?? []) as AvaliacaoDoBar[];
+  }
 
   /** Confere de novo a cada login (e ao abrir o app já logado). */
   iniciar(): void {

@@ -1,0 +1,56 @@
+<form class="cartao" (ngSubmit)="salvar()" (input)="salvo.set(false)">
+  <div>
+    <h3>Redes e localização</h3>
+    <p class="dica">Aparecem como botões no perfil do bar. Deixe em branco o que o bar não usa.</p>
+  </div>
+
+  @if (carregando()) {
+    <p class="dica">Carregando...</p>
+  } @else {
+    <label class="grupo">
+      <span class="rotulo">Instagram</span>
+      <input type="text" name="instagram" placeholder="bardoze" autocomplete="off" [(ngModel)]="dados.instagram" />
+    </label>
+
+    <label class="grupo">
+      <span class="rotulo">TikTok</span>
+      <input type="text" name="tiktok" placeholder="bardoze" autocomplete="off" [(ngModel)]="dados.tiktok" />
+    </label>
+
+    <label class="grupo">
+      <span class="rotulo">WhatsApp do bar</span>
+      <input
+        type="tel"
+        name="whatsapp"
+        placeholder="(11) 98765-4321"
+        inputmode="tel"
+        autocomplete="off"
+        [(ngModel)]="dados.whatsapp"
+      />
+    </label>
+
+    <div class="grupo">
+      <span class="rotulo">Onde fica o bar</span>
+      <app-mapa class="mapa" modo="escolher" [posicao]="ponto()" (escolheu)="marcarPonto($event)" />
+      <span class="dica">
+        @if (ponto(); as p) {
+          Marcado. O "Como chegar" do perfil leva até esse ponto.
+          <button type="button" class="tirar" (click)="tirarPonto()">Tirar o ponto</button>
+        } @else {
+          Sem ponto marcado, o "Como chegar" usa o endereço.
+        }
+      </span>
+    </div>
+
+    @if (erro(); as mensagem) {
+      <p class="erro" role="alert">{{ mensagem }}</p>
+    }
+    @if (salvo()) {
+      <p class="aviso" role="status">Redes e localização salvas.</p>
+    }
+
+    <button type="submit" class="botao-marinho" [disabled]="salvando()">
+      {{ salvando() ? 'Salvando...' : 'Salvar redes e localização' }}
+    </button>
+  }
+</form>

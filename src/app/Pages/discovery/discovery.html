@@ -1,6 +1,14 @@
 <header class="app-header">
   <div class="header-content">
     <h1>Descobrir</h1>
+    <div class="modos" role="group" aria-label="Ver como">
+      <button type="button" [class.ativo]="modo() === 'lista'" [attr.aria-pressed]="modo() === 'lista'" (click)="modo.set('lista')">
+        Lista
+      </button>
+      <button type="button" [class.ativo]="modo() === 'mapa'" [attr.aria-pressed]="modo() === 'mapa'" (click)="modo.set('mapa')">
+        Mapa
+      </button>
+    </div>
   </div>
 </header>
 
@@ -39,6 +47,14 @@
       mensagem="Não foi possível carregar os bares. Verifique sua conexão."
       (tentarDeNovo)="carregar()"
     />
+  } @else if (modo() === 'mapa') {
+    <!-- A biblioteca do Google só é baixada quando o cliente escolhe "Mapa". -->
+    <app-mapa class="mapa-descobrir" [bares]="noMapa()" />
+    @if (noMapa().length < visiveis().length) {
+      <p class="sem-ponto">
+        {{ visiveis().length - noMapa().length }} bar(es) ainda não marcaram o endereço no mapa. Veja na lista.
+      </p>
+    }
   } @else {
     <div class="bars-list">
       @for (bar of visiveis(); track bar.id) {

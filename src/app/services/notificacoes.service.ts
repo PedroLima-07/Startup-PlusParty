@@ -113,7 +113,7 @@ export class NotificacoesService {
   async abrir(notificacao: Notificacao): Promise<void> {
     this.fecharAviso();
     void this.marcarComoLida(notificacao.id);
-    await this.irPara(notificacao.link);
+    await this.irPara(linkDaNotificacao(notificacao));
   }
 
   fecharAviso(): void {
@@ -214,7 +214,7 @@ export class NotificacoesService {
       body: texto,
       icon: '/favicon.ico',
       tag: notificacao?.id,
-      data: { link: notificacao?.link ?? '/cliente/notificacoes' },
+      data: { link: (notificacao && linkDaNotificacao(notificacao)) ?? '/cliente/notificacoes' },
     };
 
     try {
@@ -257,4 +257,15 @@ export class NotificacoesService {
       await this.router.navigateByUrl(link);
     }
   }
+}
+
+/**
+ * Tela que a notificação abre. Lembrete e cancelamento de evento apontam para
+ * o perfil do bar; aqui eles já abrem na aba Agenda.
+ */
+export function linkDaNotificacao(notificacao: Pick<Notificacao, 'tipo' | 'link'>): string | null {
+  const { tipo, link } = notificacao;
+  const ehEvento = tipo === 'evento_lembrete' || tipo === 'evento_cancelado';
+  if (ehEvento && link && /^\/cliente\/estabelecimento\/[^/?#]+$/.test(link)) return `${link}?aba=agenda`;
+  return link;
 }

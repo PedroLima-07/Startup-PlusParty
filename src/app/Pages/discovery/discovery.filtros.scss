@@ -91,3 +91,61 @@
     color: #2f6bff;
   }
 }
+
+// Lista ou Mapa, no topo.
+.header-content {
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.modos {
+  display: flex;
+  gap: 2px;
+  padding: 3px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.14);
+
+  button {
+    min-height: 32px;
+    padding: 0 14px;
+    border: 0;
+    border-radius: 999px;
+    background: transparent;
+    color: rgba(255, 255, 255, 0.8);
+    font: inherit;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+
+    &.ativo {
+      background: #fff;
+      color: #0f1f4b;
+      font-weight: 800;
+    }
+  }
+}
+
+.mapa-descobrir {
+  height: calc(100dvh - 300px);
+  min-height: 360px;
+}
+
+.sem-ponto {
+  margin: 10px 0 0;
+  color: #6b7280;
+  font-size: 13px;
+}
+
+@include d.desktop {
+  .modos {
+    background: #e8ecf5;
+
+    button {
+      color: #4d5565;
+    }
+  }
+
+  .mapa-descobrir {
+    height: calc(100dvh - 260px);
+  }
+}

@@ -1,60 +1,103 @@
 <div class="pagina">
   <h2>Perfil do bar</h2>
 
-  <form class="cartao" (ngSubmit)="salvar()" (input)="salvo.set(false)">
-    <div class="grupo">
-      <span class="rotulo">Foto de capa</span>
-      <div class="capa">
-        @if (fotoDeCapa(); as foto) {
-          <img [src]="foto" alt="Foto de capa do bar" />
-        } @else {
-          <app-icone nome="camera" />
-        }
-        <label class="trocar-foto">
-          <app-icone nome="camera" /> Trocar foto
-          <input type="file" accept="image/*" hidden (change)="escolherFoto($event)" />
-        </label>
+  @if (carregando()) {
+    <p class="dica">Carregando os dados do bar...</p>
+  } @else {
+    <form class="cartao" (ngSubmit)="salvar()" (input)="salvo.set(false)">
+      <div class="grupo">
+        <span class="rotulo">Foto de capa</span>
+        <div class="capa">
+          @if (fotoDeCapa(); as foto) {
+            <img [src]="foto" alt="Foto de capa do bar" />
+          } @else {
+            <app-icone nome="camera" />
+          }
+          <label class="trocar-foto">
+            <app-icone nome="camera" /> Trocar foto
+            <input type="file" accept="image/jpeg,image/png,image/webp" hidden (change)="escolherFoto($event)" />
+          </label>
+        </div>
+        <span class="dica">Aparece no topo do perfil e no Descobrir. JPG, PNG ou WebP, até 5 MB.</span>
       </div>
-    </div>
 
-    <label class="grupo">
-      <span class="rotulo">Nome do estabelecimento</span>
-      <input type="text" name="nome" required [(ngModel)]="perfil.nome" />
-      <span class="dica">Aparece na saudação do painel e no app dos clientes.</span>
-    </label>
+      <label class="grupo">
+        <span class="rotulo">Nome do estabelecimento</span>
+        <input type="text" name="nome" required [(ngModel)]="form.nome" />
+        <span class="dica">Aparece na saudação do painel e no app dos clientes.</span>
+      </label>
 
-    <label class="grupo">
-      <span class="rotulo">Descrição curta</span>
-      <textarea name="descricao" rows="2" [(ngModel)]="perfil.descricaoCurta"></textarea>
-      <span class="dica">Uma frase que resume o bar para quem está procurando onde ir.</span>
-    </label>
+      <label class="grupo">
+        <span class="rotulo">Descrição curta</span>
+        <textarea name="descricao" rows="2" [(ngModel)]="form.descricao"></textarea>
+        <span class="dica">Uma frase que resume o bar no cartão do Descobrir.</span>
+      </label>
 
-    <label class="grupo">
-      <span class="rotulo">Endereço</span>
-      <input type="text" name="endereco" [(ngModel)]="perfil.endereco" />
-    </label>
+      <label class="grupo">
+        <span class="rotulo">Sobre o bar</span>
+        <textarea name="sobre" rows="4" [(ngModel)]="form.sobre"></textarea>
+        <span class="dica">Texto da aba Sobre do perfil. Em branco, o perfil usa a descrição curta.</span>
+      </label>
 
-    <label class="grupo">
-      <span class="rotulo">Capacidade</span>
-      <span class="com-unidade">
-        <input type="number" name="capacidade" min="1" inputmode="numeric" [(ngModel)]="perfil.capacidade" />
-        <span>pessoas</span>
-      </span>
-      <span class="dica">Usada para calcular o selo de movimento (Normal ou Quente).</span>
-    </label>
+      <label class="grupo">
+        <span class="rotulo">Endereço</span>
+        <input type="text" name="endereco" [(ngModel)]="form.endereco" />
+        <span class="dica">Sem ponto marcado no mapa, o "Como chegar" usa este endereço.</span>
+      </label>
 
-    <label class="grupo">
-      <span class="rotulo">Horário de funcionamento</span>
-      <input type="text" name="horario" [(ngModel)]="perfil.horarioFuncionamento" />
-      <span class="dica">Exibido no perfil público do bar.</span>
-    </label>
+      <label class="grupo">
+        <span class="rotulo">Capacidade</span>
+        <span class="com-unidade">
+          <input type="number" name="capacidade" min="1" inputmode="numeric" [(ngModel)]="form.capacidade" />
+          <span>pessoas</span>
+        </span>
+        <span class="dica">Usada para calcular o selo de movimento (Normal ou Quente).</span>
+      </label>
 
-    @if (salvo()) {
-      <p class="aviso" role="status">Alterações salvas.</p>
-    }
+      <div class="grupo">
+        <span class="rotulo">Horário de funcionamento</span>
+        <div class="horario">
+          <label>
+            <span>Abre às</span>
+            <input type="time" name="abre" [(ngModel)]="form.abre" />
+          </label>
+          <label>
+            <span>Fecha às</span>
+            <input type="time" name="fecha" [(ngModel)]="form.fecha" />
+          </label>
+        </div>
+        <div class="dias" role="group" aria-label="Dias em que o bar abre">
+          @for (d of dias; track d.valor) {
+            <button
+              type="button"
+              [class.ativo]="form.dias.has(d.valor)"
+              [attr.aria-pressed]="form.dias.has(d.valor)"
+              (click)="alternarDia(d.valor)"
+            >
+              {{ d.rotulo }}
+            </button>
+          }
+        </div>
+        <span class="dica">
+          Fechando depois da meia-noite (ex.: das 18h às 2h), marque o dia em que o bar abre. O app mostra "Aberto
+          agora" e libera o "Abrir comanda" por este horário.
+        </span>
+      </div>
 
-    <button type="submit" class="botao-marinho">Salvar</button>
-  </form>
+      @if (erro(); as mensagem) {
+        <p class="erro" role="alert">{{ mensagem }}</p>
+      }
+      @if (salvo()) {
+        <p class="aviso" role="status">Alterações salvas.</p>
+      }
+
+      <button type="submit" class="botao-marinho" [disabled]="salvando()">
+        {{ salvando() ? 'Salvando...' : 'Salvar' }}
+      </button>
+    </form>
+  }
+
+  <app-redes-localizacao />
 
   <button type="button" class="sair" (click)="sair()">Sair da conta</button>
 </div>
