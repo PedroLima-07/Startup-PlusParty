@@ -1,0 +1,65 @@
+:host {
+  display: block;
+  min-height: 100dvh;
+  background: #f7f8fb;
+  color: #0f1f4b;
+  font-family: system-ui, sans-serif;
+}
+
+.legal {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 24px 20px 64px;
+  line-height: 1.65;
+
+  h1 {
+    margin: 16px 0 4px;
+    font-size: 28px;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+  }
+
+  h2 {
+    margin: 28px 0 8px;
+    font-size: 18px;
+    font-weight: 800;
+  }
+
+  p,
+  li {
+    color: #333a4a;
+    font-size: 15px;
+  }
+
+  ul {
+    padding-left: 20px;
+  }
+
+  li + li {
+    margin-top: 6px;
+  }
+
+  a {
+    color: #2f6bff;
+    font-weight: 600;
+  }
+}
+
+.atualizado {
+  margin: 0 0 20px;
+  color: #6b7280 !important;
+  font-size: 13px !important;
+}
+
+.voltar {
+  min-height: 40px;
+  padding: 0 14px;
+  border: 1px solid #d5dbe8;
+  border-radius: 999px;
+  background: #fff;
+  color: #0f1f4b;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}

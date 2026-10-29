@@ -178,3 +178,30 @@ form {
   font-size: 0.75rem;
   margin: 0;
 }
+
+// "Ao cadastrar, você concorda com..." e os links da política e dos termos.
+.aceite {
+  margin: 4px 0 0;
+  color: #6b7280;
+  font-size: 12px;
+  line-height: 1.5;
+  text-align: center;
+
+  a {
+    color: #2f6bff;
+    font-weight: 600;
+  }
+}
+
+.links-legais {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 16px;
+  color: #9aa1af;
+  font-size: 12px;
+
+  a {
+    color: inherit;
+  }
+}

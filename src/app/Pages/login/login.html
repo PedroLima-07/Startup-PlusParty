@@ -74,6 +74,14 @@
             }
           }
         </button>
+
+        @if (modo() === 'cadastro') {
+          <p class="aceite">
+            Ao cadastrar, você concorda com os
+            <a routerLink="/termos" target="_blank">Termos de Uso</a> e a
+            <a routerLink="/privacidade" target="_blank">Política de Privacidade</a>.
+          </p>
+        }
       </form>
 
       @if (modo() === 'login') {
@@ -91,6 +99,12 @@
         </p>
       }
     }
+
+    <nav class="links-legais" aria-label="Documentos">
+      <a routerLink="/privacidade">Privacidade</a>
+      <span aria-hidden="true">·</span>
+      <a routerLink="/termos">Termos de Uso</a>
+    </nav>
   </div>
 
   <p class="rodape">+party 2026 · São Paulo</p>
