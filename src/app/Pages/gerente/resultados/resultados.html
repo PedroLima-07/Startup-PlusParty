@@ -1,40 +1,171 @@
 <div class="pagina">
   <header class="cabecalho">
-    <h1>Resultados</h1>
-    <p>Como foi a noite de hoje até agora</p>
+    <div>
+      <h1>Resultados</h1>
+      <p>
+        @if (periodo() === 'hoje') {
+          Como foi a noite de hoje até agora
+        } @else {
+          Últimos {{ periodo() }} dias, comparados com os {{ periodo() }} dias antes
+        }
+      </p>
+    </div>
+    <div class="periodos" role="group" aria-label="Período">
+      @for (p of periodos; track p.valor) {
+        <button
+          type="button"
+          [class.ativo]="periodo() === p.valor"
+          [attr.aria-pressed]="periodo() === p.valor"
+          (click)="escolher(p.valor)"
+        >
+          {{ p.rotulo }}
+        </button>
+      }
+    </div>
   </header>
 
-  @if (movimento.erro(); as mensagem) {
-    <p class="mensagem-erro" role="alert">{{ mensagem }}</p>
+  @if (periodo() === 'hoje') {
+    @if (movimento.erro(); as mensagem) {
+      <p class="mensagem-erro" role="alert">{{ mensagem }}</p>
+    }
+
+    <section class="cartao">
+      <h2>
+        Lotação por hora
+        <span class="ajuda" title="Quantas comandas estavam abertas ao mesmo tempo em cada hora.">?</span>
+      </h2>
+      <p class="subtitulo">Comandas abertas em cada faixa de horário, hoje</p>
+      <app-grafico-horas [dados]="movimento.lotacaoPorHora()" />
+    </section>
+
+    <section class="cartao">
+      <h2>
+        Mais vendidos
+        <span class="ajuda" title="Soma das quantidades de cada item em todos os pedidos de hoje.">?</span>
+      </h2>
+      <p class="subtitulo">Itens mais pedidos hoje</p>
+      <app-mais-vendidos [itens]="movimento.maisVendidos()" />
+    </section>
+
+    <section class="cartao">
+      <h2>
+        Tempo médio de preparo
+        <span class="ajuda" title="Tempo entre o pedido chegar e o setor marcar como pronto.">?</span>
+      </h2>
+      <p class="subtitulo">Do pedido enviado até marcado como pronto</p>
+      <app-tempo-preparo
+        [bar]="movimento.minutosPreparoBar()"
+        [cozinha]="movimento.minutosPreparoCozinha()"
+      />
+    </section>
+  } @else if (erro(); as mensagem) {
+    <p class="mensagem-erro" role="alert">
+      {{ mensagem }}
+      <button type="button" class="tentar" (click)="tentarDeNovo()">Tentar de novo</button>
+    </p>
+  } @else if (carregando() && !dados()) {
+    <p class="carregando">Somando o período...</p>
+  } @else if (dados(); as d) {
+    <div class="numeros" [class.atualizando]="carregando()">
+      @for (c of cartoes(); track c.rotulo) {
+        <div class="numero">
+          <span class="numero-rotulo">{{ c.rotulo }}</span>
+          <strong>{{ c.moeda ? (c.valor | currency: 'BRL' : 'symbol' : '1.0-0') : c.valor }}</strong>
+          @if (c.variacao; as v) {
+            <span class="variacao" [class]="v.sentido">{{ v.texto }}</span>
+          } @else {
+            <span class="variacao igual">sem comparação</span>
+          }
+        </div>
+      }
+    </div>
+
+    <section class="cartao largo">
+      <h2>Faturamento por dia</h2>
+      <p class="subtitulo">Só comandas pagas · o dia vira às 6h</p>
+      <div class="barras" role="img" aria-label="Gráfico do faturamento de cada dia do período">
+        @for (b of barras(); track b.dia) {
+          <div class="barra" [title]="(b.dia | date: 'dd/MM') + ': ' + (b.faturamento | currency: 'BRL')">
+            <span class="barra-preenchida" [style.height.%]="b.altura"></span>
+            <span class="barra-dia">{{ barras().length > 15 ? (b.dia | date: 'dd') : b.semana }}</span>
+          </div>
+        }
+      </div>
+    </section>
+
+    <section class="cartao">
+      <h2>Mais vendidos</h2>
+      <p class="subtitulo">Itens mais pedidos no período</p>
+      <app-mais-vendidos [itens]="d.mais_vendidos" />
+    </section>
+
+    @if (totais(); as t) {
+      <section class="cartao">
+        <h2>Clientes e operação</h2>
+        <dl class="lista-dados">
+          <dt>Clientes que voltaram</dt>
+          <dd>{{ t.clientes_que_voltaram }} de {{ t.clientes }}</dd>
+          <dt>Mesa / balcão</dt>
+          <dd>{{ t.comandas_na_mesa }} / {{ t.comandas_no_balcao }}</dd>
+          <dt>Tempo até liberar</dt>
+          <dd>{{ minutos(t.minutos_para_liberar) }}</dd>
+          <dt>Preparo bar / cozinha</dt>
+          <dd>{{ minutos(t.minutos_preparo_bar) }} / {{ minutos(t.minutos_preparo_cozinha) }}</dd>
+          <dt>Permanência média</dt>
+          <dd>{{ minutos(t.minutos_permanencia) }}</dd>
+          <dt>Recusadas / canceladas</dt>
+          <dd>{{ t.recusadas }} / {{ t.canceladas }}</dd>
+          <dt>Contas não pagas</dt>
+          <dd [class.perigo]="t.nao_pagas > 0">
+            {{ t.nao_pagas }}@if (t.nao_pagas > 0) { · {{ t.valor_nao_pago | currency: 'BRL' }}}
+          </dd>
+        </dl>
+      </section>
+    }
+
+    @if (picos().length > 0) {
+      <section class="cartao">
+        <h2>Horários mais cheios</h2>
+        <p class="subtitulo">Quando mais comandas foram abertas</p>
+        <ol class="picos">
+          @for (p of picos(); track p.texto) {
+            <li><strong>{{ p.texto }}</strong> · {{ p.comandas }} comandas</li>
+          }
+        </ol>
+      </section>
+    }
+
+    @if (d.sem_venda.length > 0) {
+      <section class="cartao">
+        <h2>Não venderam nada</h2>
+        <p class="subtitulo">Itens do cardápio sem pedido no período</p>
+        <ul class="sem-venda">
+          @for (item of d.sem_venda; track item.nome) {
+            <li>{{ item.nome }}</li>
+          }
+        </ul>
+      </section>
+    }
+
+    <section class="cartao largo resumo-avaliacoes">
+      <div>
+        <h2>Avaliações</h2>
+        <p class="subtitulo">
+          @if (avaliacoes(); as a) {
+            @if (a.total > 0) {
+              ★ {{ media(a.media) }} em {{ a.total }} {{ a.total === 1 ? 'avaliação' : 'avaliações' }}
+              @if (a.sem_resposta > 0) {
+                · {{ a.sem_resposta }} sem resposta
+              }
+            } @else {
+              Nenhuma avaliação no período
+            }
+          } @else {
+            Veja o que os clientes acharam
+          }
+        </p>
+      </div>
+      <a class="link" routerLink="/gerente/avaliacoes">Ver avaliações →</a>
+    </section>
   }
-
-  <section class="cartao">
-    <h2>
-      Lotação por hora
-      <span class="ajuda" title="Quantas comandas estavam abertas ao mesmo tempo em cada hora.">?</span>
-    </h2>
-    <p class="subtitulo">Comandas abertas em cada faixa de horário, hoje</p>
-    <app-grafico-horas [dados]="movimento.lotacaoPorHora()" />
-  </section>
-
-  <section class="cartao">
-    <h2>
-      Mais vendidos
-      <span class="ajuda" title="Soma das quantidades de cada item em todos os pedidos de hoje.">?</span>
-    </h2>
-    <p class="subtitulo">Itens mais pedidos hoje</p>
-    <app-mais-vendidos [itens]="movimento.maisVendidos()" />
-  </section>
-
-  <section class="cartao">
-    <h2>
-      Tempo médio de preparo
-      <span class="ajuda" title="Tempo entre o pedido chegar e o setor marcar como pronto.">?</span>
-    </h2>
-    <p class="subtitulo">Do pedido enviado até marcado como pronto</p>
-    <app-tempo-preparo
-      [bar]="movimento.minutosPreparoBar()"
-      [cozinha]="movimento.minutosPreparoCozinha()"
-    />
-  </section>
 </div>

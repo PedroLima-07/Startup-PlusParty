@@ -40,6 +40,15 @@
         <app-icone nome="resultados" />
         <span>Resultados</span>
       </a>
+      <!-- Só no desktop: no celular se chega pelo cartão de Resultados e pelo alerta do Movimento. -->
+      <a routerLink="/gerente/avaliacoes" routerLinkActive="ativo" class="item item-desktop">
+        <app-icone nome="estrela" />
+        <span>Avaliações</span>
+      </a>
+      <a routerLink="/gerente/agenda" routerLinkActive="ativo" class="item">
+        <app-icone nome="calendario" />
+        <span>Agenda</span>
+      </a>
       <a routerLink="/gerente/postagens" routerLinkActive="ativo" class="item">
         <app-icone nome="postagens" />
         <span>Postagens</span>

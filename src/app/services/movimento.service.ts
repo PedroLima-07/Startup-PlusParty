@@ -221,13 +221,16 @@ export class MovimentoService {
     const perfil = await this.authService.perfilAtual();
     const estabelecimentoId = perfil?.estabelecimento?.id ?? null;
 
-    const [comandas, chamados, capacidade] = await Promise.all([
+    const [comandas, chamados, capacidade, notasBaixas] = await Promise.all([
       this.buscarComandas(inicio),
       this.contarChamados(inicio),
       estabelecimentoId ? this.buscarCapacidade(estabelecimentoId) : Promise.resolve(null),
+      // Detalhe do painel: se falhar, o Movimento abre sem este alerta.
+      this.buscarNotasBaixas(inicio).catch(() => []),
     ]);
 
     const numeros = calcularMovimento(comandas, agora);
+    numeros.alertas = [...numeros.alertas, ...alertasDeNotaBaixa(notasBaixas)];
     this.aplicar(numeros);
     this.linhas.set(comandas);
     this.chamadosDeGarcom.set(chamados);
@@ -283,6 +286,21 @@ export class MovimentoService {
 
     if (error) throw error;
     return (data ?? []) as unknown as LinhaComandaMovimento[];
+  }
+
+  /** Avaliações de 1 ou 2 estrelas da noite, ainda sem resposta. O RLS limita ao bar do gerente. */
+  private async buscarNotasBaixas(inicio: string): Promise<NotaBaixa[]> {
+    const { data, error } = await this.supabase.client
+      .from('avaliacoes')
+      .select('id, nota, comentario, autor:perfis!avaliacoes_usuario_id_fkey(nome)')
+      .lte('nota', 2)
+      .is('resposta', null)
+      .gte('criada_em', inicio)
+      .order('criada_em', { ascending: false })
+      .limit(3);
+
+    if (error) throw error;
+    return (data ?? []) as unknown as NotaBaixa[];
   }
 
   /** Chamados de garçom da noite. O RLS limita aos alertas das comandas do bar. */
@@ -524,7 +542,7 @@ function calcularAlertas(
     }
   }
 
-  const ordem: AlertaGerente['tipo'][] = ['pagamento', 'pedido_parado', 'liberacao', 'sem_pedido'];
+  const ordem: AlertaGerente['tipo'][] = ['pagamento', 'pedido_parado', 'liberacao', 'sem_pedido', 'nota_baixa'];
   return alertas.sort((a, b) => ordem.indexOf(a.tipo) - ordem.indexOf(b.tipo));
 }
 
@@ -648,4 +666,26 @@ function moeda(valor: number): string {
 function percentual(parte: number, todo: number): number {
   if (todo <= 0) return 0;
   return Math.min(100, Math.round((parte / todo) * 100));
+}
+
+interface NotaBaixa {
+  id: string;
+  nota: number;
+  comentario: string | null;
+  autor: { nome: string | null } | null;
+}
+
+/** Uma avaliação de 1 ou 2 estrelas hoje vira alerta: vale responder enquanto o cliente lembra. */
+export function alertasDeNotaBaixa(notas: NotaBaixa[]): AlertaGerente[] {
+  return notas.map((avaliacao) => {
+    const nome = avaliacao.autor?.nome?.trim().split(/\s+/)[0] || 'Um cliente';
+    const comentario = avaliacao.comentario?.trim();
+    return {
+      id: `nota-${avaliacao.id}`,
+      tipo: 'nota_baixa' as const,
+      titulo: `Avaliação de ${avaliacao.nota} ${avaliacao.nota === 1 ? 'estrela' : 'estrelas'}`,
+      detalhe: comentario ? `${nome}: "${comentario.slice(0, 80)}"` : `${nome} não deixou comentário`,
+      comanda: null,
+    };
+  });
 }

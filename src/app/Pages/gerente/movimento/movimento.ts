@@ -1,6 +1,6 @@
 import { CurrencyPipe, DatePipe, NgTemplateOutlet } from '@angular/common';
 import { Component, DestroyRef, OnInit, computed, inject, signal } from '@angular/core';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { AlertaGerente, ComandaResumo, TipoAlertaGerente } from '../../../models';
 import { Carregando } from '../../../components/carregando/carregando';
 import { AuthService } from '../../../services/auth.service';
@@ -39,6 +39,7 @@ const APARENCIA_ALERTA: Record<TipoAlertaGerente, { icone: NomeIcone; acao: stri
   pedido_parado: { icone: 'relogio', acao: 'Ver na cozinha' },
   liberacao: { icone: 'relogio', acao: 'Avisar atendente' },
   sem_pedido: { icone: 'casa', acao: 'Ver comanda' },
+  nota_baixa: { icone: 'estrela', acao: 'Responder' },
 };
 
 /** Painel principal do gerente: o que precisa de atenção, o faturamento e as comandas do dia. */
@@ -62,6 +63,7 @@ export class Movimento implements OnInit {
   private authService = inject(AuthService);
   private supabase = inject(SupabaseService);
   private destroyRef = inject(DestroyRef);
+  private router = inject(Router);
 
   /** No desktop o cartão de faturamento sobe para o lado dos números. */
   protected readonly desktop = telaDesktop();
@@ -137,6 +139,10 @@ export class Movimento implements OnInit {
    * liberação marca que o atendente foi avisado. Nenhum tira o alerta da lista.
    */
   protected agir(alerta: AlertaGerente): void {
+    if (alerta.tipo === 'nota_baixa') {
+      void this.router.navigateByUrl('/gerente/avaliacoes');
+      return;
+    }
     if (alerta.comanda) {
       const comanda = this.movimento.comandas().find((c) => c.numero === alerta.comanda);
       if (comanda) this.comandaAberta.set(comanda.id);

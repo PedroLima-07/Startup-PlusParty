@@ -101,6 +101,8 @@ export const routes: Routes = [
       { path: 'movimento/resumo', loadComponent: () => import('./Pages/gerente/resumo/resumo').then(m => m.Resumo) },
       { path: 'resultados', loadComponent: () => import('./Pages/gerente/resultados/resultados').then(m => m.Resultados) },
       { path: 'postagens', loadComponent: () => import('./Pages/gerente/postagens/postagens').then(m => m.Postagens) },
+      { path: 'agenda', loadComponent: () => import('./Pages/gerente/agenda/agenda').then(m => m.AgendaGerente) },
+      { path: 'avaliacoes', loadComponent: () => import('./Pages/gerente/avaliacoes/avaliacoes').then(m => m.AvaliacoesGerente) },
       { path: 'divulgar', loadComponent: () => import('./Pages/gerente/divulgar/divulgar').then(m => m.Divulgar) },
       // O convite vem antes da Equipe: senão "convite" seria lido como o id de um atendente.
       { path: 'equipe/convite', loadComponent: () => import('./Pages/gerente/equipe-convite/equipe-convite').then(m => m.EquipeConvite) },

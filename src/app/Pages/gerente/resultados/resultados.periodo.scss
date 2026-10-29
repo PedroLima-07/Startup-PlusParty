@@ -1,0 +1,201 @@
+@use '../gerente' as g;
+@use '../../../../styles/desktop' as d;
+
+// Período (Hoje, 3, 7, 15, 30 dias) e os números somados pelo banco.
+
+.cabecalho {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.periodos {
+  display: flex;
+  gap: 2px;
+  max-width: 100%;
+  padding: 4px;
+  border-radius: 999px;
+  background: #e8ecf5;
+  overflow-x: auto;
+  scrollbar-width: none;
+
+  button {
+    flex-shrink: 0;
+    min-height: 32px;
+    padding: 0 12px;
+    border: 0;
+    border-radius: 999px;
+    background: transparent;
+    color: #4d5565;
+    font: inherit;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+
+    &.ativo {
+      background: #fff;
+      color: g.$marinho;
+      font-weight: 800;
+      box-shadow: 0 1px 3px rgba(15, 31, 75, 0.12);
+    }
+  }
+}
+
+.numeros {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  transition: opacity 150ms ease;
+
+  &.atualizando {
+    opacity: 0.55;
+  }
+}
+
+.numero {
+  @include g.cartao;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+
+  strong {
+    @include g.numero;
+    font-size: 22px;
+  }
+}
+
+.numero-rotulo {
+  @include g.rotulo;
+}
+
+.variacao {
+  font-size: 12px;
+  font-weight: 700;
+
+  &.subiu {
+    color: #15803d;
+  }
+
+  &.caiu {
+    color: #b45309;
+  }
+
+  &.igual {
+    color: g.$texto-suave;
+    font-weight: 500;
+  }
+}
+
+.barras {
+  display: flex;
+  align-items: stretch;
+  gap: 6px;
+  height: 160px;
+}
+
+.barra {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  justify-content: flex-end;
+  gap: 6px;
+  min-width: 0;
+}
+
+.barra-preenchida {
+  display: block;
+  border-radius: 6px 6px 0 0;
+  background: g.$azul;
+}
+
+.barra-dia {
+  overflow: hidden;
+  color: g.$texto-suave;
+  font-size: 11px;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.lista-dados {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 10px 16px;
+  margin: 12px 0 0;
+  font-size: 14px;
+
+  dt {
+    color: g.$texto-suave;
+  }
+
+  dd {
+    margin: 0;
+    font-weight: 700;
+    text-align: right;
+
+    &.perigo {
+      color: g.$perigo;
+    }
+  }
+}
+
+.picos,
+.sem-venda {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 0;
+  padding-left: 20px;
+  font-size: 14px;
+}
+
+.resumo-avaliacoes {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+
+  .subtitulo {
+    margin-bottom: 0;
+  }
+}
+
+.link {
+  flex-shrink: 0;
+  color: g.$azul;
+  font-size: 14px;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.carregando {
+  margin: 0;
+  color: g.$texto-suave;
+  font-size: 14px;
+}
+
+.tentar {
+  @include g.botao-contorno;
+  margin-left: 8px;
+}
+
+@include d.desktop {
+  .numeros {
+    grid-column: 1 / -1;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 16px;
+  }
+
+  .numero strong {
+    font-size: 28px;
+  }
+
+  .largo {
+    grid-column: 1 / -1;
+  }
+
+  .barras {
+    height: 200px;
+  }
+}
