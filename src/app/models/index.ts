@@ -338,7 +338,7 @@ export interface ComandaResumo {
   status: 'aberta' | 'aguardando_pagamento' | 'paga' | 'nao_paga';
 }
 
-export type TipoAlertaGerente = 'pagamento' | 'pedido_parado' | 'liberacao' | 'sem_pedido';
+export type TipoAlertaGerente = 'pagamento' | 'pedido_parado' | 'liberacao' | 'sem_pedido' | 'nota_baixa';
 
 /** Situação que pede a atenção do gerente no painel de Movimento. */
 export interface AlertaGerente {
@@ -361,15 +361,11 @@ export interface ItemVendido {
   quantidade: number;
 }
 
-export interface PerfilBar {
-  nome: string;
-  descricaoCurta: string;
-  endereco: string;
-  /** Lotação máxima; base do selo de movimento (Normal ou Quente). */
-  capacidade: number;
-  horarioFuncionamento: string;
-  fotoCapaUrl?: string;
-}
+/** O que o gerente edita em Configurações (tabela estabelecimentos). */
+export type DadosDoBar = Pick<
+  Estabelecimento,
+  'nome' | 'descricao' | 'sobre' | 'endereco' | 'capacidade' | 'horario_abre' | 'horario_fecha' | 'dias_abertos'
+>;
 
 export type StatusMovimento = 'normal' | 'quente';
 
@@ -399,3 +395,71 @@ export interface AvaliacaoDoBar {
   resposta: string | null;
   respondida_em: string | null;
 }
+
+/** Números de um período em Resultados (supabase/resultados_periodo.sql → totais). */
+export interface TotaisResultados {
+  faturamento: number;
+  comandas_pagas: number;
+  ticket_medio: number | null;
+  nao_pagas: number;
+  valor_nao_pago: number;
+  recusadas: number;
+  canceladas: number;
+  clientes: number;
+  clientes_que_voltaram: number;
+  comandas_na_mesa: number;
+  comandas_no_balcao: number;
+  itens_vendidos: number;
+  faturamento_bar: number;
+  faturamento_cozinha: number;
+  minutos_permanencia: number | null;
+  minutos_para_liberar: number | null;
+  minutos_para_pagar: number | null;
+  minutos_preparo_bar: number | null;
+  minutos_preparo_cozinha: number | null;
+}
+
+/** Tudo o que a tela Resultados mostra para 3, 7, 15 ou 30 dias, já somado no banco. */
+export interface ResultadosPeriodo {
+  periodo: { dias: number; de: string; ate: string };
+  totais: TotaisResultados;
+  /** Os mesmos números no período anterior de mesmo tamanho. */
+  anterior: TotaisResultados;
+  por_dia: { dia: string; faturamento: number; comandas_pagas: number }[];
+  /** Comandas abertas por dia da semana (0 = domingo) e hora. */
+  calor: { dia_semana: number; hora: number; comandas: number }[];
+  mais_vendidos: { nome: string; quantidade: number; receita: number }[];
+  mais_receita: { nome: string; quantidade: number; receita: number }[];
+  sem_venda: { nome: string; categoria: string }[];
+}
+
+/** Números das avaliações no período (avaliacoes_periodo). */
+export interface AvaliacoesPeriodo {
+  dias: number;
+  total: number;
+  media: number | null;
+  sem_resposta: number;
+  distribuicao: Record<'1' | '2' | '3' | '4' | '5', number>;
+  anterior: { total: number; media: number | null };
+}
+
+/** Avaliação como o gerente vê: com a denúncia, se houver. */
+export interface AvaliacaoGerente extends AvaliacaoDoBar {
+  denunciada_em: string | null;
+}
+
+/** Evento como o gerente cadastra (tabela eventos). */
+export interface EventoDoBar {
+  id: string;
+  titulo: string;
+  descricao: string | null;
+  inicio: string;
+  fim: string | null;
+  entrada: number | null;
+  repete_semanal: boolean;
+  cancelado_em: string | null;
+  /** Vem de agenda_do_bar: o gerente não lê a lista de quem marcou. */
+  interessados: number;
+}
+
+export type NovoEvento = Pick<EventoDoBar, 'titulo' | 'descricao' | 'inicio' | 'entrada' | 'repete_semanal'>;

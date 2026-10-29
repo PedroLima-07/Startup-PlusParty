@@ -14,6 +14,8 @@ import { Icone } from '../componentes/icone';
  */
 const SUBPAGINAS: { rota: string; titulo: string; voltar: string; desktop?: boolean }[] = [
   { rota: '/gerente/movimento/resumo', titulo: 'Resumo da noite', voltar: '/gerente/movimento' },
+  // No celular se chega pelo cartão de Resultados; no desktop, pelo menu lateral.
+  { rota: '/gerente/avaliacoes', titulo: 'Avaliações', voltar: '/gerente/resultados', desktop: false },
   // No celular se chega pelo cartão do Movimento; no desktop, pelo menu lateral.
   { rota: '/gerente/divulgar', titulo: 'Divulgar meu bar', voltar: '/gerente/movimento', desktop: false },
   // No desktop é o "Perfil do bar" do menu lateral, sem seta de voltar.

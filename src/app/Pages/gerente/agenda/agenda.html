@@ -1,0 +1,152 @@
+<div class="pagina">
+  <header class="cabecalho">
+    <div>
+      <h1>Agenda</h1>
+      <p>Os clientes veem no perfil do bar e recebem um lembrete 2 horas antes se marcarem interesse.</p>
+    </div>
+    <button type="button" class="botao-azul" (click)="novo()">+ Evento</button>
+  </header>
+
+  @if (erro(); as mensagem) {
+    <p class="mensagem-erro" role="alert">
+      {{ mensagem }}
+      <button type="button" class="botao-contorno" (click)="carregar()">Tentar de novo</button>
+    </p>
+  } @else if (carregando()) {
+    <p class="vazio">Carregando a agenda...</p>
+  } @else {
+    <ul class="eventos">
+      @for (ev of eventos(); track ev.id) {
+        <li class="evento" [class.cancelado]="ev.cancelado_em">
+          <div class="data" [class.hoje]="dia(ev) === 'HOJE'">
+            <span>{{ dia(ev) }}</span>
+            <strong>{{ ev.inicio | date: 'HH:mm' }}</strong>
+          </div>
+          <div class="texto">
+            <strong>{{ ev.titulo }}</strong>
+            <span>
+              @if (ev.cancelado_em) {
+                Cancelado
+              } @else {
+                @if (ev.repete_semanal) {
+                  Toda semana · próxima {{ proxima(ev) | date: 'dd/MM' }} ·
+                }
+                @if (ev.entrada) {
+                  {{ ev.entrada | currency: 'BRL' }}
+                } @else {
+                  Entrada grátis
+                }
+              }
+            </span>
+          </div>
+          <span class="interessados">
+            <strong>{{ ev.interessados }}</strong> {{ ev.interessados === 1 ? 'interessado' : 'interessados' }}
+          </span>
+          @if (!ev.cancelado_em) {
+            <div class="acoes">
+              <button type="button" class="botao-contorno" (click)="editar(ev)">Editar</button>
+              <button type="button" class="botao-cancelar" (click)="pedirCancelamento(ev)">Cancelar</button>
+            </div>
+          }
+        </li>
+      } @empty {
+        <li class="vazio">
+          Nenhum evento marcado. Toque em "+ Evento" para divulgar uma roda de samba, um show ou um jogo no telão.
+        </li>
+      }
+    </ul>
+  }
+</div>
+
+@if (painel(); as p) {
+  <div class="fundo" (click)="fecharPainel()">
+    <form
+      class="painel"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="titulo-painel"
+      (click)="$event.stopPropagation()"
+      (ngSubmit)="salvar()"
+    >
+      <h2 id="titulo-painel">{{ editando() ? 'Editar evento' : 'Novo evento' }}</h2>
+
+      <label class="campo">
+        <span>Nome do evento</span>
+        <input type="text" name="titulo" maxlength="80" required [(ngModel)]="form.titulo" placeholder="Roda de samba" />
+      </label>
+
+      <div class="duas-colunas">
+        <label class="campo">
+          <span>Dia</span>
+          <input type="date" name="data" required [(ngModel)]="form.data" />
+        </label>
+        <label class="campo">
+          <span>Começa às</span>
+          <input type="time" name="hora" required [(ngModel)]="form.hora" />
+        </label>
+      </div>
+
+      <label class="marcar">
+        <input type="checkbox" name="repete" [(ngModel)]="form.repete_semanal" />
+        Repete toda semana neste dia e horário
+      </label>
+
+      <label class="campo">
+        <span>Entrada (em branco = grátis)</span>
+        <input type="text" name="entrada" inputmode="decimal" [(ngModel)]="form.entrada" placeholder="15,00" />
+      </label>
+
+      <label class="campo">
+        <span>Descrição</span>
+        <textarea name="descricao" rows="3" maxlength="500" [(ngModel)]="form.descricao"></textarea>
+      </label>
+
+      @if (editando()) {
+        <p class="dica">Quem marcou interesse continua marcado.</p>
+      }
+      @if (erroForm(); as mensagem) {
+        <p class="mensagem-erro" role="alert">{{ mensagem }}</p>
+      }
+
+      <div class="rodape">
+        <button type="button" class="botao-contorno" (click)="fecharPainel()">Fechar</button>
+        <button type="submit" class="botao-marinho" [disabled]="salvando()">
+          {{ salvando() ? 'Salvando...' : 'Salvar evento' }}
+        </button>
+      </div>
+    </form>
+  </div>
+}
+
+@if (cancelando(); as ev) {
+  <div class="fundo centro" (click)="fecharPainel()">
+    <section
+      class="confirmar"
+      role="alertdialog"
+      aria-modal="true"
+      aria-labelledby="titulo-cancelar"
+      (click)="$event.stopPropagation()"
+    >
+      <h2 id="titulo-cancelar">Cancelar "{{ ev.titulo }}"?</h2>
+      <p>
+        @if (ev.interessados > 0) {
+          {{ ev.interessados }} {{ ev.interessados === 1 ? 'cliente marcou' : 'clientes marcaram' }} interesse e
+          {{ ev.interessados === 1 ? 'vai receber' : 'vão receber' }} um aviso.
+        }
+        @if (ev.repete_semanal) {
+          Todas as semanas deste evento saem da agenda.
+        }
+        Não dá para desfazer.
+      </p>
+      @if (erroCancelar(); as mensagem) {
+        <p class="mensagem-erro" role="alert">{{ mensagem }}</p>
+      }
+      <div class="rodape">
+        <button type="button" class="botao-contorno" (click)="cancelando.set(null)">Voltar</button>
+        <button type="button" class="botao-perigo" [disabled]="salvando()" (click)="confirmarCancelamento()">
+          Cancelar evento
+        </button>
+      </div>
+    </section>
+  </div>
+}

@@ -1,0 +1,260 @@
+@use '../gerente' as g;
+@use '../../../../styles/desktop' as d;
+
+.pagina {
+  @include g.pagina;
+  max-width: 900px;
+}
+
+.cabecalho {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 12px;
+
+  h1 {
+    margin: 0;
+    font-size: 24px;
+    font-weight: 800;
+    @include g.titulo-desktop;
+  }
+
+  p {
+    margin: 4px 0 0;
+    color: g.$texto-suave;
+    font-size: 13px;
+  }
+}
+
+.botao-azul {
+  @include g.botao-azul;
+  flex-shrink: 0;
+  min-height: 44px;
+}
+
+.botao-marinho {
+  @include g.botao-marinho;
+}
+
+.botao-contorno {
+  @include g.botao-contorno;
+}
+
+.botao-cancelar {
+  @include g.botao;
+  border-color: #f3c4c4;
+  background: #fff;
+  color: g.$perigo;
+}
+
+.botao-perigo {
+  @include g.botao;
+  background: g.$perigo;
+  color: #fff;
+}
+
+.eventos {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.evento {
+  @include g.cartao;
+  display: grid;
+  grid-template-columns: 64px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px 14px;
+
+  &.cancelado {
+    opacity: 0.6;
+
+    .texto strong {
+      text-decoration: line-through;
+    }
+  }
+
+  // No celular as ações descem para uma linha própria.
+  .acoes {
+    display: flex;
+    grid-column: 1 / -1;
+    justify-content: flex-end;
+    gap: 8px;
+  }
+
+  @include d.desktop {
+    grid-template-columns: 72px minmax(0, 1fr) auto auto;
+
+    .acoes {
+      grid-column: auto;
+    }
+  }
+}
+
+.data {
+  display: flex;
+  flex-direction: column;
+  padding: 8px 0;
+  border-radius: 12px;
+  background: #f5f7fb;
+  text-align: center;
+
+  span {
+    color: g.$texto-suave;
+    font-size: 10px;
+    font-weight: 700;
+  }
+
+  strong {
+    @include g.numero;
+    font-size: 17px;
+  }
+
+  &.hoje {
+    background: #eaf0ff;
+
+    span {
+      color: g.$azul;
+    }
+  }
+}
+
+.texto {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+
+  span {
+    color: g.$texto-suave;
+    font-size: 13px;
+  }
+}
+
+.interessados {
+  color: g.$texto-suave;
+  font-size: 13px;
+  text-align: right;
+
+  strong {
+    color: g.$marinho;
+  }
+}
+
+.vazio {
+  padding: 24px 16px;
+  border: 1px dashed g.$borda;
+  border-radius: 12px;
+  background: #fff;
+  color: g.$texto-suave;
+  font-size: 14px;
+  text-align: center;
+}
+
+.mensagem-erro {
+  @include g.mensagem-erro;
+}
+
+.dica {
+  margin: 0;
+  color: g.$texto-suave;
+  font-size: 12px;
+}
+
+// ------------------------------------------------- painel e confirmação
+.fundo {
+  @include g.janela-fundo;
+  display: flex;
+  justify-content: flex-end;
+
+  &.centro {
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+  }
+}
+
+.painel {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  width: min(440px, 100%);
+  height: 100%;
+  padding: 24px;
+  overflow-y: auto;
+  background: #fff;
+  box-sizing: border-box;
+
+  h2 {
+    margin: 0;
+    font-size: 20px;
+  }
+}
+
+.campo {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 700;
+
+  input,
+  textarea {
+    @include g.campo;
+    font-weight: 400;
+  }
+
+  textarea {
+    resize: vertical;
+  }
+}
+
+.duas-colunas {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.marcar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
+
+  input {
+    width: 18px;
+    height: 18px;
+  }
+}
+
+.rodape {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: auto;
+}
+
+.confirmar {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: min(420px, 100%);
+  padding: 22px;
+  border-radius: 18px;
+  background: #fff;
+
+  h2 {
+    margin: 0;
+    font-size: 18px;
+  }
+
+  p {
+    margin: 0;
+    color: g.$texto-suave;
+    font-size: 14px;
+    line-height: 1.5;
+  }
+}

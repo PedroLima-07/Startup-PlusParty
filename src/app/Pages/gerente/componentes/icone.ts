@@ -34,6 +34,7 @@ export type NomeIcone =
   | 'arquivo'
   | 'etiqueta'
   | 'calendario'
+  | 'estrela'
   | 'baixar'
   | 'compartilhar';
 
@@ -191,6 +192,9 @@ export type NomeIcone =
         @case ('etiqueta') {
           <path d="M20.59 13.41 13.42 20.6a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z" />
           <line x1="7" y1="7" x2="7.01" y2="7" />
+        }
+        @case ('estrela') {
+          <path d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1-4.4-4.3 6.1-.9z" />
         }
         @case ('calendario') {
           <rect x="3" y="4" width="18" height="18" rx="2" />

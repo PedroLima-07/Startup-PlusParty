@@ -79,9 +79,13 @@ export class EstabelecimentosService {
       if (regra) throw new RedeInvalidaError(regra[1] as RedeInvalidaError['campo']);
       throw error;
     }
-    // A lista guardada ficou velha para este bar.
-    this.guardada = null;
+    this.esquecerLista();
     return data as RedesELocalizacao;
+  }
+
+  /** O gerente mudou o bar: a próxima tela busca a lista de novo. */
+  esquecerLista(): void {
+    this.guardada = null;
   }
 
   /** Ids dos bares com evento hoje (o dia do bar vira às 6h). */
