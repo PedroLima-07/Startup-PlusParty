@@ -1,0 +1,170 @@
+<main class="legal">
+  <button type="button" class="voltar" (click)="voltar()">‹ Voltar</button>
+
+  @if (documento() === 'privacidade') {
+    <h1>Política de Privacidade</h1>
+    <p class="atualizado">Atualizada em {{ atualizadoEm }}</p>
+
+    <p>
+      O +party é um app de comanda digital para bares: você encontra um bar, abre a comanda pelo celular, faz
+      pedidos e acompanha a conta. Esta política explica quais dados pessoais o app usa, para quê, com quem eles
+      são compartilhados e quais são os seus direitos, de acordo com a Lei Geral de Proteção de Dados
+      (Lei nº 13.709/2018, a LGPD).
+    </p>
+
+    <h2>1. Quais dados usamos</h2>
+    <ul>
+      <li><strong>Cadastro:</strong> nome, e-mail, telefone (quando informado), senha (guardada só de forma
+        criptografada; ninguém da equipe consegue ler) e foto de perfil (opcional).</li>
+      <li><strong>Uso das comandas:</strong> bar, mesa ou balcão, itens pedidos, valores, horários de abertura,
+        fechamento e pagamento, e quem da equipe do bar liberou e recebeu a comanda.</li>
+      <li><strong>Conta não paga:</strong> quando o gerente do bar registra que uma conta foi embora sem
+        pagamento, esse registro fica no histórico e aparece para a equipe do bar quando você abrir uma nova
+        comanda lá.</li>
+      <li><strong>Avaliações:</strong> a nota e o comentário que você deixar depois de pagar uma comanda.</li>
+      <li><strong>Agenda e fila:</strong> os eventos em que você marcou interesse e a sua posição na fila de uma
+        mesa.</li>
+      <li><strong>Notificações:</strong> avisos que o app gera para você (comanda liberada, pedido pronto,
+        lembrete de evento) e se você permitiu as notificações do navegador.</li>
+      <li><strong>Equipe do bar:</strong> para atendentes e gerentes, também o bar em que trabalham e o
+        desempenho no atendimento (pedidos preparados e comandas atendidas).</li>
+    </ul>
+    <p>
+      O app <strong>não</strong> usa a sua localização, não guarda dados de cartão (o pagamento é feito
+      diretamente no bar) e não usa ferramentas de rastreamento ou publicidade.
+    </p>
+
+    <h2>2. Para que usamos</h2>
+    <ul>
+      <li>Criar e proteger a sua conta e confirmar o seu e-mail.</li>
+      <li>Abrir, atender e fechar comandas: o bar precisa saber quem pediu o quê e em que mesa.</li>
+      <li>Evitar calotes: impedir que uma conta seja aberta enquanto outra está sem pagamento.</li>
+      <li>Mostrar avaliações, agenda e novidades dos bares, e enviar os avisos que você pediu.</li>
+      <li>Dar ao gerente números do próprio bar (faturamento, itens mais vendidos, horários de movimento).</li>
+    </ul>
+    <p>
+      A base legal é a <strong>execução do serviço</strong> que você pediu ao criar a conta (art. 7º, V, da LGPD)
+      e o <strong>legítimo interesse</strong> do bar em receber pelo que foi consumido (art. 7º, IX). Para as
+      notificações do navegador, pedimos o seu <strong>consentimento</strong>, que você pode retirar a qualquer
+      momento nas configurações do navegador.
+    </p>
+
+    <h2>3. Quem vê os seus dados</h2>
+    <ul>
+      <li><strong>A equipe do bar onde você abre a comanda:</strong> o seu nome, a sua foto, a mesa, os pedidos,
+        os valores e o histórico de contas não pagas naquele app.</li>
+      <li><strong>Outros clientes:</strong> só veem o seu <strong>primeiro nome</strong> junto da avaliação que
+        você deixar. Nada mais é público.</li>
+      <li><strong>Serviços que fazem o app funcionar</strong> (operadores, na linguagem da LGPD):
+        <ul>
+          <li><strong>Supabase</strong>: banco de dados, login e armazenamento das fotos;</li>
+          <li><strong>Google (Gmail)</strong>: envio dos e-mails de confirmação de conta e de troca de senha;</li>
+          <li><strong>Google Maps</strong>: quando você abre um mapa no app, o Google recebe o seu endereço de
+            internet (IP), como em qualquer site que mostra um mapa do Google.</li>
+        </ul>
+      </li>
+    </ul>
+    <p>Não vendemos nem alugamos dados pessoais.</p>
+
+    <h2>4. Armazenamento no seu aparelho</h2>
+    <p>
+      O app <strong>não usa cookies</strong>. Ele guarda no navegador apenas o necessário para funcionar: a sua
+      sessão de login (apagada quando você fecha a aba ou sai da conta) e duas preferências (se você dispensou o
+      aviso de notificações e, para gerentes, o cartão "Divulgue o +party"). Por isso não há banner de cookies.
+    </p>
+
+    <h2>5. Por quanto tempo guardamos</h2>
+    <p>
+      Os dados da conta ficam enquanto ela existir. Comandas, pedidos e o registro de conta não paga ficam
+      guardados porque fazem parte do histórico de vendas do bar. Se você pedir a exclusão da conta, apagamos ou
+      anonimizamos os seus dados pessoais, mantendo só o que a lei obriga a guardar.
+    </p>
+
+    <h2>6. Segurança</h2>
+    <p>
+      O acesso aos dados é controlado no próprio banco: cada cliente só vê as próprias comandas, e cada equipe só
+      vê o que é do seu bar. As senhas são guardadas criptografadas e toda a comunicação usa conexão segura
+      (HTTPS).
+    </p>
+
+    <h2>7. Os seus direitos</h2>
+    <p>
+      Você pode pedir a qualquer momento: confirmação de que tratamos os seus dados, acesso a eles, correção,
+      exclusão, portabilidade e informação sobre com quem eles foram compartilhados (art. 18 da LGPD). O nome e a
+      foto você mesmo altera no app.
+      @if (contato) {
+        Para os outros pedidos, escreva para <a [href]="'mailto:' + contato">{{ contato }}</a>.
+      } @else {
+        Para os outros pedidos, fale com a equipe do +party pelos canais oficiais do projeto.
+      }
+      Você também pode reclamar à Autoridade Nacional de Proteção de Dados (ANPD).
+    </p>
+
+    <h2>8. Idade mínima</h2>
+    <p>O +party é feito para bares e não deve ser usado por menores de 18 anos.</p>
+
+    <h2>9. Mudanças nesta política</h2>
+    <p>
+      Se esta política mudar, a data no topo é atualizada e, se a mudança for importante, avisamos pelo app.
+      Veja também os <a routerLink="/termos">Termos de Uso</a>.
+    </p>
+  } @else {
+    <h1>Termos de Uso</h1>
+    <p class="atualizado">Atualizados em {{ atualizadoEm }}</p>
+
+    <p>
+      Ao criar uma conta no +party você concorda com estes termos e com a
+      <a routerLink="/privacidade">Política de Privacidade</a>.
+    </p>
+
+    <h2>1. O que é o +party</h2>
+    <p>
+      Um app que liga clientes e bares: o cliente abre a comanda pelo celular e faz os pedidos; a equipe do bar
+      libera a comanda, prepara os pedidos e confirma o pagamento. O +party não vende os produtos e não processa
+      pagamentos: preços, cardápio, atendimento e cobrança são de responsabilidade de cada bar.
+    </p>
+
+    <h2>2. Sua conta</h2>
+    <ul>
+      <li>Você precisa ter 18 anos ou mais.</li>
+      <li>Use dados verdadeiros e mantenha a sua senha em segredo. O que for feito com a sua conta é de sua
+        responsabilidade.</li>
+      <li>Uma comanda aberta por você é uma conta sua no bar: o que for pedido nela deve ser pago.</li>
+    </ul>
+
+    <h2>3. Comandas e pagamento</h2>
+    <ul>
+      <li>A comanda só começa depois que a equipe do bar a libera.</li>
+      <li>Enquanto houver uma conta sua esperando pagamento, o app não deixa abrir outra comanda.</li>
+      <li>Se o bar registrar que uma conta não foi paga, esse registro fica no seu histórico e é mostrado à
+        equipe do bar. Se você acha que o registro está errado, fale com o bar.</li>
+    </ul>
+
+    <h2>4. Avaliações</h2>
+    <p>
+      Só avalia quem pagou uma comanda no bar. Não publique ofensas, dados de outras pessoas ou conteúdo
+      ilegal. O bar pode responder publicamente e denunciar avaliações abusivas, que podem ser removidas.
+    </p>
+
+    <h2>5. Para bares</h2>
+    <p>
+      O gerente é responsável pelas informações do bar (cardápio, preços, horário, postagens e eventos) e por
+      quem aceita na equipe. A equipe deve usar os dados dos clientes só para atender as comandas.
+    </p>
+
+    <h2>6. Uso proibido</h2>
+    <p>
+      Não é permitido tentar acessar dados de outras pessoas ou de outros bares, sobrecarregar o serviço, usar
+      robôs para criar contas ou fazer pedidos falsos. Contas que fizerem isso podem ser suspensas.
+    </p>
+
+    <h2>7. Disponibilidade</h2>
+    <p>
+      O +party é um projeto em desenvolvimento. Ele pode ficar fora do ar ou mudar sem aviso, e não substitui o
+      controle de caixa do bar.
+    </p>
+
+    <h2>8. Mudanças</h2>
+    <p>Estes termos podem mudar; a data no topo mostra a versão em vigor.</p>
+  }
+</main>
