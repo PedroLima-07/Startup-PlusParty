@@ -154,6 +154,7 @@ Os scripts ficam versionados na pasta [`supabase/`](supabase/) e são aplicados 
 | `bar_redes_localizacao.sql` | Instagram, TikTok, WhatsApp e ponto no mapa do bar (o banco limpa o que o gerente digita); edição de postagens sem mudar a data de publicação |
 | `demo_bar_dze.sql` | Demonstração no Bar D'Zé: a noite de hoje e os 30 dias anteriores (sexta e sábado cheios), avaliações, agenda com interessados, uma fila de mesa e uma conta não paga, com os horários de agora. `demo_bar_dze_remover.sql` apaga tudo |
 | `seguranca_advisor.sql` | Correções do Security Advisor do Supabase: `search_path` fixo em todas as funções, funções de trigger fechadas para chamadas diretas e funções `SECURITY DEFINER` fechadas para visitantes, exceto as que o app usa sem login |
+| `indices.sql` | Índices das consultas mais usadas (Movimento, Resultados, comandas do cliente, equipe), sugeridos pelo Index Advisor do Supabase |
 
 ### Segurança
 
