@@ -60,6 +60,11 @@ export const routes: Routes = [
     canActivate: [authGuard],
   },
   {
+    path: 'cliente/conta',
+    loadComponent: () => import('./Pages/conta/conta').then((m) => m.ContaPage),
+    canActivate: [authGuard],
+  },
+  {
     path: 'cliente/abrir-comanda/:id',
     loadComponent: () =>
       import('./Pages/abrir-comanda/local/local').then((m) => m.AbrirComandaLocalComponent),

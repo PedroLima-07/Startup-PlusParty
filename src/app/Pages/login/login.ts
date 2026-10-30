@@ -24,7 +24,10 @@ export class LoginPage {
   protected readonly modo = signal<Modo>('login');
   protected readonly carregando = signal(false);
   protected readonly erro = signal<string | null>(null);
-  protected readonly aviso = signal<string | null>(null);
+  protected readonly aviso = signal<string | null>(
+    // Volta da tela Minha conta depois de excluir a conta.
+    this.route.snapshot.queryParamMap.get('conta') === 'excluida' ? 'Sua conta foi excluída.' : null,
+  );
   /**
    * E-mail esperando o código de confirmação: o formulário dá lugar à tela
    * do código. Acontece logo depois do cadastro e quando alguém tenta entrar

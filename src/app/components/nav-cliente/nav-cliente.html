@@ -63,10 +63,10 @@
   @if (conta(); as c) {
     <div class="conta">
       <span class="conta-avatar" aria-hidden="true">{{ c.inicial }}</span>
-      <span class="conta-texto">
+      <a class="conta-texto" routerLink="/cliente/conta" title="Minha conta">
         <strong>{{ c.nome }}</strong>
-        <span>Cliente</span>
-      </span>
+        <span>Minha conta</span>
+      </a>
       <button type="button" class="conta-sair" [disabled]="saindo()" (click)="sair()">Sair</button>
     </div>
   } @else {

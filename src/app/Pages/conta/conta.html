@@ -1,0 +1,52 @@
+<main class="conta">
+  <h1>Minha conta</h1>
+
+  <section class="cartao">
+    <span class="avatar" aria-hidden="true">{{ nome().charAt(0).toUpperCase() || '?' }}</span>
+    <div>
+      <strong>{{ nome() || 'Cliente' }}</strong>
+      <span>{{ email() }}</span>
+    </div>
+  </section>
+
+  <section class="cartao links">
+    <a routerLink="/privacidade">Política de Privacidade</a>
+    <a routerLink="/termos">Termos de Uso</a>
+  </section>
+
+  <button type="button" class="sair" (click)="sair()">Sair da conta</button>
+
+  <section class="cartao perigo">
+    <h2>Excluir minha conta</h2>
+    <p>
+      Apagamos as suas notificações, interesses em eventos e o seu lugar em filas, e o seu nome, e-mail e foto
+      deixam de existir. As comandas e avaliações continuam no histórico do bar, sem o seu nome. Não dá para
+      desfazer.
+    </p>
+
+    @if (!confirmando()) {
+      <button type="button" class="botao-perigo" (click)="abrirConfirmacao()">Excluir minha conta</button>
+    } @else {
+      <label class="confirmar">
+        <span>Para confirmar, digite <strong>{{ palavra }}</strong></span>
+        <input type="text" name="confirmacao" autocomplete="off" [(ngModel)]="digitado" />
+      </label>
+      @if (erro(); as mensagem) {
+        <p class="erro" role="alert">{{ mensagem }}</p>
+      }
+      <div class="acoes">
+        <button type="button" class="botao-contorno" (click)="confirmando.set(false)">Voltar</button>
+        <button
+          type="button"
+          class="botao-perigo"
+          [disabled]="digitado.trim().toUpperCase() !== palavra || excluindo()"
+          (click)="excluir()"
+        >
+          {{ excluindo() ? 'Excluindo...' : 'Excluir para sempre' }}
+        </button>
+      </div>
+    }
+  </section>
+</main>
+
+<app-nav-cliente class="apenas-desktop" />

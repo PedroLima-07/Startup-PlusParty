@@ -60,6 +60,7 @@ Os scripts desta pasta são aplicados pelo **SQL Editor** do Supabase. Cada um e
 | `seguranca_advisor.sql` | Correções do Security Advisor do Supabase: `search_path` fixo em todas as funções, funções de trigger fechadas para chamadas diretas e funções `SECURITY DEFINER` fechadas para visitantes, exceto as que o app usa sem login |
 | `indices.sql` | Índices das consultas mais usadas (Movimento, Resultados, comandas do cliente, equipe), sugeridos pelo Index Advisor do Supabase |
 | `seguranca_pedidos.sql` | Regra de gravação de itens de pedido tão rígida quanto a `criar_pedido` (comanda aberta, item do mesmo bar e disponível, quantidade de 1 a 99) e cadastro de perfil só como cliente |
+| `excluir_conta.sql` | "Excluir minha conta" (LGPD): apaga notificações, interesses, fila e pedidos de avaliação, anonimiza o perfil e desativa o login; comandas e avaliações ficam no histórico do bar sem o nome. Só para clientes sem comanda em andamento |
 
 ## Google Maps
 
