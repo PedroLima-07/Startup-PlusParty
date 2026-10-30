@@ -193,7 +193,9 @@ as $$
          or (e.inicio + make_interval(weeks => semana))::date <= e.repetir_ate);
 $$;
 
-revoke all on function public.ocorrencias_de_eventos(timestamptz, timestamptz) from public, anon, authenticated;
+-- Só expande as datas dos eventos, que já são públicos (bares_com_evento_hoje usa).
+revoke all on function public.ocorrencias_de_eventos(timestamptz, timestamptz) from public;
+grant execute on function public.ocorrencias_de_eventos(timestamptz, timestamptz) to anon, authenticated;
 
 create or replace function public.agenda_do_bar(p_estabelecimento uuid, p_dias int default 30)
 returns table (
@@ -216,11 +218,12 @@ as $$
   order by o.inicio;
 $$;
 
+-- Só lê eventos, que são públicos: roda com a permissão de quem chama.
 create or replace function public.bares_com_evento_hoje()
 returns setof uuid
 language sql
 stable
-security definer
+security invoker
 set search_path = public
 as $$
   with dia as (

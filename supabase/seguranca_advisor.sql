@@ -18,11 +18,14 @@
 --
 -- 3. Funções SECURITY DEFINER que visitantes (anon) podiam chamar sem
 --    precisar. Só ficam abertas para visitantes as que o app usa sem login:
---      agenda_do_bar, avaliacoes_do_bar, bares_com_evento_hoje,
---      lotacao_estabelecimentos
+--      agenda_do_bar, avaliacoes_do_bar, lotacao_estabelecimentos,
+--      ver_convite (a página do link de convite abre antes do login)
 --    e as que as regras de segurança (RLS) usam por dentro:
 --      meu_tipo, meu_estabelecimento_id, sou_staff
 --    Quem estava logado continua podendo chamar o que já chamava.
+--
+-- 4. bares_com_evento_hoje deixa de ser SECURITY DEFINER: ela só lê eventos,
+--    que já são públicos. Roda com a permissão de quem chama.
 --
 -- Os avisos que continuam depois disso são esperados: são as funções do app
 -- (avaliar, marcar_interesse, resultados_periodo...) que o usuário logado
@@ -37,7 +40,7 @@ do $$
 declare
   f record;
   abertas_para_visitante text[] := array[
-    'agenda_do_bar', 'avaliacoes_do_bar', 'bares_com_evento_hoje', 'lotacao_estabelecimentos',
+    'agenda_do_bar', 'avaliacoes_do_bar', 'lotacao_estabelecimentos', 'ver_convite',
     'meu_tipo', 'meu_estabelecimento_id', 'sou_staff'
   ];
   logado_podia boolean;
@@ -72,6 +75,14 @@ begin
     end if;
   end loop;
 end $$;
+
+-- A 1ª versão deste script fechou ver_convite para visitantes; reabre.
+grant execute on function public.ver_convite(text) to anon, authenticated;
+
+-- 4. Evento hoje: só lê eventos (públicos), não precisa de SECURITY DEFINER.
+alter function public.bares_com_evento_hoje() security invoker;
+grant execute on function public.ocorrencias_de_eventos(timestamptz, timestamptz) to anon, authenticated;
+grant execute on function public.bares_com_evento_hoje() to anon, authenticated;
 
 notify pgrst, 'reload schema';
 
