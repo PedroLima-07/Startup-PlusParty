@@ -1,234 +1,268 @@
 <div align="center">
 
-<!-- Banner: adicionar docs/img/banner.png e descomentar
-<img src="docs/img/banner.png" alt="+party — comanda digital para bares" width="720" />
+<!-- Banner: salvar em .github/assets/banner.png e descomentar
+<img src=".github/assets/banner.png" alt="+party — Sua noite, sem complicação." width="760" />
 -->
 
 # +party
 
-<h3>Sua noite, sem complicação.</h3>
+### Sua noite, sem complicação.
 
-Comanda digital para bares: do pedido ao pagamento, sem fila e sem papel.
+**Comanda digital para bares:** escolher o bar, pedir e fechar a conta pelo celular, direto no navegador.<br/>
+Menos fila no balcão, nada de papel e nenhum aplicativo para baixar.
 
 <p>
-  <a href="#-o-que-é-o-party">Sobre</a> ·
-  <a href="#-experimente">Como rodar</a> ·
-  <a href="#-arquitetura">Arquitetura</a> ·
-  <a href="#-estado-do-projeto">Estado do projeto</a> ·
-  <a href="#-equipe">Equipe</a>
+  <a href="https://plusparty-landingpage.pedrocardosolima20.workers.dev/"><img src="https://img.shields.io/badge/Conheça_o_+party-site_oficial-2F6BFF?style=for-the-badge" alt="Site oficial do +party" /></a>
+  <a href="https://www.youtube.com/@PlusParty-c3y"><img src="https://img.shields.io/badge/Veja_no-YouTube-FF0000?style=for-the-badge&logo=youtube&logoColor=white" alt="Canal do +party no YouTube" /></a>
 </p>
 
 <p>
   <img src="https://img.shields.io/badge/Angular-22-DD0031?logo=angular&logoColor=white" alt="Angular 22" />
   <img src="https://img.shields.io/badge/TypeScript-6-3178C6?logo=typescript&logoColor=white" alt="TypeScript 6" />
   <img src="https://img.shields.io/badge/Supabase-PostgreSQL-3ECF8E?logo=supabase&logoColor=white" alt="Supabase" />
-  <img src="https://img.shields.io/badge/testes-Vitest-6E9F18?logo=vitest&logoColor=white" alt="Vitest" />
+  <img src="https://img.shields.io/badge/tempo_real-Realtime-0F1F4B" alt="Tempo real" />
   <img src="https://img.shields.io/badge/licença-MIT-blue" alt="Licença MIT" />
 </p>
 
+<sub>Startup Project One · Análise e Desenvolvimento de Sistemas · Facens · equipe TechnoMind</sub>
+
 </div>
 
-<!-- Imagem de destaque: adicionar docs/img/tres-acessos.png (uma tela de cada área) e descomentar
-<img src="docs/img/tres-acessos.png" alt="As três áreas do +party: cliente, atendente e gerente" width="100%" />
+---
+
+<!-- Imagem de destaque: uma tela de cada acesso (cliente no celular, atendente e gerente no desktop),
+     salvar em .github/assets/tres-acessos.png e descomentar
+<img src=".github/assets/tres-acessos.png" alt="As três áreas do +party: cliente, atendente e gerente" width="100%" />
 -->
 
-## 🍻 O que é o +party?
+## 🍻 A dor
 
-O **+party** resolve os atritos de uma noite fora dos dois lados do balcão. Do lado do cliente: escolher o bar, abrir uma comanda digital e pedir sem enfrentar fila. Do lado do estabelecimento: liberar quem chegou, organizar os pedidos entre bar e cozinha e acompanhar o movimento da noite.
+Sexta-feira, 23h, bar lotado. **Tudo trava no balcão.**
 
-É um projeto acadêmico da disciplina **Startup Project One**, do curso de Análise e Desenvolvimento de Sistemas da **Facens**. O protótipo foi validado com professores e com personas reais, incluindo um dono de bar em atividade.
+<table>
+  <tr>
+    <th width="50%">Quem está no bar</th>
+    <th width="50%">Quem administra o bar</th>
+  </tr>
+  <tr>
+    <td>
+      🕒 Perde tempo de lazer na fila, <b>para pedir e para fechar a conta</b><br/><br/>
+      🤷 Sai de casa sem saber se o bar está aberto, cheio ou com promoção<br/><br/>
+      📵 Não quer baixar mais um aplicativo só para consumir
+    </td>
+    <td>
+      📝 Comanda de papel se perde e gera divergência no caixa<br/><br/>
+      🔀 Pedidos se embolam entre bar e cozinha<br/><br/>
+      📉 Sem dados da noite e sem um jeito simples de divulgar promoções
+    </td>
+  </tr>
+</table>
 
-O sistema tem **três acessos**, todos pela mesma tela de login. O app identifica o tipo do usuário e leva cada um para a sua área:
+## 💡 A ideia
 
-| Acesso | Quem usa | O que faz |
-|---|---|---|
-| 🍹 **Cliente** | Quem está no bar | Encontra o bar, abre a comanda, faz pedidos e fecha a conta |
-| 👨‍🍳 **Atendente** | Barman, cozinha e caixa | Libera a entrada, acompanha bar e cozinha e confirma o pagamento |
-| 📊 **Gerente** | Dono do bar | Acompanha o movimento e os resultados da noite, publica postagens, monta a equipe e edita o perfil do bar |
+> **Escolher o bar, pedir e fechar a conta pelo celular, direto no navegador.**
+> O cliente ganha tempo e a conta clara na tela. O bar ganha o controle da noite em tempo real.
 
-## ⚡ Experimente
+O +party une as duas pontas da noite: a **descoberta**, antes de sair de casa, e a **operação**, dentro do bar. Tudo num web app que abre no navegador do celular e do computador, sem maquininha própria, sem cartão de recarga e sem taxa por transação.
 
-Com Node.js e npm instalados:
+## 👥 Um login, três acessos
 
-```bash
-git clone https://github.com/PedroLima-07/Startup-PlusParty.git
-cd Startup-PlusParty
-npm install
-npm start
+Todo mundo entra pela mesma tela. O app reconhece quem é e leva cada um para a sua área.
+
+<table>
+  <tr>
+    <th width="33%">🍹 Cliente</th>
+    <th width="33%">🧑‍🍳 Atendente</th>
+    <th width="33%">📊 Gerente</th>
+  </tr>
+  <tr valign="top">
+    <td>
+      Descobre bares por filtro ou no mapa, vê a agenda e as avaliações, abre a comanda na mesa ou no balcão, pede pelo cardápio e acompanha cada item até ficar pronto.
+    </td>
+    <td>
+      Libera quem chegou, vê os pedidos separados entre <b>bar</b> e <b>cozinha</b>, avisa quando ficam prontos e confirma o pagamento no caixa.
+    </td>
+    <td>
+      Acompanha o movimento ao vivo e os resultados por período, publica promoções e eventos, responde avaliações e monta a equipe.
+    </td>
+  </tr>
+</table>
+
+## 🌙 A noite em seis passos
+
+```mermaid
+flowchart LR
+    A["🔎 Escolhe o bar<br/><sub>fotos, horário, lotação<br/>e promoções</sub>"] --> B["📲 Abre a comanda<br/><sub>na mesa ou<br/>no balcão</sub>"]
+    B --> C["✅ Atendente libera<br/><sub>confirma que o<br/>cliente chegou</sub>"]
+    C --> D["🍺 Pede pelo cardápio<br/><sub>o preço fica<br/>congelado</sub>"]
+    D --> E["🔥 Bar e cozinha<br/>preparam<br/><sub>cada setor vê<br/>só os seus itens</sub>"]
+    E --> F["💳 Fecha a conta<br/>e paga no caixa<br/><sub>o atendente<br/>confirma</sub>"]
 ```
 
-O app abre em **http://localhost:4200**, na tela de login.
+1. **Escolhe o bar.** Fotos, horário, lotação, promoções e agenda, mesmo sem login.
+2. **Abre a comanda.** Na mesa ou no balcão. A comanda é da pessoa, não da mesa: cada amigo tem a sua.
+3. **O atendente libera.** Ele confirma que o cliente está mesmo no bar. Antes disso, nada de pedido.
+4. **Pede pelo cardápio.** O preço fica congelado no momento do pedido.
+5. **Bar e cozinha preparam.** Cada setor vê só os seus itens, e o cliente é avisado quando fica pronto.
+6. **Fecha a conta e paga.** O pagamento é no caixa do bar; o atendente confirma e a comanda fecha.
 
-| Comando | O que faz |
-|---|---|
-| `npm start` | Sobe o app em modo de desenvolvimento |
-| `npm test` | Roda os testes unitários |
-| `npm run build` | Gera a versão de produção |
-
-A conexão com o Supabase já vem configurada em `src/environments`. A chave usada é a pública (*publishable*): quem protege os dados são as regras do próprio banco.
-
-<!-- Resultado: adicionar docs/img/jornada.png (discovery, comanda e cardápio) e descomentar
-<img src="docs/img/jornada.png" alt="Jornada do cliente: discovery, comanda e cardápio" width="100%" />
+<!-- Jornada do cliente em prints de celular (Descobrir, perfil do bar, comanda),
+     salvar em .github/assets/jornada.png e descomentar
+<img src=".github/assets/jornada.png" alt="Jornada do cliente: Descobrir, perfil do bar e comanda" width="100%" />
 -->
 
-## 🧭 Jornada principal
+## ✨ O que já funciona
 
-O fluxo completo funciona de ponta a ponta, com dados reais:
+<details open>
+<summary><b>🍹 Para quem sai à noite</b></summary>
 
-| # | Quem | O que acontece |
+- **Descobrir:** filtros *Aberto agora*, *Evento hoje* e *Quente agora*, lista ou mapa, e a nota de quem já foi ("★ 4,6 · 128 avaliações").
+- **Perfil do bar:** fotos, horário, *Como chegar*, Instagram e WhatsApp, além das abas Cardápio, Agenda, Novidades e Avaliações.
+- **Novidades:** promoções e eventos dos bares numa lista simples.
+- **Comanda digital:** em mesa ou balcão, com a conta sempre clara na tela.
+- **Fila da mesa:** se a mesa está sendo liberada, o cliente entra na fila. Quando ela libera, a comanda abre sozinha e chega o aviso *"Sua mesa liberou!"*.
+- **Agenda:** "Tenho interesse" nos eventos, com lembrete 2 horas antes.
+- **Avaliação verificada:** só avalia quem pagou uma comanda naquele bar.
+- **Notificações na hora:** comanda liberada, pedido pronto e pagamento confirmado.
+
+</details>
+
+<details>
+<summary><b>🧑‍🍳 Para quem atende</b></summary>
+
+- **Pedidos separados por setor:** bar e cozinha, cada um no seu ritmo (*novo → em preparo → pronto*).
+- **Três cartões que dizem o que fazer agora:** *Liberar*, *Receber* e *Abertas*, com destaque para quem espera há muito tempo.
+- **Aviso de histórico:** a equipe é avisada se o cliente já saiu sem pagar antes.
+- **Ajuste de mesa:** troca de mesa na hora de liberar, e "Nesta mesa agora" para ver quem divide a mesa.
+
+</details>
+
+<details>
+<summary><b>📊 Para quem administra</b></summary>
+
+- **Movimento ao vivo:** faturamento, comandas, ticket médio e *"Precisa de atenção"*, com conta sem pagamento, pedido parado, cliente esperando e avaliação baixa.
+- **Resultados por período:** 3, 7, 15 ou 30 dias, comparados com o período anterior, com mais vendidos, horários de pico, clientes que voltaram e itens que não vendem.
+- **Postagens no estilo Instagram:** promoções, eventos e novidades, que chegam como notificação para quem já foi ao bar.
+- **Agenda de eventos:** únicos ou semanais, com a contagem de interessados.
+- **Avaliações:** média, distribuição, resposta pública e denúncia.
+- **Equipe por convite:** link de convite com validade, aprovação do gerente e desempenho de cada atendente.
+- **Divulgar meu bar:** imagem pronta para o Story do Instagram, link para a bio e textos para o WhatsApp.
+
+</details>
+
+## 🔐 Seguro de verdade, não só na tela
+
+A segurança do +party mora **no banco de dados**, não apenas na interface. Mesmo quem tentar chamar a API diretamente esbarra nas mesmas regras:
+
+- 🙋 **Cada um vê só o que é seu.** O cliente vê as próprias comandas; a equipe vê só o bar em que trabalha.
+- 🚫 **Ninguém trapaceia a conta.** O cliente não libera a própria comanda, não a marca como paga e não muda o preço do que pede.
+- 👔 **Ninguém se promove sozinho.** Todo mundo nasce cliente, e só o gerente contrata, por convite.
+- 🛡️ **Uma comanda ativa por pessoa.** Quem tem conta sem pagar não abre outra até acertar.
+- 🍪 **Sem rastreamento.** O app não usa cookies nem anúncios, e a Política de Privacidade e os Termos de Uso ficam abertos dentro do app.
+
+## 🎯 Para quem é
+
+| | 🍻 O frequentador (B2C) | 🏪 O bar (B2B) |
 |---|---|---|
-| 1 | Cliente | Escolhe o bar no Discovery e vê o perfil do estabelecimento |
-| 2 | Cliente | Informa se está em uma mesa ou no balcão |
-| 3 | Sistema | A comanda nasce como *aguardando liberação* |
-| 4 | Atendente | Confirma a presença do cliente e libera a comanda (ou recusa, se ele não estiver no bar) |
-| 5 | Cliente | Monta o carrinho no cardápio e confirma o pedido |
-| 6 | Bar e cozinha | Cada setor vê os seus itens e avança: *novo → em andamento → pronto* |
-| 7 | Cliente | Fecha a conta, confirmando que recebeu tudo |
-| 8 | Cliente | Paga no caixa (fora do sistema) |
-| 9 | Atendente | Confirma o pagamento e a comanda é encerrada |
+| **Quem** | 19 a 25 anos, universitário ou no primeiro emprego, sai à noite em Sorocaba | Bar ou pub com pico de movimento |
+| **O que quer** | Achar o rolê e a promoção certa, e pedir sem esperar o garçom | Organizar bar e cozinha, fechar o caixa sem divergência e atrair público |
+| **Como usa** | De graça, pelo navegador | Assinatura mensal |
 
-### Regras de negócio
+### O mercado
 
-- A **comanda pertence ao cliente**, não à mesa: várias pessoas na mesma mesa têm comandas separadas
-- A comanda pode não ter mesa (**balcão**)
-- **Nenhum pedido antes da liberação**: o atendente confirma a presença física do cliente
-- O **status fica em cada item**: bar e cozinha avançam em ritmos diferentes
-- O **preço é congelado no pedido**: mudanças no cardápio não alteram o que já foi pedido
-- O **pagamento acontece no caixa**: o app registra o fechamento e a confirmação, mas não processa transações
+| 🇧🇷 Brasil | São Paulo | 🎶 Sorocaba | 🚀 1º ano |
+|:---:|:---:|:---:|:---:|
+| **589.348**<br/><sub>bares e restaurantes ativos</sub> | **154.259**<br/><sub>estabelecimentos no estado</sub> | **344**<br/><sub>bares com entretenimento</sub> | **10 bares**<br/><sub>cerca de 2,9% do nicho local</sub> |
 
-## ✨ Principais funcionalidades
+<sub>Fonte: dados abertos de CNPJ da Receita Federal, CNAE 5611-2, agosto de 2026.</sub>
 
-- **Login único com redirecionamento por perfil**: cliente, atendente e gerente, cada um na sua área
-- **Recuperação de senha por e-mail**
-- **Confirmação do e-mail com código de 6 números** no cadastro do cliente e no convite de atendente (ligar no Supabase: [`supabase/emails/COMO_CONFIGURAR.md`](supabase/emails/COMO_CONFIGURAR.md))
-- **Discovery de bares** com fotos, busca e perfil completo do estabelecimento
-- **Comanda digital** em mesa ou balcão, sem comandas duplicadas
-- **Cardápio por categoria** com carrinho; o pedido é gravado numa única transação no banco
-- **Telas do atendente**: Pedidos, separados em Bar e Cozinha, e Comandas, para liberar ou recusar a entrada, acompanhar as abertas e conferir os itens antes de confirmar o pagamento, com um contador de pendências na navegação
-- **Área do gerente** com movimento, resumo da noite, resultados, postagens, equipe e perfil do bar
-- **Equipe por convite**: o gerente gera um link (válido por 48 horas e para uma pessoa só), o atendente cria a conta por ele, com foto, e o gerente aprova. No perfil de cada atendente, o gerente vê os pedidos entregues por hora e por noite
-- **Feed de promoções**: o gerente publica promoções de bebida e comida, eventos e novidades, vendo a prévia do cartão; o cliente vê tudo no Feed, com filtro por tipo, desconto e validade
-- **Notificações do cliente**: comanda liberada ou recusada, pedido pronto (bar e cozinha), pagamento confirmado e promoção nova de um bar que ele já visitou. Chegam na hora, com aviso no topo da tela e, se a pessoa permitir, aviso do navegador quando o +party está em outra aba
-- **Layout para celular e desktop** nas três áreas: no computador, menu lateral; o atendente vê os pedidos em colunas (Novos e Em preparo) e as comandas com o detalhe ao lado; o gerente tem o Movimento em painel e o perfil de cada atendente ao lado da lista da Equipe
-- **Atualização em tempo real** entre a tela do cliente e a do atendente (requer o script `realtime.sql` aplicado no banco)
-- **Segurança no banco**: as regras valem mesmo para quem chama a API diretamente
+### Quem resolve um lado não resolve o outro
 
-## 🏗️ Arquitetura
+| O que o bar e o cliente precisam | Zig | Goomer | Guias locais | **+party** |
+|---|:---:|:---:|:---:|:---:|
+| Descobrir o bar antes de sair | ❌ | ❌ | ✅ | ✅ |
+| Comanda e pedido pelo celular | ✅ | só cardápio QR | ❌ | ✅ |
+| Sem recarga nem taxa por transação | ❌ | ✅ | — | ✅ |
+| Sem baixar aplicativo | — | ✅ | — | ✅ |
+
+<sub>Benchmark da equipe, setembro de 2026.</sub>
+
+### Modelo de negócio
+
+- **Receita:** assinatura mensal do bar (cerca de **R$ 299**) e destaque pago nas Novidades.
+- **Canais:** visita aos bares, landing page e a própria vitrine de Novidades.
+- **Métricas que importam:** bares ativos, comandas por noite, ticket médio e tempo de preparo.
+
+## 🧪 Validado com quem usa
+
+Testamos o protótipo no bar **Japa's Deck**, em Sorocaba, em 3 de setembro de 2026, com dois frequentadores e um gerente de bebidas. O que ouvimos virou produto:
+
+| O que ouvimos | O que fizemos |
+|---|---|
+| *"Quero saber onde tem rolê e promoção"* | Criamos a vitrine de promoções e eventos, hoje **Novidades** |
+| *"A letra está difícil de ler"* | Mais contraste e tipografia maior |
+| *"O painel do gerente está carregado"* | Painel focado em alertas e no resumo da noite |
+| *"Preciso confiar no fechamento do caixa"* | Só o atendente confirma o pagamento |
+
+## 🛠️ Como construímos
+
+```mermaid
+flowchart LR
+    subgraph App["📱 Web app (Angular 22 + TypeScript)"]
+        C[Cliente]
+        A[Atendente]
+        G[Gerente]
+    end
+    subgraph Supabase["☁️ Supabase"]
+        Auth["Login e e-mail"]
+        DB[("PostgreSQL<br/>regras de acesso por linha")]
+        RT["Realtime<br/>atualiza as telas na hora"]
+        ST["Storage<br/>fotos"]
+    end
+    App <--> Auth
+    App <--> DB
+    DB --> RT --> App
+    App <--> ST
+```
 
 | Camada | Tecnologia |
 |---|---|
-| Interface | Angular 22 (standalone components, signals, `@if` / `@for`), SCSS |
-| Linguagem | TypeScript 6 |
-| Backend | Supabase: PostgreSQL, Auth, Row Level Security e Realtime |
-| Testes | Vitest |
-| Protótipo e gestão | Figma e Trello |
+| Interface | **Angular 22** e **TypeScript**, mobile-first, abre no celular e no computador |
+| Banco e tempo real | **Supabase** com **PostgreSQL**: o pedido chega na hora ao bar e à cozinha |
+| Regras de negócio | No próprio banco: regras de acesso por linha (RLS), *triggers* e funções |
+| Qualidade | Testes automatizados com **Vitest**, revisão em *pull requests* e análise de segurança e desempenho no Supabase |
+| Produto | Lean Startup, Figma, Trello e Scrum |
 
-<!-- Diagrama do banco: adicionar docs/img/diagrama-banco.png (exportado do dbdiagram) e descomentar
-<img src="docs/img/diagrama-banco.png" alt="Diagrama do banco de dados" width="100%" />
--->
+<sub>Quer ver por dentro? Os scripts do banco e o que cada um faz estão em [`supabase/README.md`](supabase/README.md).</sub>
 
-### Banco de dados
+## 🚀 Próximos passos
 
-8 tabelas: `estabelecimentos`, `perfis`, `itens`, `comandas`, `pedidos`, `pedido_itens`, `alertas` e `postagens`.
+- 🤖 **Chatbot com IA:** tira dúvidas sobre o bar, ajuda no cardápio e recomenda promoções.
+- 📱 **App nativo:** notificações mesmo com o app fechado e acesso aos recursos do celular.
+- 🍻 **Bares-piloto em Sorocaba:** rumo à meta de 10 bares no primeiro ano.
 
-Os scripts ficam versionados na pasta [`supabase/`](supabase/) e são aplicados pelo SQL Editor do Supabase:
+## 👋 Quem somos
 
-| Arquivo | Função |
-|---|---|
-| `rls_policies.sql` | Regras de acesso por linha das 8 tabelas |
-| `trigger_criar_perfil.sql` | Cria o perfil automaticamente no cadastro |
-| `protecoes.sql` | Valida as regras de negócio no próprio banco |
-| `criar_pedido.sql` | Grava o pedido e os itens numa única transação |
-| `realtime.sql` | Liga a atualização em tempo real |
-| `estabelecimentos_detalhes.sql` | Foto, descrição, tags e horário de funcionamento do bar |
-| `seed_novo_bar.sql` | Modelo para cadastrar um bar novo, o seu cardápio e o gerente |
-| `equipe.sql` | Atendente pede para entrar na equipe de um bar e o gerente aprova, recusa ou remove |
-| `equipe_convites.sql` | Entrada na equipe só por convite, foto de perfil (Storage) e registro de quem entregou cada pedido |
-| `recusar_comanda.sql` | Status `recusada`: o atendente recusa a comanda de quem não está no bar |
-| `feed_notificacoes.sql` | Postagens com tipo, preço e validade (com promoções de exemplo), fotos no Storage e notificações criadas pelo próprio banco |
-| `comanda_regras.sql` | Uma comanda ativa por cliente (trava abas duplicadas e conta não paga), status `cancelada` e `nao_paga` (gerente libera quem saiu sem pagar) e histórico de contas não pagas para quem libera |
-| `avaliacoes.sql` | Avaliações verificadas: só quem pagou avalia (uma vez por comanda, até 7 dias), o pedido fica guardado até responder ou dispensar, nota do bar calculada pelo banco, resposta e denúncia do gerente |
-| `mesa_fila.sql` | Situação da mesa (livre, em uso, sendo liberada) e fila de espera: quando a mesa libera, o banco abre a comanda do primeiro da fila e avisa |
-| `agenda_eventos.sql` | Agenda de eventos do bar (com repetição semanal), "Tenho interesse", lembrete 2 h antes (pg_cron) e aviso de evento cancelado |
-| `resultados_periodo.sql` | Números da tela Resultados para 3, 7, 15 ou 30 dias, já somados no banco e comparados com o período anterior |
-| `bar_redes_localizacao.sql` | Instagram, TikTok, WhatsApp e ponto no mapa do bar (o banco limpa o que o gerente digita); edição de postagens sem mudar a data de publicação |
-| `demo_bar_dze.sql` | Demonstração no Bar D'Zé: a noite de hoje e os 30 dias anteriores (sexta e sábado cheios), avaliações, agenda com interessados, uma fila de mesa e uma conta não paga, com os horários de agora. `demo_bar_dze_remover.sql` apaga tudo |
-| `seguranca_advisor.sql` | Correções do Security Advisor do Supabase: `search_path` fixo em todas as funções, funções de trigger fechadas para chamadas diretas e funções `SECURITY DEFINER` fechadas para visitantes, exceto as que o app usa sem login |
+Sete pessoas do 4º semestre de **Análise e Desenvolvimento de Sistemas** da **Facens**, sob orientação do **Prof. Renato do Nascimento Júnior**.
 
-### Segurança
-
-- **Row Level Security** em todas as tabelas: o cliente só vê as próprias comandas; funcionário e gerente só veem o que é do seu bar
-- **Regras validadas no banco**, não só na tela: um cliente não consegue liberar a própria comanda, marcá-la como paga, mudar o próprio perfil para gerente nem definir o preço do item que pede
-- **Rotas protegidas**: as telas do atendente e do gerente só abrem para a equipe do bar, e usar uma comanda exige login
-
-### Google Maps
-
-O mapa do Descobrir e o ponto do bar nas Configurações do gerente usam a **Maps JavaScript API**. Sem chave, o app mostra "Mapa indisponível" e todo o resto funciona, inclusive o "Como chegar", que é só um link para o app do Google Maps e não usa a chave.
-
-Para ligar o mapa:
-
-1. No [Google Cloud Console](https://console.cloud.google.com/), crie um projeto (ou use um existente) e ative o **faturamento**. O uso de um app pequeno fica dentro da cota gratuita mensal, mas o Google exige o cartão cadastrado.
-2. Em **APIs e serviços → Biblioteca**, ative a **Maps JavaScript API**.
-3. Em **APIs e serviços → Credenciais**, crie uma **chave de API** e restrinja:
-   - **Restrições de aplicativo:** *Sites*, com os domínios do app (ex.: `https://seu-dominio.com/*` e `http://localhost:4200/*`);
-   - **Restrições de API:** só a *Maps JavaScript API*.
-4. Em **Faturamento → Orçamentos e alertas**, crie um alerta de orçamento (ex.: R$ 10) para ser avisado de qualquer uso inesperado.
-5. Cole a chave em `googleMapsKey` nos dois arquivos de `src/environments/`. Com as restrições do passo 3 ela pode ficar no código: só funciona nos domínios liberados.
-
-Depois, cada gerente marca o ponto do bar em **Configurações → Redes e localização**, e o bar aparece no mapa do Descobrir.
-
-### Estrutura de pastas
-
-```
-src/app/
-├── Pages/        telas (login, discovery, comanda, cardápio, atendente, gerente…)
-├── components/   componentes reutilizáveis
-├── guards/       proteção de rotas por tipo de usuário
-├── models/       interfaces compartilhadas
-└── services/     acesso ao Supabase, um serviço por área
-supabase/         scripts SQL do banco
-public/           imagens e ícones
-```
-
-A landing page do projeto fica em um repositório separado.
-
-## 📍 Estado do projeto
-
-🚧 **Em desenvolvimento** — apresentação final prevista para **15/11/2026**.
-
-| Área | Situação |
-|---|---|
-| Jornada do cliente | ✅ Pronta, com dados reais |
-| Telas do atendente | ✅ Prontas, com dados reais |
-| Login, cadastro e recuperação de senha | ✅ Prontos |
-| Área do gerente | 🚧 Login real; telas ainda com dados de exemplo |
-| Feed, chamar garçom, avaliação e histórico | 📋 Próximas etapas |
-| Cadastro de cardápio pelo gerente | ⛔ Fora do escopo: feito pela equipe no banco |
-| Pagamento dentro do app | ⛔ Fora do escopo |
-
-## 🤝 Como contribuir
-
-1. Crie uma branch a partir da `main` (`feature/nome-da-tarefa` ou `fix/nome-do-problema`)
-2. Faça commits no padrão *conventional commits*: `feat:`, `fix:`, `chore:`, `docs:`, `style:`
-3. Rode `npm test` e `npm run build` antes de abrir o pull request
-4. Se a mudança exigir alteração no banco, inclua o script em `supabase/` e avise no PR que ele precisa ser aplicado antes do merge
-
-## 👥 Equipe
-
-<!-- Completar com o nome e a função dos 7 integrantes -->
-
-<p>
-  <a href="https://github.com/PedroLima-07"><img src="https://github.com/PedroLima-07.png?size=80" width="64" alt="PedroLima-07" /></a>
-  <a href="https://github.com/NathanDotAlves"><img src="https://github.com/NathanDotAlves.png?size=80" width="64" alt="NathanDotAlves" /></a>
-  <a href="https://github.com/gabrielmarques23"><img src="https://github.com/gabrielmarques23.png?size=80" width="64" alt="gabrielmarques23" /></a>
-  <a href="https://github.com/luizeflss"><img src="https://github.com/luizeflss.png?size=80" width="64" alt="luizeflss" /></a>
-  <a href="https://github.com/danilobossolani"><img src="https://github.com/danilobossolani.png?size=80" width="64" alt="danilobossolani" /></a>
-</p>
-
-## 📄 Licença
-
-Distribuído sob a licença **MIT**. Veja o arquivo [`LICENSE`](LICENSE).
+| | Integrante | Papel |
+|:---:|---|---|
+| <a href="https://github.com/PedroLima-07"><img src="https://github.com/PedroLima-07.png?size=80" width="48" alt="Pedro Lima" /></a> | **Pedro Lima** | Scrum Master e desenvolvedor full-stack |
+| <a href="https://github.com/NathanDotAlves"><img src="https://github.com/NathanDotAlves.png?size=80" width="48" alt="Nathan da Silva" /></a> | **Nathan da Silva** | Back-end, banco de dados e versionamento |
+| <a href="https://github.com/gabrielmarques23"><img src="https://github.com/gabrielmarques23.png?size=80" width="48" alt="Gabriel Marques" /></a> | **Gabriel Marques** | Front-end e integração |
+| <a href="https://github.com/luizeflss"><img src="https://github.com/luizeflss.png?size=80" width="48" alt="Luiz Eduardo" /></a> | **Luiz Eduardo** | Requisitos, modelagem e documentação |
+| <a href="https://github.com/danilobossolani"><img src="https://github.com/danilobossolani.png?size=80" width="48" alt="Danilo Bossolani" /></a> | **Danilo Bossolani** | BI, marketing e validação de mercado |
+| 🎨 | **Kauã David** | UI/UX e identidade visual |
+| 🎨 | **Sabrina Montosa** | UI/UX e design de apresentação |
 
 <div align="center">
-  <sub>+party 2026 · Startup Project One · Análise e Desenvolvimento de Sistemas · Facens</sub>
+
+### Quer ver o +party funcionando?
+
+<a href="https://plusparty-landingpage.pedrocardosolima20.workers.dev/"><b>🌐 Site oficial</b></a> · <a href="https://www.youtube.com/@PlusParty-c3y"><b>▶️ YouTube</b></a>
+
+<br/>
+
+<sub>Distribuído sob a licença MIT · +party 2026 · Sua noite, sem complicação.</sub>
+
 </div>
