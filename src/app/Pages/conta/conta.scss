@@ -1,0 +1,160 @@
+@use '../../../styles/desktop' as d;
+
+:host {
+  display: block;
+  min-height: 100dvh;
+  background: #f7f8fb;
+  color: #0f1f4b;
+  font-family: system-ui, sans-serif;
+}
+
+.conta {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  max-width: 560px;
+  margin: 0 auto;
+  padding: 24px 16px 48px;
+
+  h1 {
+    margin: 0 0 4px;
+    font-size: 26px;
+    font-weight: 800;
+  }
+}
+
+.cartao {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px;
+  border: 1px solid #e3e7ef;
+  border-radius: 16px;
+  background: #fff;
+
+  div {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+  }
+
+  span {
+    overflow: hidden;
+    color: #6b7280;
+    font-size: 13px;
+    text-overflow: ellipsis;
+  }
+}
+
+.avatar {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: #dbe6ff;
+  color: #0f1f4b !important;
+  font-size: 18px !important;
+  font-weight: 800;
+}
+
+.links {
+  flex-direction: column;
+  align-items: flex-start;
+
+  a {
+    color: #2f6bff;
+    font-size: 14px;
+    font-weight: 600;
+  }
+}
+
+.sair,
+.botao-contorno {
+  min-height: 44px;
+  padding: 0 16px;
+  border: 1px solid #0f1f4b;
+  border-radius: 12px;
+  background: #fff;
+  color: #0f1f4b;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.perigo {
+  flex-direction: column;
+  align-items: stretch;
+  border-color: #f3c4c4;
+
+  h2 {
+    margin: 0;
+    color: #b91c1c;
+    font-size: 16px;
+  }
+
+  p {
+    margin: 0;
+    color: #4d5565;
+    font-size: 13px;
+    line-height: 1.5;
+  }
+}
+
+.botao-perigo {
+  min-height: 44px;
+  padding: 0 16px;
+  border: 0;
+  border-radius: 12px;
+  background: #dc2626;
+  color: #fff;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+.confirmar {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 13px;
+
+  input {
+    padding: 12px 14px;
+    border: 1px solid #e3e7ef;
+    border-radius: 10px;
+    font: inherit;
+    font-size: 15px;
+  }
+}
+
+.acoes {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.erro {
+  margin: 0;
+  color: #b91c1c;
+  font-size: 13px;
+}
+
+@include d.desktop {
+  :host {
+    padding-left: d.$largura-menu;
+  }
+
+  .conta {
+    padding-top: 44px;
+  }
+}

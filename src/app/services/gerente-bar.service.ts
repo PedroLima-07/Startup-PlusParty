@@ -1,6 +1,8 @@
 import { Injectable, inject } from '@angular/core';
 import {
   AvaliacaoGerente,
+  Item,
+  NovoItem,
   AvaliacoesPeriodo,
   EventoDoBar,
   NovoEvento,
@@ -69,6 +71,53 @@ export class GerenteBarService {
       p_motivo: motivo,
     });
     if (error) throw error;
+  }
+
+  // -------------------------------------------------------------- cardápio
+  /** Todos os itens do bar, inclusive os esgotados, por categoria e nome. */
+  async itens(): Promise<Item[]> {
+    const { data, error } = await this.supabase.client
+      .from('itens')
+      .select('*')
+      .eq('estabelecimento_id', await this.meuBar())
+      .order('categoria')
+      .order('nome');
+    if (error) throw error;
+    return (data ?? []) as Item[];
+  }
+
+  async criarItem(item: NovoItem): Promise<Item> {
+    const { data, error } = await this.supabase.client
+      .from('itens')
+      .insert({ ...item, estabelecimento_id: await this.meuBar() })
+      .select('*')
+      .single();
+    if (error) throw error;
+    return data as Item;
+  }
+
+  /** O preço novo vale para os próximos pedidos; os já feitos guardam o preço da hora. */
+  async editarItem(id: string, mudanca: Partial<NovoItem>): Promise<Item> {
+    const { data, error } = await this.supabase.client
+      .from('itens')
+      .update(mudanca)
+      .eq('id', id)
+      .select('*')
+      .single();
+    if (error) throw error;
+    return data as Item;
+  }
+
+  /**
+   * Apaga o item. Item que já foi pedido não pode sumir (os pedidos antigos
+   * apontam para ele): nesse caso devolve `false`, e o certo é marcar como
+   * esgotado.
+   */
+  async apagarItem(id: string): Promise<boolean> {
+    const { error } = await this.supabase.client.from('itens').delete().eq('id', id);
+    if (error?.code === '23503') return false;
+    if (error) throw error;
+    return true;
   }
 
   // ---------------------------------------------------------------- agenda

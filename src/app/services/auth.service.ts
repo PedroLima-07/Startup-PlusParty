@@ -133,6 +133,31 @@ export class AuthService {
     if (error) throw error;
   }
 
+  /**
+   * Exclui a conta de quem está logado (supabase/excluir_conta.sql): apaga a
+   * foto de perfil, apaga ou anonimiza os dados no banco e encerra a sessão.
+   * O banco recusa conta da equipe e quem tem comanda em andamento; a
+   * mensagem dele vem no erro.
+   */
+  async excluirConta(): Promise<void> {
+    const usuario = await this.usuarioAtual();
+    if (!usuario) throw new Error('Usuário não autenticado.');
+
+    // A foto sai primeiro: depois da exclusão, a pasta não é mais de ninguém.
+    const armazenamento = this.supabase.client.storage.from(BUCKET_FOTOS);
+    const { data: fotos } = await armazenamento.list(usuario.id);
+    if (fotos?.length) {
+      await armazenamento.remove(fotos.map((foto) => `${usuario.id}/${foto.name}`));
+    }
+
+    const { error } = await this.supabase.client.rpc('excluir_minha_conta');
+    if (error) throw new Error(error.message);
+
+    this.perfilGuardado = null;
+    // A sessão já foi apagada no banco; aqui só limpa a aba.
+    await this.supabase.client.auth.signOut({ scope: 'local' }).catch(() => undefined);
+  }
+
   async sair(): Promise<void> {
     this.perfilGuardado = null;
     const { error } = await this.supabase.client.auth.signOut();

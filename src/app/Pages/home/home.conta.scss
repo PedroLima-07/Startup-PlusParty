@@ -126,3 +126,20 @@
     display: none;
   }
 }
+
+.conta-link {
+  display: flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0 10px;
+  border-radius: 10px;
+  color: #0f1f4b;
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+
+  &:hover,
+  &:focus-visible {
+    background: #f1f3f8;
+  }
+}

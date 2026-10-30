@@ -81,6 +81,9 @@ export interface Item {
   disponivel: boolean;
 }
 
+/** O que o gerente preenche para criar ou editar um item do cardápio. */
+export type NovoItem = Pick<Item, 'nome' | 'categoria' | 'preco' | 'setor' | 'disponivel'>;
+
 export interface Comanda {
   id: string;
   usuario_id: string;

@@ -179,3 +179,30 @@ h2 {
 .erro {
   @include g.mensagem-erro;
 }
+
+// Atalho para o Cardápio (no celular é por aqui que se chega lá).
+.atalho-cardapio {
+  @include g.cartao;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  color: g.$marinho;
+  text-decoration: none;
+
+  span:first-child {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  small {
+    color: g.$texto-suave;
+    font-size: 12px;
+  }
+
+  > span:last-child {
+    color: g.$texto-suave;
+    font-size: 22px;
+  }
+}
