@@ -2,6 +2,7 @@ import { CurrencyPipe, DatePipe } from '@angular/common';
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { EventoDoBar, NovoEvento } from '../../../models';
+import { lerEntrada } from '../../../dinheiro';
 import { GerenteBarService } from '../../../services/gerente-bar.service';
 
 const DIAS_PLURAL = ['DOMINGOS', 'SEGUNDAS', 'TERÇAS', 'QUARTAS', 'QUINTAS', 'SEXTAS', 'SÁBADOS'];
@@ -33,13 +34,8 @@ function dois(n: number): string {
   return String(n).padStart(2, '0');
 }
 
-/** "15,00" → 15; vazio → null (grátis). */
-export function lerEntrada(texto: string): number | null | 'invalida' {
-  const limpo = texto.replace(/[R$\s]/g, '').replace(/\./g, '').replace(',', '.');
-  if (!limpo) return null;
-  const valor = Number(limpo);
-  return Number.isFinite(valor) && valor >= 0 ? valor : 'invalida';
-}
+// Entrada vazia é grátis (null). Exportada também aqui para os testes da agenda.
+export { lerEntrada };
 
 /**
  * Agenda do gerente: eventos do bar (únicos ou toda semana), com quantos

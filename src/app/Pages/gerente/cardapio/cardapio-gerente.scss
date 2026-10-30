@@ -1,0 +1,282 @@
+@use '../gerente' as g;
+@use '../../../../styles/desktop' as d;
+
+.pagina {
+  @include g.pagina;
+  max-width: 900px;
+}
+
+.cabecalho {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 12px;
+
+  h1 {
+    margin: 0;
+    font-size: 24px;
+    font-weight: 800;
+    @include g.titulo-desktop;
+  }
+
+  p {
+    margin: 4px 0 0;
+    color: g.$texto-suave;
+    font-size: 13px;
+  }
+}
+
+.botao-azul {
+  @include g.botao-azul;
+  flex-shrink: 0;
+  min-height: 44px;
+}
+
+.botao-marinho {
+  @include g.botao-marinho;
+}
+
+.botao-contorno {
+  @include g.botao-contorno;
+}
+
+.botao-perigo {
+  @include g.botao;
+  background: g.$perigo;
+  color: #fff;
+}
+
+.link,
+.link-perigo {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: g.$azul;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.link-perigo {
+  color: g.$perigo;
+}
+
+.sucesso {
+  margin: 0;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: #e6f7ee;
+  color: #146c43;
+  font-size: 13px;
+}
+
+.busca input {
+  @include g.campo;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+}
+
+.categoria {
+  @include g.cartao;
+  padding: 0;
+  overflow: hidden;
+
+  ul {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+}
+
+.categoria-topo {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 14px 16px;
+  border-bottom: 1px solid g.$borda;
+
+  h2 {
+    margin: 0;
+    font-size: 15px;
+  }
+}
+
+.item {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 8px 12px;
+  padding: 12px 16px;
+
+  & + & {
+    border-top: 1px solid g.$borda;
+  }
+
+  &.esgotado .item-texto strong,
+  &.esgotado .preco {
+    color: g.$texto-suave;
+  }
+
+  @include d.desktop {
+    grid-template-columns: minmax(0, 1fr) 110px 120px auto;
+  }
+}
+
+.item-texto {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 8px;
+  min-width: 0;
+
+  strong {
+    font-size: 15px;
+  }
+}
+
+.setor {
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: #eaf0ff;
+  color: g.$azul;
+  font-size: 11px;
+  font-weight: 700;
+
+  &.cozinha {
+    background: #fff4e0;
+    color: #9a4a00;
+  }
+}
+
+.preco {
+  @include g.numero;
+  font-size: 15px;
+  text-align: right;
+}
+
+.disponivel {
+  min-height: 34px;
+  padding: 0 12px;
+  border: 1px solid #b7e4c7;
+  border-radius: 999px;
+  background: #e6f7ee;
+  color: #146c43;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+
+  &.desligado {
+    border-color: #f3c4c4;
+    background: #fde8e8;
+    color: #b91c1c;
+  }
+}
+
+.vazio {
+  padding: 24px 16px;
+  border: 1px dashed g.$borda;
+  border-radius: 12px;
+  background: #fff;
+  color: g.$texto-suave;
+  font-size: 14px;
+  text-align: center;
+}
+
+.mensagem-erro {
+  @include g.mensagem-erro;
+}
+
+.dica {
+  margin: 0;
+  color: g.$texto-suave;
+  font-size: 12px;
+}
+
+// ----------------------------------------------------------- painel
+.fundo {
+  @include g.janela-fundo;
+  justify-content: flex-end;
+}
+
+.painel {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  width: min(440px, 100%);
+  height: 100%;
+  padding: 24px;
+  overflow-y: auto;
+  background: #fff;
+  box-sizing: border-box;
+
+  h2 {
+    margin: 0;
+    font-size: 20px;
+  }
+}
+
+.campo {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 700;
+
+  input {
+    @include g.campo;
+    font-weight: 400;
+  }
+}
+
+.setores {
+  display: flex;
+  gap: 16px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  font-size: 14px;
+
+  legend {
+    margin-bottom: 6px;
+    font-size: 13px;
+    font-weight: 700;
+  }
+
+  label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+}
+
+.marcar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
+
+  input {
+    width: 18px;
+    height: 18px;
+  }
+}
+
+.rodape {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: auto;
+}
+
+.espaco {
+  flex: 1;
+}

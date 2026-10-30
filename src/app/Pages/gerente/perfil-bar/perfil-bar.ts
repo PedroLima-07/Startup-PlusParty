@@ -1,6 +1,6 @@
 import { Component, OnDestroy, OnInit, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { DadosDoBar } from '../../../models';
 import { AuthService } from '../../../services/auth.service';
 import { BarPerfilService } from '../../../services/bar-perfil.service';
@@ -39,7 +39,7 @@ const LIMITE_FOTO = 5 * 1024 * 1024;
  */
 @Component({
   selector: 'app-perfil-bar',
-  imports: [FormsModule, Icone, RedesLocalizacao],
+  imports: [FormsModule, Icone, RedesLocalizacao, RouterLink],
   templateUrl: './perfil-bar.html',
   styleUrl: './perfil-bar.scss',
 })

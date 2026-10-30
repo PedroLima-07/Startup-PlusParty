@@ -1,0 +1,149 @@
+<div class="pagina">
+  <header class="cabecalho">
+    <div>
+      <h1>Cardápio</h1>
+      <p>
+        {{ itens().length }} {{ itens().length === 1 ? 'item' : 'itens' }}
+        @if (esgotados() > 0) {
+          · {{ esgotados() }} {{ esgotados() === 1 ? 'esgotado' : 'esgotados' }}
+        }
+        · Os clientes veem as mudanças ao abrir o cardápio; item esgotado não pode mais ser pedido.
+      </p>
+    </div>
+    <button type="button" class="botao-azul" (click)="novo()">+ Item</button>
+  </header>
+
+  @if (aviso(); as texto) {
+    <p class="sucesso" role="status">{{ texto }}</p>
+  }
+
+  @if (erro(); as mensagem) {
+    <p class="mensagem-erro" role="alert">
+      {{ mensagem }}
+      <button type="button" class="botao-contorno" (click)="carregar()">Tentar de novo</button>
+    </p>
+  } @else if (carregando()) {
+    <p class="vazio">Carregando o cardápio...</p>
+  } @else if (itens().length === 0) {
+    <p class="vazio">O cardápio está vazio. Toque em "+ Item" para cadastrar a primeira bebida ou porção.</p>
+  } @else {
+    <label class="busca">
+      <span class="sr-only">Buscar no cardápio</span>
+      <input
+        type="search"
+        placeholder="Buscar item ou categoria"
+        [ngModel]="busca()"
+        (ngModelChange)="busca.set($event)"
+      />
+    </label>
+
+    @for (g of grupos(); track g.categoria) {
+      <section class="categoria">
+        <div class="categoria-topo">
+          <h2>{{ g.categoria }}</h2>
+          <button type="button" class="link" (click)="novo(g.categoria)">+ Item em {{ g.categoria }}</button>
+        </div>
+        <ul>
+          @for (item of g.itens; track item.id) {
+            <li class="item" [class.esgotado]="!item.disponivel">
+              <div class="item-texto">
+                <strong>{{ item.nome }}</strong>
+                <span class="setor" [class.cozinha]="item.setor === 'cozinha'">
+                  {{ item.setor === 'bar' ? 'Bar' : 'Cozinha' }}
+                </span>
+              </div>
+              <span class="preco">{{ item.preco | currency: 'BRL' }}</span>
+              <button
+                type="button"
+                class="disponivel"
+                [class.desligado]="!item.disponivel"
+                role="switch"
+                [attr.aria-checked]="item.disponivel"
+                [attr.aria-label]="item.nome + (item.disponivel ? ': disponível' : ': esgotado')"
+                [disabled]="alternando() === item.id"
+                (click)="alternarDisponivel(item)"
+              >
+                {{ item.disponivel ? 'Disponível' : 'Esgotado' }}
+              </button>
+              <button type="button" class="botao-contorno" (click)="editar(item)">Editar</button>
+            </li>
+          }
+        </ul>
+      </section>
+    } @empty {
+      <p class="vazio">Nenhum item com "{{ busca() }}".</p>
+    }
+  }
+</div>
+
+@if (painel(); as p) {
+  <div class="fundo" (click)="fecharPainel()">
+    <form
+      class="painel"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="titulo-item"
+      (click)="$event.stopPropagation()"
+      (ngSubmit)="salvar()"
+    >
+      <h2 id="titulo-item">{{ editando() ? 'Editar item' : 'Novo item' }}</h2>
+
+      <label class="campo">
+        <span>Nome</span>
+        <input type="text" name="nome" maxlength="80" required [(ngModel)]="form.nome" placeholder="Chope Pilsen 350ml" />
+      </label>
+
+      <label class="campo">
+        <span>Categoria</span>
+        <input type="text" name="categoria" list="categorias" maxlength="40" required [(ngModel)]="form.categoria" placeholder="Cervejas" />
+        <datalist id="categorias">
+          @for (c of categorias(); track c) {
+            <option [value]="c"></option>
+          }
+        </datalist>
+      </label>
+
+      <label class="campo">
+        <span>Preço</span>
+        <input type="text" name="preco" inputmode="decimal" required [(ngModel)]="form.preco" placeholder="12,90" />
+      </label>
+
+      <fieldset class="setores">
+        <legend>Quem prepara</legend>
+        <label>
+          <input type="radio" name="setor" value="bar" [(ngModel)]="form.setor" /> Bar
+        </label>
+        <label>
+          <input type="radio" name="setor" value="cozinha" [(ngModel)]="form.setor" /> Cozinha
+        </label>
+      </fieldset>
+
+      <label class="marcar">
+        <input type="checkbox" name="disponivel" [(ngModel)]="form.disponivel" />
+        Disponível para pedir
+      </label>
+
+      @if (editando()) {
+        <p class="dica">Mudar o preço vale para os próximos pedidos. O que já foi pedido continua com o preço da hora.</p>
+      }
+      @if (erroForm(); as mensagem) {
+        <p class="mensagem-erro" role="alert">{{ mensagem }}</p>
+      }
+
+      <div class="rodape">
+        @if (editando()) {
+          @if (confirmandoApagar()) {
+            <button type="button" class="botao-perigo" [disabled]="salvando()" (click)="apagar()">Apagar mesmo</button>
+          } @else {
+            <button type="button" class="link-perigo" (click)="confirmandoApagar.set(true)">Apagar item</button>
+          }
+        }
+        <span class="espaco"></span>
+        <button type="button" class="botao-contorno" (click)="fecharPainel()">Fechar</button>
+        <button type="submit" class="botao-marinho" [disabled]="salvando()">
+          {{ salvando() ? 'Salvando...' : 'Salvar' }}
+        </button>
+      </div>
+    </form>
+  </div>
+}
