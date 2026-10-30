@@ -18,6 +18,7 @@ describe('LegalPage', () => {
     expect(texto).toContain('Supabase');
     expect(texto).toContain('não usa cookies');
     expect(texto).toContain('art. 18 da LGPD');
+    expect(texto).toContain('technomind.pp@gmail.com');
   });
 
   it('os termos linkam a política', () => {

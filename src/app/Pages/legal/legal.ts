@@ -1,12 +1,8 @@
 import { Component, input } from '@angular/core';
 import { RouterLink } from '@angular/router';
 
-/**
- * E-mail para pedidos sobre dados pessoais (LGPD). Enquanto estiver vazio, as
- * páginas dizem para escrever pelo canal de contato do bar ou do +party.
- * TODO: preencher com o e-mail oficial da equipe antes de publicar.
- */
-export const CONTATO_PRIVACIDADE = '';
+/** E-mail da equipe para pedidos sobre dados pessoais (LGPD). */
+export const CONTATO_PRIVACIDADE = 'technomind.pp@gmail.com';
 
 /** Data da versão em vigor dos textos. Mude junto quando o texto mudar. */
 export const ATUALIZADO_EM = '29 de outubro de 2026';
