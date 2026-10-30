@@ -13,6 +13,26 @@ npm start
 
 O app abre em **http://localhost:4200**. `npm test` roda os testes e `npm run build` gera a versão de produção. A conexão com o Supabase vem configurada em `src/environments`, com a chave pública (*publishable*): quem protege os dados são as regras do próprio banco.
 
+## Publicar o app
+
+O app é um site estático: `npm run build` gera tudo em `dist/temp/browser`. Já vêm prontos:
+
+- `public/_redirects` e `public/_headers` (Cloudflare Pages e Netlify) e `vercel.json` (Vercel): toda rota abre o app, mesmo ao recarregar a página; cabeçalhos de segurança (anti-*clickjacking*, HTTPS obrigatório, sem acesso a câmera, microfone e localização); e cache longo só para os arquivos com hash no nome.
+- `public/manifest.webmanifest` e `public/icons/`: o app pode ser instalado no celular ("Adicionar à tela inicial").
+
+**Cloudflare Pages** (recomendado, mesma conta da landing page):
+
+1. Cloudflare → *Workers & Pages* → *Create* → *Pages* → *Connect to Git* → escolher este repositório.
+2. *Framework preset*: **Angular** · *Build command*: `npm run build` · *Build output directory*: `dist/temp/browser`.
+3. *Save and Deploy*. Cada merge na `main` publica sozinho; cada PR ganha um endereço de teste.
+
+**Depois de publicar**, no Supabase → *Authentication* → *URL Configuration*:
+
+- *Site URL*: o endereço publicado (ex.: `https://plusparty.pages.dev`);
+- *Redirect URLs*: o mesmo endereço com `/**` no fim, e `http://localhost:4200/**` para continuar testando na máquina.
+
+Sem isso, os links de "esqueci minha senha" levam para o endereço antigo.
+
 ## Scripts do banco
 
 Os scripts desta pasta são aplicados pelo **SQL Editor** do Supabase. Cada um explica no topo o que faz e termina com uma consulta de conferência.
