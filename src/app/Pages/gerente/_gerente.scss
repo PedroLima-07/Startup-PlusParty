@@ -2,12 +2,12 @@
 // dela repetem (cartão, rótulo de seção, botões, número em destaque).
 
 $marinho: #0f1f4b;
-$azul: #2f6bff;
+$azul: #2259e0;
 $azul-claro: #cddafd;
 $fundo: #f5f6fa;
 $borda: #e3e7ef;
 $texto-suave: #6b7280;
-$rotulo: #8a93a6;
+$rotulo: #5b6475;
 $perigo: #dc2626;
 
 // Curva das animações: rápida no começo, desacelera no final.
@@ -144,10 +144,10 @@ $mono: ui-monospace, 'SF Mono', 'Cascadia Mono', 'Roboto Mono', Consolas, monosp
 // Fundo de postagem sem foto, pelo `data-tipo`: as mesmas cores do cartão
 // do Feed (components/cartao-postagem).
 @mixin fundo-postagem {
-  background: linear-gradient(135deg, #2f6bff, #0f1f4b);
+  background: linear-gradient(135deg, #2259e0, #0f1f4b);
 
   &[data-tipo='bebida'] {
-    background: linear-gradient(135deg, #ff7a59, #e2366b 55%, #8f1d64);
+    background: linear-gradient(135deg, #ff7a59, #c81e55 55%, #8f1d64);
   }
 
   &[data-tipo='comida'] {

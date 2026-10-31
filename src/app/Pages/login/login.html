@@ -1,9 +1,9 @@
-<div class="tela">
+<main class="tela">
   <div class="card-login">
-    <div class="logo">
+    <h1 class="logo" aria-label="+party">
       <span class="logo-icone">+</span>
       <span>party</span>
-    </div>
+    </h1>
     <p class="tagline">Seu rolê começa aqui</p>
 
     @if (emailParaConfirmar(); as email) {
@@ -30,7 +30,7 @@
         }
 
         <label class="campo">
-          Login
+          E-mail
           <input
             type="email"
             formControlName="email"
@@ -108,4 +108,4 @@
   </div>
 
   <p class="rodape">+party 2026 · São Paulo</p>
-</div>
+</main>

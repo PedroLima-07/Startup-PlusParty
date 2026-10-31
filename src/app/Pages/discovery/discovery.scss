@@ -52,7 +52,7 @@
 }
 
 .search-box:focus-within {
-  border-color: #2f6bff;
+  border-color: #2259e0;
   box-shadow: 0 0 0 3px rgba(47, 107, 255, 0.12);
 }
 
@@ -101,8 +101,8 @@
 }
 
 .bar-card:hover {
-  border-color: #2f6bff;
-  box-shadow: 0 0 0 2px #2f6bff, 0 12px 26px rgba(47, 107, 255, 0.22);
+  border-color: #2259e0;
+  box-shadow: 0 0 0 2px #2259e0, 0 12px 26px rgba(47, 107, 255, 0.22);
   transform: translateY(-3px);
 }
 
@@ -137,7 +137,7 @@
   display: grid;
   place-items: center;
   color: #fff;
-  background: #2f6bff;
+  background: #2259e0;
   font-size: 15px;
   font-weight: 800;
   flex-shrink: 0;
