@@ -34,12 +34,12 @@ $queda: 7.1px; // altura que o nível da areia percorre (unidades do viewBox)
 }
 
 .areia {
-  fill: var(--cor-areia, #2f6bff);
+  fill: var(--cor-areia, #2259e0);
 }
 
 .fio {
   fill: none;
-  stroke: var(--cor-areia, #2f6bff);
+  stroke: var(--cor-areia, #2259e0);
   stroke-width: 0.9;
   animation: escorrer $ciclo linear infinite;
 }

@@ -44,7 +44,7 @@ describe('FeedPage', () => {
   }
 
   function titulos(): string[] {
-    return Array.from(tela().querySelectorAll('app-cartao-postagem h3')).map((h) => h.textContent ?? '');
+    return Array.from(tela().querySelectorAll('app-cartao-postagem h2')).map((h) => h.textContent ?? '');
   }
 
   async function abrir(): Promise<void> {
