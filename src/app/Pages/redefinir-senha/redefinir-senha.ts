@@ -1,3 +1,4 @@
+import { REGRA_SENHA, VALIDADORES_SENHA_NOVA } from '../../senha';
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
@@ -24,9 +25,10 @@ export class RedefinirSenhaPage implements OnInit {
   protected readonly estado = signal<Estado>('verificando');
   protected readonly salvando = signal(false);
   protected readonly erro = signal<string | null>(null);
+  protected readonly regraSenha = REGRA_SENHA;
 
   protected readonly form = this.fb.nonNullable.group({
-    senha: ['', [Validators.required, Validators.minLength(6)]],
+    senha: ['', VALIDADORES_SENHA_NOVA],
     confirmacao: ['', [Validators.required]],
   });
 
@@ -64,8 +66,8 @@ export class RedefinirSenhaPage implements OnInit {
     if (mensagem.includes('should be different')) {
       return 'A nova senha precisa ser diferente da atual.';
     }
-    if (mensagem.includes('Password should be at least')) {
-      return 'A senha precisa ter pelo menos 6 caracteres.';
+    if (mensagem.includes('Password should')) {
+      return REGRA_SENHA;
     }
 
     return 'Não foi possível salvar a nova senha. Tente novamente.';

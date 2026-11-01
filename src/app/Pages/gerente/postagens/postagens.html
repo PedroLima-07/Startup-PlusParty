@@ -68,7 +68,8 @@
       <button type="button" class="tentar" (click)="carregar()">Tentar de novo</button>
     </p>
   } @else {
-    <ul class="grade" role="tabpanel" [attr.aria-label]="aba() === 'ativas' ? 'Ativas' : 'Encerradas'">
+    <div role="tabpanel" [attr.aria-label]="aba() === 'ativas' ? 'Ativas' : 'Encerradas'">
+    <ul class="grade">
       @for (p of visiveis(); track p.id) {
         <li class="quadro" [attr.data-tipo]="p.tipo">
           @if (p.imagem_url; as foto) {
@@ -76,7 +77,7 @@
           } @else {
             <span class="midia arte" aria-hidden="true">{{ emoji[p.tipo] }}</span>
           }
-          <h3 class="titulo">{{ p.titulo }}</h3>
+          <h2 class="titulo">{{ p.titulo }}</h2>
 
           <div class="camada">
             <div class="infos">
@@ -140,6 +141,7 @@
         </li>
       }
     </ul>
+    </div>
   }
 </div>
 

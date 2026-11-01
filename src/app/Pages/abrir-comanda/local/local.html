@@ -44,7 +44,7 @@
           </div>
           @if (conta.fechada_em) {
             <span class="conta-pendente-hora">
-              Conta fechada às {{ conta.fechada_em | date: 'HH:mm' }} · há {{ minutosEsperandoPagamento() }} min
+              Conta fechada às {{ conta.fechada_em | date: 'HH:mm' }} · há {{ duracao(minutosEsperandoPagamento() ?? 0) }}
             </span>
           }
         </div>

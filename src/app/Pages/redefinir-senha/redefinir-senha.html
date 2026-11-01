@@ -26,7 +26,7 @@
             Nova senha
             <input type="password" formControlName="senha" autocomplete="new-password" />
             @if (form.controls.senha.invalid && form.controls.senha.touched) {
-              <span class="erro-campo">Mínimo de 6 caracteres.</span>
+              <span class="erro-campo">{{ regraSenha }}</span>
             }
           </label>
 

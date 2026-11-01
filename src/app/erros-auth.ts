@@ -1,3 +1,5 @@
+import { REGRA_SENHA } from './senha';
+
 /** O que o Supabase Auth manda nos erros: `code` nas versões novas, sempre `message`. */
 function lerErro(erro: unknown): { codigo: string; mensagem: string } {
   const comCodigo = erro as { code?: unknown } | null;
@@ -36,8 +38,8 @@ export function traduzirErroAuth(erro: unknown): string {
   if (mensagem.includes('already registered') || mensagem.includes('User already registered')) {
     return 'Esse e-mail já está cadastrado.';
   }
-  if (mensagem.includes('Password should be at least')) {
-    return 'A senha precisa ter pelo menos 6 caracteres.';
+  if (mensagem.includes('Password should')) {
+    return REGRA_SENHA;
   }
   if (codigo === 'otp_expired' || mensagem.includes('Token has expired or is invalid')) {
     return 'Código incorreto ou vencido. Confira os números ou peça um novo código.';

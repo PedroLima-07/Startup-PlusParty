@@ -1,3 +1,4 @@
+import { REGRA_SENHA, VALIDADORES_SENHA_NOVA } from '../../senha';
 import { Component, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
@@ -34,11 +35,13 @@ export class LoginPage {
    * numa conta que ainda não confirmou.
    */
   protected readonly emailParaConfirmar = signal<string | null>(null);
+  protected readonly senhaVisivel = signal(false);
+  protected readonly regraSenha = REGRA_SENHA;
 
   protected readonly form = this.fb.nonNullable.group({
     nome: [''],
     email: ['', [Validators.required, Validators.email]],
-    senha: ['', [Validators.required, Validators.minLength(6)]],
+    senha: ['', [Validators.required]],
   });
 
   /** Cada modo exige campos diferentes: nome só no cadastro, senha só fora do "recuperar". */
@@ -50,7 +53,11 @@ export class LoginPage {
     const { nome, senha } = this.form.controls;
     nome.setValidators(modo === 'cadastro' ? [Validators.required] : []);
     senha.setValidators(
-      modo === 'recuperar' ? [] : [Validators.required, Validators.minLength(6)],
+      modo === 'recuperar'
+        ? []
+        : modo === 'cadastro'
+          ? VALIDADORES_SENHA_NOVA
+          : [Validators.required],
     );
     nome.updateValueAndValidity();
     senha.updateValueAndValidity();

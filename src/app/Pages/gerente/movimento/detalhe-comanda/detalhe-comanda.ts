@@ -1,3 +1,4 @@
+import { duracaoEspera } from '../../../../tempo';
 import { CurrencyPipe } from '@angular/common';
 import { Component, inject, input, output, signal } from '@angular/core';
 import { MINUTOS_ALERTA_PAGAMENTO, StatusComanda, StatusPedidoItem } from '../../../../models';
@@ -32,6 +33,7 @@ const ROTULOS_ITEM: Record<StatusPedidoItem, string> = {
   host: { '(document:keydown.escape)': 'aoApertarEsc()' },
 })
 export class DetalheComanda {
+  protected readonly duracao = duracaoEspera;
   private movimento = inject(MovimentoService);
 
   readonly detalhe = input.required<Detalhe>();

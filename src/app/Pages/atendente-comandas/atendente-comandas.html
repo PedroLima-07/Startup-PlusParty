@@ -32,11 +32,11 @@
           >
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 19-7-7 7-7"></path><path d="M19 12H5"></path></svg>
           </button>
-          <h2>{{ ativo.titulo }} · {{ ativo.quantidade }}</h2>
+          <h1>{{ ativo.titulo }} · {{ ativo.quantidade }}</h1>
         </div>
       } @else {
         <div class="titulo-pagina">
-          <h2>Comandas</h2>
+          <h1>Comandas</h1>
           <p>{{ resumoPendencias() }}</p>
         </div>
       }
@@ -79,15 +79,15 @@
                 @switch (cartao.tipo) {
                   @case ('aguardando_liberacao') {
                     <span class="cartao-contexto">
-                      <span class="contexto-longo">mais antiga esperando há {{ cartao.minutos }} min</span>
-                      <span class="contexto-curto">há {{ cartao.minutos }} min</span>
+                      <span class="contexto-longo">mais antiga esperando há {{ duracao(cartao.minutos) }}</span>
+                      <span class="contexto-curto">há {{ duracao(cartao.minutos) }}</span>
                     </span>
                   }
                   @case ('aguardando_pagamento') {
                     <span class="cartao-contexto">
                       <strong class="contexto-longo">{{ cartao.valor | currency: 'BRL' }} esperando</strong>
-                      <span class="contexto-longo">mais antiga fechou há {{ cartao.minutos }} min</span>
-                      <span class="contexto-curto">{{ cartao.valor | currency: 'BRL' : 'symbol' : '1.0-0' }} · {{ cartao.minutos }} min</span>
+                      <span class="contexto-longo">mais antiga fechou há {{ duracao(cartao.minutos) }}</span>
+                      <span class="contexto-curto">{{ cartao.valor | currency: 'BRL' : 'symbol' : '1.0-0' }} · {{ duracao(cartao.minutos) }}</span>
                     </span>
                   }
                   @default {
@@ -242,7 +242,7 @@
 
           @if (minutosEsperandoPagamento() !== null) {
             <section class="espera-pagamento" [class.atrasado]="pagamentoAtrasado()" role="status">
-              <strong>Esperando pagamento há {{ minutosEsperandoPagamento() }} min</strong>
+              <strong>Esperando pagamento há {{ duracao(minutosEsperandoPagamento() ?? 0) }}</strong>
               @if (pagamentoAtrasado()) {
                 <span>Passou de 30 min. O gerente também foi avisado.</span>
               }

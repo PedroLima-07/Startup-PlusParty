@@ -26,7 +26,7 @@ import { Carregando } from '../../components/carregando/carregando';
 import { NavAtendente } from '../../components/nav-atendente/nav-atendente';
 import { normalizarMesa } from '../../mesa';
 import { telaDesktop } from '../../tela';
-import { minutosDesde, relogio } from '../../tempo';
+import { duracaoEspera, minutosDesde, relogio } from '../../tempo';
 
 type Acao = 'liberar' | 'recusar' | 'pagar';
 
@@ -109,6 +109,9 @@ export class AtendenteComandas implements OnInit {
   protected readonly processando = signal<Acao | null>(null);
 
   private readonly selecionadaId = signal<string | null>(null);
+  /** Depois de receber um pagamento, nenhuma conta abre sozinha: evita confirmar a errada. */
+  private readonly semSelecaoAutomatica = signal(false);
+  protected readonly duracao = duracaoEspera;
 
   /** Cartão escolhido. No desktop, null é a tela inicial com os três cartões. */
   private readonly tipoEscolhido = signal<TipoLista | null>(null);
@@ -184,6 +187,7 @@ export class AtendenteComandas implements OnInit {
   protected readonly selecionada = computed(() => {
     const escolhida = this.comandas().find((comanda) => comanda.id === this.selecionadaId());
     if (escolhida) return escolhida;
+    if (this.semSelecaoAutomatica()) return null;
     return this.desktop() && this.tipoAtivo() ? (this.lista()[0]?.comanda ?? null) : null;
   });
 
@@ -224,7 +228,7 @@ export class AtendenteComandas implements OnInit {
           outra.status === 'aberta'
             ? 'comanda aberta'
             : outra.status === 'aguardando_pagamento'
-              ? `fechou a conta há ${minutosDesde(outra.fechada_em ?? outra.criada_em, this.agora())} min`
+              ? `fechou a conta há ${duracaoEspera(minutosDesde(outra.fechada_em ?? outra.criada_em, this.agora()))}`
               : 'esperando liberação',
         fechando: outra.status === 'aguardando_pagamento',
       }));
@@ -308,6 +312,7 @@ export class AtendenteComandas implements OnInit {
 
   protected abrir(comanda: ComandaAtendente): void {
     this.erro.set(null);
+    this.semSelecaoAutomatica.set(false);
     this.selecionadaId.set(comanda.id);
   }
 
@@ -316,6 +321,7 @@ export class AtendenteComandas implements OnInit {
     if (this.processando()) return;
     this.erro.set(null);
     this.selecionadaId.set(null);
+    this.semSelecaoAutomatica.set(false);
     this.tipoEscolhido.set(tipo);
   }
 
@@ -324,13 +330,14 @@ export class AtendenteComandas implements OnInit {
     if (this.processando()) return;
     this.erro.set(null);
     this.selecionadaId.set(null);
+    this.semSelecaoAutomatica.set(false);
     this.tipoEscolhido.set(null);
   }
 
   /** "esperando há 7 min", "fechou há 34 min" ou "aberta às 21:10". */
   protected textoDaEspera(comanda: ComandaAtendente, minutos: number): string {
-    if (comanda.status === 'aguardando_liberacao') return `esperando há ${minutos} min`;
-    if (comanda.status === 'aguardando_pagamento') return `fechou há ${minutos} min`;
+    if (comanda.status === 'aguardando_liberacao') return `esperando há ${duracaoEspera(minutos)}`;
+    if (comanda.status === 'aguardando_pagamento') return `fechou há ${duracaoEspera(minutos)}`;
     const abertura = new Date(comanda.liberada_em ?? comanda.criada_em);
     const hora = String(abertura.getHours()).padStart(2, '0');
     const minuto = String(abertura.getMinutes()).padStart(2, '0');
@@ -448,6 +455,7 @@ export class AtendenteComandas implements OnInit {
         : lista.filter((c) => c.id !== comanda.id),
     );
     this.selecionadaId.set(null);
+    this.semSelecaoAutomatica.set(acao === 'pagar');
     this.processando.set(null);
     this.avisar(mensagem);
 
