@@ -341,7 +341,7 @@ export interface ComandaResumo {
   status: 'aberta' | 'aguardando_pagamento' | 'paga' | 'nao_paga';
 }
 
-export type TipoAlertaGerente = 'pagamento' | 'pedido_parado' | 'liberacao' | 'sem_pedido' | 'nota_baixa';
+export type TipoAlertaGerente = 'pagamento' | 'pedido_parado' | 'liberacao' | 'sem_pedido' | 'nota_baixa' | 'item_nao_recebido';
 
 /** Situação que pede a atenção do gerente no painel de Movimento. */
 export interface AlertaGerente {
@@ -466,3 +466,20 @@ export interface EventoDoBar {
 }
 
 export type NovoEvento = Pick<EventoDoBar, 'titulo' | 'descricao' | 'inicio' | 'entrada' | 'repete_semanal'>;
+
+/** Motivos de um toque para fechar a conta sem um item. O cliente também pode escrever. */
+export const MOTIVOS_ITEM_NAO_RECEBIDO = ['Demorou muito', 'Preciso ir embora', 'Desisti do pedido'] as const;
+
+/** Item que saiu da conta porque o cliente fechou sem recebê-lo. */
+export interface ItemNaoRecebido {
+  id: string;
+  comanda_id: string;
+  nome: string;
+  setor: string | null;
+  quantidade: number;
+  preco_unitario: number;
+  status_no_fechamento: string;
+  motivo: string;
+  criado_em: string;
+  ciente_em: string | null;
+}

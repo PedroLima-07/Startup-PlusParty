@@ -1,0 +1,39 @@
+.avisos {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 0 0 12px;
+}
+
+.aviso {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 14px;
+  border: 1px solid #fecaca;
+  border-radius: 12px;
+  background: #fee2e2;
+  color: #7f1d1d;
+}
+
+.texto {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  font-size: 14px;
+}
+
+button {
+  min-height: 44px;
+  flex-shrink: 0;
+  padding: 0 16px;
+  border: 1px solid #b91c1c;
+  border-radius: 10px;
+  background: #fff;
+  color: #7f1d1d;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}

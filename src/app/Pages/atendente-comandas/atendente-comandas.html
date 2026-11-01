@@ -35,6 +35,8 @@
       <app-botao-atualizar [desabilitado]="carregando()" (atualizar)="atualizarLista()" />
     </div>
 
+    <app-aviso-item-nao-recebido />
+
     @if (erroLista() ?? (selecionada() ? null : erro()); as mensagem) {
       <p class="mensagem-erro" role="alert">{{ mensagem }}</p>
     }

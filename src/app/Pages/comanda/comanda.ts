@@ -1,8 +1,11 @@
+import { ItensNaoRecebidosService } from '../../services/itens-nao-recebidos.service';
 import { CurrencyPipe, DatePipe } from '@angular/common';
 import { Component, DestroyRef, OnInit, computed, inject, input, signal } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import {
   ComandaDetalhada,
+  ItemNaoRecebido,
+  MOTIVOS_ITEM_NAO_RECEBIDO,
   MINUTOS_ALERTA_PAGAMENTO,
   PedidoItemDetalhado,
   StatusPedidoItem,
@@ -26,11 +29,12 @@ const ROTULOS_STATUS_ITEM: Record<StatusPedidoItem, string> = {
   selector: 'app-comanda',
   imports: [AtivarAvisos, Carregando, CurrencyPipe, DatePipe, ErroCarregar, NavCliente, RouterLink],
   templateUrl: './comanda.html',
-  styleUrls: ['./comanda.scss', './comanda.conta.scss'],
-  host: { '(document:keydown.escape)': 'confirmandoRecebimento.set(false)' },
+  styleUrls: ['./comanda.scss', './comanda.conta.scss', './comanda.fechar.scss'],
+  host: { '(document:keydown.escape)': 'cancelarFechamento()' },
 })
 export class ComandaPage implements OnInit {
   private comandaService = inject(ComandaService);
+  private readonly itensNaoRecebidos = inject(ItensNaoRecebidosService);
   private supabase = inject(SupabaseService);
   private destroyRef = inject(DestroyRef);
   private router = inject(Router);
@@ -43,6 +47,25 @@ export class ComandaPage implements OnInit {
   protected readonly comanda = signal<ComandaDetalhada | null>(null);
   protected readonly itens = signal<PedidoItemDetalhado[]>([]);
   protected readonly confirmandoRecebimento = signal(false);
+  /** Segunda etapa do fechamento: o motivo de fechar sem algum item. */
+  protected readonly pedindoMotivo = signal(false);
+  protected readonly prontosNaoRecebidos = signal<ReadonlySet<string>>(new Set());
+  protected readonly motivoRapido = signal('');
+  protected readonly motivoTexto = signal('');
+  protected readonly motivos = MOTIVOS_ITEM_NAO_RECEBIDO;
+  protected readonly naoCobrados = signal<ItemNaoRecebido[]>([]);
+  protected readonly itensPendentes = computed(() => this.itens().filter((i) => i.status !== 'pronto'));
+  protected readonly itensProntos = computed(() => this.itens().filter((i) => i.status === 'pronto'));
+  private readonly itensRecebidos = computed(() =>
+    this.itensProntos().filter((i) => !this.prontosNaoRecebidos().has(i.id)),
+  );
+  protected readonly totalAoFechar = computed(() => this.comandaService.calcularTotal(this.itensRecebidos()));
+  protected readonly algoNaoRecebido = computed(
+    () => this.itensPendentes().length > 0 || this.prontosNaoRecebidos().size > 0,
+  );
+  protected readonly motivoFinal = computed(() =>
+    [this.motivoRapido(), this.motivoTexto().trim()].filter(Boolean).join(': '),
+  );
   protected readonly cancelando = signal(false);
   protected readonly erroCancelamento = signal<string | null>(null);
   protected readonly erroCarregar = signal(false);
@@ -141,23 +164,58 @@ export class ComandaPage implements OnInit {
   }
 
   protected abrirConfirmacaoRecebimento(): void {
+    this.prontosNaoRecebidos.set(new Set());
+    this.motivoRapido.set('');
+    this.motivoTexto.set('');
+    this.pedindoMotivo.set(false);
     this.confirmandoRecebimento.set(true);
+  }
+
+  protected alternarNaoRecebido(id: string): void {
+    this.prontosNaoRecebidos.update((atual) => {
+      const novo = new Set(atual);
+      if (!novo.delete(id)) novo.add(id);
+      return novo;
+    });
+  }
+
+  protected alternarMotivo(motivo: string): void {
+    this.motivoRapido.update((atual) => (atual === motivo ? '' : motivo));
+  }
+
+  protected aoDigitarMotivo(evento: Event): void {
+    this.motivoTexto.set((evento.target as HTMLTextAreaElement).value);
+  }
+
+  protected voltarDoMotivo(): void {
+    this.pedindoMotivo.set(false);
   }
 
   protected cancelarFechamento(): void {
     this.confirmandoRecebimento.set(false);
+    this.pedindoMotivo.set(false);
     this.erroFechamento.set(null);
   }
 
   protected async confirmarFechamento(): Promise<void> {
     if (this.fechando()) return;
+    if (this.algoNaoRecebido() && !this.pedindoMotivo()) {
+      this.pedindoMotivo.set(true);
+      return;
+    }
+    if (this.pedindoMotivo() && !this.motivoFinal()) return;
 
     this.fechando.set(true);
     this.erroFechamento.set(null);
 
     try {
-      await this.comandaService.fecharConta(this.id());
+      if (this.algoNaoRecebido()) {
+        await this.comandaService.fecharContaSemItens(this.id(), [...this.prontosNaoRecebidos()], this.motivoFinal());
+      } else {
+        await this.comandaService.fecharConta(this.id());
+      }
       this.confirmandoRecebimento.set(false);
+      this.pedindoMotivo.set(false);
       await this.carregarDados(true);
     } catch {
       this.erroFechamento.set('Não foi possível fechar a conta agora. Tente de novo.');
@@ -184,6 +242,9 @@ export class ComandaPage implements OnInit {
       const acabouDePagar = comanda.status === 'paga' && this.comanda()?.status !== 'paga';
       this.comanda.set(comanda);
       this.itens.set(itens);
+      if (comanda?.status !== 'aberta') {
+        this.itensNaoRecebidos.daComanda(this.id()).then((lista) => this.naoCobrados.set(lista)).catch(() => undefined);
+      }
       // Pagamento confirmado: o pedido de avaliação aparece na hora.
       if (acabouDePagar) void this.avaliacao.verificar();
     } catch {

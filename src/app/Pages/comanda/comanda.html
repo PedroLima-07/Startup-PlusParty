@@ -21,6 +21,15 @@
         <p class="rotulo">Total da comanda</p>
         <p class="valor">{{ total() | currency: 'BRL' }}</p>
 
+        @if (naoCobrados().length > 0) {
+          <section class="nao-cobrados">
+            <strong>Não cobrado, pois você não recebeu</strong>
+            @for (item of naoCobrados(); track item.id) {
+              <span>{{ item.quantidade }}x {{ item.nome }}</span>
+            }
+          </section>
+        }
+
         @if (esperandoPagamento() && c.fechada_em) {
           <p class="selo-fechada">
             Conta fechada às {{ c.fechada_em | date: 'HH:mm' }} · há {{ duracao(minutosEsperandoPagamento() ?? 0) }}
@@ -214,30 +223,65 @@
 
       @if (confirmandoRecebimento()) {
         <div class="overlay">
-          <div class="modal">
-            <span class="icone-modal">📋</span>
-            <p class="pergunta">Você recebeu tudo o que você pediu?</p>
+          <div class="modal modal-fechar" role="dialog" aria-modal="true" aria-labelledby="titulo-fechar">
+            @if (!pedindoMotivo()) {
+              <h2 id="titulo-fechar">Confira antes de fechar</h2>
+              @if (itensPendentes().length > 0) {
+                <p class="explica">Ainda não ficou pronto. Se fechar agora, você não recebe nem paga:</p>
+                <ul class="lista-fechar">
+                  @for (item of itensPendentes(); track item.id) {
+                    <li>
+                      <span>{{ item.quantidade }}x {{ item.item.nome }}</span>
+                      <s>{{ item.quantidade * item.preco_unitario | currency: 'BRL' }}</s>
+                    </li>
+                  }
+                </ul>
+              }
+              @if (itensProntos().length > 0) {
+                <p class="explica">Prontos. Marque o que você não recebeu:</p>
+                <ul class="lista-fechar">
+                  @for (item of itensProntos(); track item.id) {
+                    <li>
+                      <label>
+                        <input type="checkbox" [checked]="prontosNaoRecebidos().has(item.id)" (change)="alternarNaoRecebido(item.id)" />
+                        Não recebi {{ item.quantidade }}x {{ item.item.nome }}
+                      </label>
+                      <span>{{ item.quantidade * item.preco_unitario | currency: 'BRL' }}</span>
+                    </li>
+                  }
+                </ul>
+              }
+              <p class="total-fechar">A pagar: <strong>{{ totalAoFechar() | currency: 'BRL' }}</strong></p>
+              <div class="acoes-fechar">
+                <button class="botao-primario" type="button" (click)="confirmarFechamento()">
+                  {{ algoNaoRecebido() ? 'Fechar sem estes itens' : (fechando() ? 'Fechando...' : 'Fechar conta') }}
+                </button>
+                <button class="botao-secundario" type="button" [disabled]="fechando()" (click)="cancelarFechamento()">
+                  {{ itensPendentes().length > 0 ? 'Esperar o item' : 'Voltar' }}
+                </button>
+              </div>
+            } @else {
+              <h2 id="titulo-fechar">Por que você está fechando agora?</h2>
+              <p class="explica">Sua resposta ajuda o bar a melhorar.</p>
+              <div class="motivos">
+                @for (motivo of motivos; track motivo) {
+                  <button type="button" class="motivo" [attr.aria-pressed]="motivoRapido() === motivo" (click)="alternarMotivo(motivo)">{{ motivo }}</button>
+                }
+              </div>
+              <label class="campo-motivo">
+                Conte mais (opcional)
+                <textarea maxlength="200" [value]="motivoTexto()" (input)="aoDigitarMotivo($event)" placeholder="O que aconteceu?"></textarea>
+              </label>
+              <div class="acoes-fechar">
+                <button class="botao-primario" type="button" [disabled]="!motivoFinal() || fechando()" (click)="confirmarFechamento()">
+                  {{ fechando() ? 'Fechando...' : 'Fechar conta · ' + (totalAoFechar() | currency: 'BRL') }}
+                </button>
+                <button class="botao-secundario" type="button" [disabled]="fechando()" (click)="voltarDoMotivo()">Voltar</button>
+              </div>
+            }
             @if (erroFechamento(); as mensagem) {
               <p class="aviso-erro" role="alert">{{ mensagem }}</p>
             }
-            <div class="acoes-modal">
-              <button
-                class="botao-secundario"
-                type="button"
-                [disabled]="fechando()"
-                (click)="cancelarFechamento()"
-              >
-                Não
-              </button>
-              <button
-                class="botao-primario"
-                type="button"
-                [disabled]="fechando()"
-                (click)="confirmarFechamento()"
-              >
-                {{ fechando() ? 'Fechando...' : 'Sim' }}
-              </button>
-            </div>
           </div>
         </div>
       }

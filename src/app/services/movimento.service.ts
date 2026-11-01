@@ -221,16 +221,17 @@ export class MovimentoService {
     const perfil = await this.authService.perfilAtual();
     const estabelecimentoId = perfil?.estabelecimento?.id ?? null;
 
-    const [comandas, chamados, capacidade, notasBaixas] = await Promise.all([
+    const [comandas, chamados, capacidade, notasBaixas, naoRecebidos] = await Promise.all([
       this.buscarComandas(inicio),
       this.contarChamados(inicio),
       estabelecimentoId ? this.buscarCapacidade(estabelecimentoId) : Promise.resolve(null),
       // Detalhe do painel: se falhar, o Movimento abre sem este alerta.
       this.buscarNotasBaixas(inicio).catch(() => []),
+      this.buscarItensNaoRecebidos(inicio).catch(() => []),
     ]);
 
     const numeros = calcularMovimento(comandas, agora);
-    numeros.alertas = [...numeros.alertas, ...alertasDeNotaBaixa(notasBaixas)];
+    numeros.alertas = [...numeros.alertas, ...alertasDeNotaBaixa(notasBaixas), ...alertasDeItemNaoRecebido(naoRecebidos)];
     this.aplicar(numeros);
     this.linhas.set(comandas);
     this.chamadosDeGarcom.set(chamados);
@@ -289,6 +290,18 @@ export class MovimentoService {
   }
 
   /** Avaliações de 1 ou 2 estrelas da noite, ainda sem resposta. O RLS limita ao bar do gerente. */
+  private async buscarItensNaoRecebidos(inicio: string): Promise<ItemNaoRecebidoAlerta[]> {
+    const { data, error } = await this.supabase.client
+      .from('itens_nao_recebidos')
+      .select('id, nome, quantidade, preco_unitario, motivo')
+      .gte('criado_em', inicio)
+      .order('criado_em', { ascending: false })
+      .limit(5);
+
+    if (error) throw error;
+    return (data ?? []) as unknown as ItemNaoRecebidoAlerta[];
+  }
+
   private async buscarNotasBaixas(inicio: string): Promise<NotaBaixa[]> {
     const { data, error } = await this.supabase.client
       .from('avaliacoes')
@@ -542,7 +555,7 @@ function calcularAlertas(
     }
   }
 
-  const ordem: AlertaGerente['tipo'][] = ['pagamento', 'pedido_parado', 'liberacao', 'sem_pedido', 'nota_baixa'];
+  const ordem: AlertaGerente['tipo'][] = ['pagamento', 'pedido_parado', 'liberacao', 'sem_pedido', 'nota_baixa', 'item_nao_recebido'];
   return alertas.sort((a, b) => ordem.indexOf(a.tipo) - ordem.indexOf(b.tipo));
 }
 
@@ -673,6 +686,28 @@ interface NotaBaixa {
   nota: number;
   comentario: string | null;
   autor: { nome: string | null } | null;
+}
+
+export interface ItemNaoRecebidoAlerta {
+  id: string;
+  nome: string;
+  quantidade: number;
+  preco_unitario: number;
+  motivo: string;
+}
+
+/** Item não servido e tirado da conta: o gerente vê o valor e o motivo do cliente. */
+export function alertasDeItemNaoRecebido(itens: ItemNaoRecebidoAlerta[]): AlertaGerente[] {
+  return itens.map((item) => {
+    const valor = (item.quantidade * item.preco_unitario).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+    return {
+      id: `nao-recebido-${item.id}`,
+      tipo: 'item_nao_recebido' as const,
+      titulo: `Comanda fechada sem receber: ${item.quantidade}x ${item.nome}`,
+      detalhe: `${valor} não cobrados. Motivo: ${item.motivo}`,
+      comanda: null,
+    };
+  });
 }
 
 /** Uma avaliação de 1 ou 2 estrelas hoje vira alerta: vale responder enquanto o cliente lembra. */

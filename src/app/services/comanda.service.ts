@@ -232,6 +232,17 @@ export class ComandaService {
   }
 
   /** A hora do fechamento (fechada_em) quem grava é o banco. */
+  /** Fecha sem cobrar itens não recebidos: o banco tira da conta e registra o motivo. */
+  async fecharContaSemItens(comandaId: string, itensProntosNaoRecebidos: string[], motivo: string): Promise<void> {
+    const { error } = await this.supabase.client.rpc('fechar_conta_sem_itens', {
+      p_comanda_id: comandaId,
+      p_itens_prontos_nao_recebidos: itensProntosNaoRecebidos,
+      p_motivo: motivo,
+    });
+
+    if (error) throw error;
+  }
+
   async fecharConta(comandaId: string): Promise<void> {
     const { error } = await this.supabase.client
       .from('comandas')

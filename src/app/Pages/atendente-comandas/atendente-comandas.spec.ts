@@ -124,8 +124,8 @@ describe('AtendenteComandas', () => {
 
   beforeEach(async () => {
     supabase = {
-      escutarMudancas: vi.fn((_tabelas: unknown, aoMudar: () => void) => {
-        avisarMudanca = aoMudar;
+      escutarMudancas: vi.fn((tabelas: { tabela: string }[], aoMudar: () => void) => {
+        if (tabelas[0].tabela === 'comandas') avisarMudanca = aoMudar;
         return () => {};
       }),
     };

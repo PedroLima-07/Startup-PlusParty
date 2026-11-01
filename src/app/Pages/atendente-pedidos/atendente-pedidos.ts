@@ -1,3 +1,4 @@
+import { AvisoItemNaoRecebido } from '../../components/aviso-item-nao-recebido/aviso-item-nao-recebido';
 import { BotaoAtualizar } from '../../components/botao-atualizar/botao-atualizar';
 import { duracaoEspera } from '../../tempo';
 import { DatePipe, NgClass } from '@angular/common';
@@ -28,7 +29,7 @@ interface Coluna {
 
 @Component({
   selector: 'app-atendente-pedidos',
-  imports: [BotaoAtualizar, Carregando, DatePipe, NavAtendente, NgClass],
+  imports: [AvisoItemNaoRecebido, BotaoAtualizar, Carregando, DatePipe, NavAtendente, NgClass],
   templateUrl: './atendente-pedidos.html',
   styleUrls: ['./atendente-pedidos.scss', './atendente-pedidos.desktop.scss'],
 })
