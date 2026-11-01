@@ -14,7 +14,7 @@ import { NavCliente } from '../../components/nav-cliente/nav-cliente';
 import { Carregando } from '../../components/carregando/carregando';
 import { ErroCarregar } from '../../components/erro-carregar/erro-carregar';
 import { AtivarAvisos } from '../../components/ativar-avisos/ativar-avisos';
-import { minutosDesde, relogio } from '../../tempo';
+import { minutosDesde, relogio, duracaoEspera } from '../../tempo';
 
 const ROTULOS_STATUS_ITEM: Record<StatusPedidoItem, string> = {
   novo: 'Enviado',
@@ -27,6 +27,7 @@ const ROTULOS_STATUS_ITEM: Record<StatusPedidoItem, string> = {
   imports: [AtivarAvisos, Carregando, CurrencyPipe, DatePipe, ErroCarregar, NavCliente, RouterLink],
   templateUrl: './comanda.html',
   styleUrls: ['./comanda.scss', './comanda.conta.scss'],
+  host: { '(document:keydown.escape)': 'confirmandoRecebimento.set(false)' },
 })
 export class ComandaPage implements OnInit {
   private comandaService = inject(ComandaService);
@@ -64,6 +65,7 @@ export class ComandaPage implements OnInit {
   );
 
   /** Minutos desde que o cliente fechou a conta; null se ela não está fechada. */
+  protected readonly duracao = duracaoEspera;
   protected readonly minutosEsperandoPagamento = computed(() => {
     const fechadaEm = this.comanda()?.fechada_em;
     return this.esperandoPagamento() && fechadaEm ? minutosDesde(fechadaEm, this.agora()) : null;

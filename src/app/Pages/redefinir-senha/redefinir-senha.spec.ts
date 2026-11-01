@@ -68,14 +68,14 @@ describe('RedefinirSenhaPage', () => {
     expect(tela().textContent).toContain('As senhas não são iguais');
   });
 
-  it('não salva senha com menos de 6 caracteres', async () => {
+  it('não salva senha fora da regra', async () => {
     await abrir('cliente');
     preencher('123', '123');
 
     await enviar();
 
     expect(authService.definirNovaSenha).not.toHaveBeenCalled();
-    expect(tela().textContent).toContain('Mínimo de 6 caracteres');
+    expect(tela().textContent).toContain('Mínimo de 8 caracteres');
   });
 
   it('salva a nova senha e leva o usuário para a tela inicial dele', async () => {
@@ -93,7 +93,7 @@ describe('RedefinirSenhaPage', () => {
     authService.definirNovaSenha.mockRejectedValueOnce(
       new Error('New password should be different from the old password.'),
     );
-    preencher('mesmaSenha', 'mesmaSenha');
+    preencher('mesmaSenha1', 'mesmaSenha1');
 
     await enviar();
 

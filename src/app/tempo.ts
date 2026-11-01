@@ -18,6 +18,18 @@ export function haQuantoTempo(data: string, agora = new Date()): string {
   return `${String(quando.getDate()).padStart(2, '0')}/${String(quando.getMonth() + 1).padStart(2, '0')}`;
 }
 
+/** Tempo de espera em texto: "12 min", "3 h" ou "21 dias". */
+export function duracaoEspera(valor: number | null): string {
+  const minutos = valor ?? 0;
+  if (minutos < 60) return `${minutos} min`;
+  if (minutos < 24 * 60) {
+    const resto = minutos % 60;
+    return `${Math.floor(minutos / 60)} h${resto ? ` ${resto} min` : ''}`;
+  }
+  const dias = Math.floor(minutos / (24 * 60));
+  return dias === 1 ? '1 dia' : `${dias} dias`;
+}
+
 /** Minutos inteiros desde `data` (nunca negativo). */
 export function minutosDesde(data: string, agora = Date.now()): number {
   return Math.max(0, Math.floor((agora - new Date(data).getTime()) / MINUTO));

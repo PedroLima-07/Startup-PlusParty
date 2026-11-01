@@ -232,7 +232,7 @@ describe('AtendentePedidos', () => {
 
       // Os pedidos do teste são de 2026-09-24: esperam há muito tempo.
       expect(espera?.classList).toContain('atrasado');
-      expect(espera?.textContent).toMatch(/^há \d+ min$/);
+      expect(espera?.textContent).toMatch(/^há \d+ (min|h|dias?)/);
     });
   });
 });

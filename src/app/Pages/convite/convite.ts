@@ -1,3 +1,4 @@
+import { REGRA_SENHA, VALIDADORES_SENHA_NOVA } from '../../senha';
 import { Component, OnInit, inject, input, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
@@ -48,11 +49,12 @@ export class ConvitePage implements OnInit {
   protected readonly fotoPrevia = signal<string | null>(null);
 
   private fotoEscolhida: File | null = null;
-
+
+  protected readonly regraSenha = REGRA_SENHA;
   protected readonly form = this.fb.nonNullable.group({
     nome: ['', [Validators.required]],
     email: ['', [Validators.required, Validators.email]],
-    senha: ['', [Validators.required, Validators.minLength(6)]],
+    senha: ['', VALIDADORES_SENHA_NOVA],
     telefone: ['', [Validators.required, Validators.pattern(/^[\d\s()+-]{8,20}$/)]],
   });
 

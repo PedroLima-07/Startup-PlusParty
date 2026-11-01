@@ -13,7 +13,7 @@ import {
 import { AuthService } from '../../../services/auth.service';
 import { EstabelecimentosService } from '../../../services/estabelecimentos.service';
 import { SupabaseService } from '../../../services/supabase.service';
-import { minutosDesde, relogio } from '../../../tempo';
+import { minutosDesde, relogio, duracaoEspera } from '../../../tempo';
 
 /** De quanto em quanto tempo a posição na fila é conferida. */
 const ATUALIZAR_FILA_MS = 20_000;
@@ -60,6 +60,7 @@ export class AbrirComandaLocalComponent implements OnInit {
   protected readonly fila = signal<EsperaNaFila | null>(null);
   protected readonly mexendoNaFila = signal(false);
 
+  protected readonly duracao = duracaoEspera;
   protected readonly minutosEsperandoPagamento = computed(() => {
     const conta = this.contaPendente();
     return conta?.fechada_em ? minutosDesde(conta.fechada_em, this.agora()) : null;

@@ -1,3 +1,4 @@
+import { duracaoEspera } from '../../tempo';
 import { DatePipe, NgClass } from '@angular/common';
 import { Component, DestroyRef, OnInit, computed, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
@@ -144,7 +145,7 @@ export class AtendentePedidos implements OnInit {
 
   protected espera(pedido: PedidoSetor): string {
     const minutos = this.minutosEsperando(pedido);
-    return minutos < 1 ? 'agora' : `há ${minutos} min`;
+    return minutos < 1 ? 'agora' : `há ${duracaoEspera(minutos)}`;
   }
 
   protected atrasado(pedido: PedidoSetor): boolean {

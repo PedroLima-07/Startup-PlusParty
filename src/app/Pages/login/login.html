@@ -45,13 +45,30 @@
         @if (modo() !== 'recuperar') {
           <label class="campo">
             Senha
-            <input
-              type="password"
-              formControlName="senha"
-              [autocomplete]="modo() === 'cadastro' ? 'new-password' : 'current-password'"
-            />
+            <span class="campo-senha">
+              <input
+                [type]="senhaVisivel() ? 'text' : 'password'"
+                formControlName="senha"
+                [autocomplete]="modo() === 'cadastro' ? 'new-password' : 'current-password'"
+              />
+              <button
+                class="ver-senha"
+                type="button"
+                [attr.aria-label]="senhaVisivel() ? 'Ocultar senha' : 'Mostrar senha'"
+                [attr.aria-pressed]="senhaVisivel()"
+                (click)="$event.preventDefault(); senhaVisivel.set(!senhaVisivel())"
+              >
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z" />
+                  <circle cx="12" cy="12" r="3" />
+                  @if (senhaVisivel()) {
+                    <path d="M4 4l16 16" />
+                  }
+                </svg>
+              </button>
+            </span>
             @if (form.controls.senha.invalid && form.controls.senha.touched) {
-              <span class="erro-campo">Mínimo de 6 caracteres.</span>
+              <span class="erro-campo">{{ modo() === 'cadastro' ? regraSenha : 'Informe sua senha.' }}</span>
             }
           </label>
         }

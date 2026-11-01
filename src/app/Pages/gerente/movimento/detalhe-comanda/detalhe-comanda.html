@@ -20,7 +20,7 @@
     <div class="detalhe-selos">
       <span class="selo-status" [class]="d.status">{{ rotuloStatus(d.status) }}</span>
       @if (d.minutosSemPagamento !== null && d.minutosSemPagamento >= limitePagamento) {
-        <span class="selo-atraso">Sem pagamento há {{ d.minutosSemPagamento }} min</span>
+        <span class="selo-atraso">Sem pagamento há {{ duracao(d.minutosSemPagamento) }}</span>
       }
     </div>
 

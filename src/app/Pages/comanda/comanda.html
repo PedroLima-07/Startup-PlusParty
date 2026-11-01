@@ -9,7 +9,7 @@
   @if (comandaEncerrada()) {
     <div class="tela tela-fechamento">
       <header class="cabecalho">
-        <h1>Comanda encerrada</h1>
+        <h1>{{ c.status === 'aguardando_pagamento' ? 'Conta fechada: pague no caixa' : 'Comanda encerrada' }}</h1>
       </header>
 
       <div class="conteudo-fechamento">
@@ -23,7 +23,7 @@
 
         @if (esperandoPagamento() && c.fechada_em) {
           <p class="selo-fechada">
-            Conta fechada às {{ c.fechada_em | date: 'HH:mm' }} · há {{ minutosEsperandoPagamento() }} min
+            Conta fechada às {{ c.fechada_em | date: 'HH:mm' }} · há {{ duracao(minutosEsperandoPagamento() ?? 0) }}
           </p>
         }
 

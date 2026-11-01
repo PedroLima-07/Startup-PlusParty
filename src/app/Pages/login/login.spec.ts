@@ -53,6 +53,17 @@ describe('LoginPage — recuperar senha', () => {
     botao('Esqueceu a senha').click();
   });
 
+  it('mostra e oculta a senha pelo botão do olho', () => {
+    botao('Entrar').click();
+    const campo = () => tela().querySelector<HTMLInputElement>('input[formControlName=senha]')!;
+    expect(campo().type).toBe('password');
+    tela().querySelector<HTMLButtonElement>('.ver-senha')!.click();
+    expect(campo().type).toBe('text');
+    expect(tela().querySelector('.ver-senha')!.getAttribute('aria-label')).toBe('Ocultar senha');
+    tela().querySelector<HTMLButtonElement>('.ver-senha')!.click();
+    expect(campo().type).toBe('password');
+  });
+
   it('no modo recuperar, pede só o e-mail', () => {
     expect(tela().querySelector('input[type=password]')).toBeNull();
     expect(tela().querySelector('input[type=email]')).not.toBeNull();

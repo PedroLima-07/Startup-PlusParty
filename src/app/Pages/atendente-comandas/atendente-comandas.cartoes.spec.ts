@@ -151,10 +151,10 @@ describe('AtendenteComandas — cartões no desktop', () => {
     expect(nomes()).toEqual(['Carla', 'João']);
     expect(tela().querySelector('.card.selecionada')?.textContent).toContain('Carla');
     expect(tela().querySelector('.cliente-destaque')?.textContent).toContain('Carla');
-    expect(tela().querySelector('.topo-pagina h2')?.textContent).toContain('Receber pagamento · 2');
+    expect(tela().querySelector('.topo-pagina h1')?.textContent).toContain('Receber pagamento · 2');
   });
 
-  it('depois de confirmar, a próxima conta entra sozinha no detalhe', async () => {
+  it('depois de confirmar, nenhuma conta abre sozinha no detalhe', async () => {
     cartao('Receber').click();
     listar.mockResolvedValue(NOITE.filter((c) => c.id !== 'r2'));
 
@@ -164,7 +164,8 @@ describe('AtendenteComandas — cartões no desktop', () => {
     await assentar();
 
     expect(nomes()).toEqual(['João']);
-    expect(tela().querySelector('.cliente-destaque')?.textContent).toContain('João');
+    expect(tela().querySelector('.cliente-destaque')).toBeNull();
+    expect(tela().querySelector('.sem-selecao')).not.toBeNull();
   });
 
   it('a seta volta para os três cartões', () => {

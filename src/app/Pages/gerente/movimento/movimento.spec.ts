@@ -293,7 +293,7 @@ describe('Movimento (gerente)', () => {
       const responsaveis = tela().querySelector('.detalhe-responsaveis')?.textContent ?? '';
       expect(responsaveis).toContain('Ana Lima · 21:14');
       expect(responsaveis).toContain('22:30');
-      expect(tela().querySelector('.selo-atraso')?.textContent).toContain('Sem pagamento há 77 min');
+      expect(tela().querySelector('.selo-atraso')?.textContent).toContain('Sem pagamento há 1 h 17 min');
     });
 
     it('marcar como não paga pede confirmação antes de gravar', async () => {

@@ -1,7 +1,7 @@
 :host {
   --azul-marinho: #0f1f4b;
   --azul-acao: #2259e0;
-  --cinza-texto: #6b7280;
+  --cinza-texto: #5b6475;
   --cinza-borda: #e5e7eb;
   --fundo: #f7f8fa;
 
@@ -95,6 +95,38 @@ form {
   }
 }
 
+.campo-senha {
+  position: relative;
+  display: block;
+
+  input {
+    box-sizing: border-box;
+    width: 100%;
+    padding-right: 48px;
+  }
+}
+
+.ver-senha {
+  position: absolute;
+  top: 50%;
+  right: 4px;
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--azul-marinho);
+  cursor: pointer;
+  transform: translateY(-50%);
+
+  &:focus-visible {
+    outline: 2px solid var(--azul-acao);
+  }
+}
+
 .erro-campo {
   color: #dc2626;
   font-size: 0.75rem;
@@ -182,7 +214,7 @@ form {
 // "Ao cadastrar, você concorda com..." e os links da política e dos termos.
 .aceite {
   margin: 4px 0 0;
-  color: #6b7280;
+  color: #5b6475;
   font-size: 12px;
   line-height: 1.5;
   text-align: center;
