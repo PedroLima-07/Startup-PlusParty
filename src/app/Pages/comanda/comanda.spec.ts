@@ -50,6 +50,7 @@ describe('ComandaPage — tratamento de erro', () => {
       buscarComanda: vi.fn().mockResolvedValue(COMANDA),
       buscarItensPedidos: vi.fn().mockResolvedValue(ITENS),
       fecharConta: vi.fn().mockResolvedValue(undefined),
+      fecharContaSemItens: vi.fn().mockResolvedValue(undefined),
       cancelarSolicitacao: vi.fn(),
       calcularTotal: vi.fn().mockReturnValue(24),
     };
@@ -81,8 +82,40 @@ describe('ComandaPage — tratamento de erro', () => {
     expect(component['itens']()).toEqual(ITENS);
   });
 
+  it('item ainda não pronto pede o motivo e sai da conta ao fechar', async () => {
+    await criar();
+    component['itens'].set([{ ...ITENS[0], id: 'p1', status: 'novo' } as never]);
+    component['abrirConfirmacaoRecebimento']();
+
+    await component['confirmarFechamento']();
+    expect(component['pedindoMotivo']()).toBe(true);
+    expect(comandaService['fecharContaSemItens']).not.toHaveBeenCalled();
+
+    await component['confirmarFechamento']();
+    expect(comandaService['fecharContaSemItens']).not.toHaveBeenCalled();
+
+    component['alternarMotivo']('Demorou muito');
+    await component['confirmarFechamento']();
+    expect(comandaService['fecharContaSemItens']).toHaveBeenCalledWith(expect.anything(), [], 'Demorou muito');
+    expect(component['confirmandoRecebimento']()).toBe(false);
+  });
+
+  it('item pronto marcado como não recebido também sai da conta', async () => {
+    await criar();
+    component['itens'].set([{ ...ITENS[0], id: 'p2', status: 'pronto' } as never]);
+    component['abrirConfirmacaoRecebimento']();
+    component['alternarNaoRecebido']('p2');
+    expect(component['algoNaoRecebido']()).toBe(true);
+    component['aoDigitarMotivo']({ target: { value: 'Não chegou' } } as unknown as Event);
+    component['pedindoMotivo'].set(true);
+    await component['confirmarFechamento']();
+
+    expect(comandaService['fecharContaSemItens']).toHaveBeenCalledWith(expect.anything(), ['p2'], 'Não chegou');
+  });
+
   it('avisa quando fechar a conta falha e mantém a pergunta aberta', async () => {
     await criar();
+    component['itens'].set([{ ...ITENS[0], status: 'pronto' } as never]);
     comandaService['fecharConta'].mockRejectedValueOnce(new Error('offline'));
     component['abrirConfirmacaoRecebimento']();
 
@@ -95,6 +128,7 @@ describe('ComandaPage — tratamento de erro', () => {
 
   it('não envia o fechamento duas vezes se clicarem seguido', async () => {
     await criar();
+    component['itens'].set([{ ...ITENS[0], status: 'pronto' } as never]);
     let terminar!: () => void;
     comandaService['fecharConta'].mockReturnValueOnce(new Promise<void>((r) => (terminar = r)));
 

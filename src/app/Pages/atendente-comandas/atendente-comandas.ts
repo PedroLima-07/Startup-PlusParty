@@ -1,3 +1,4 @@
+import { AvisoItemNaoRecebido } from '../../components/aviso-item-nao-recebido/aviso-item-nao-recebido';
 import { BotaoAtualizar } from '../../components/botao-atualizar/botao-atualizar';
 import { CurrencyPipe, DatePipe } from '@angular/common';
 import {
@@ -87,7 +88,7 @@ interface AvisoNaTela {
 
 @Component({
   selector: 'app-atendente-comandas',
-  imports: [BotaoAtualizar, Carregando, CurrencyPipe, DatePipe, NavAtendente],
+  imports: [AvisoItemNaoRecebido, BotaoAtualizar, Carregando, CurrencyPipe, DatePipe, NavAtendente],
   templateUrl: './atendente-comandas.html',
   styleUrls: [
     './atendente-comandas.scss',

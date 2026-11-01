@@ -40,6 +40,7 @@ const APARENCIA_ALERTA: Record<TipoAlertaGerente, { icone: NomeIcone; acao: stri
   liberacao: { icone: 'relogio', acao: 'Avisar atendente' },
   sem_pedido: { icone: 'casa', acao: 'Ver comanda' },
   nota_baixa: { icone: 'estrela', acao: 'Responder' },
+  item_nao_recebido: { icone: 'alerta', acao: 'Marcar como visto' },
 };
 
 /** Painel principal do gerente: o que precisa de atenção, o faturamento e as comandas do dia. */

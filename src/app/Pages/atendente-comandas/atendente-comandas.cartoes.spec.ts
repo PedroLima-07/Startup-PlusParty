@@ -107,8 +107,8 @@ describe('AtendenteComandas — cartões no desktop', () => {
         {
           provide: SupabaseService,
           useValue: {
-            escutarMudancas: (_tabelas: unknown, aoMudar: () => void) => {
-              avisarMudanca = aoMudar;
+            escutarMudancas: (tabelas: { tabela: string }[], aoMudar: () => void) => {
+              if (tabelas[0].tabela === 'comandas') avisarMudanca = aoMudar;
               return () => {};
             },
           },
