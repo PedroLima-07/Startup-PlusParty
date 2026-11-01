@@ -96,32 +96,6 @@ $suave: #5b6475;
     }
   }
 
-  .btn-atualizar {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    min-height: 44px;
-    padding: 0 16px;
-    border: 1px solid #d5dbe6;
-    border-radius: 12px;
-    background: #fff;
-    color: $marinho;
-    font: inherit;
-    font-size: 14px;
-    font-weight: 700;
-    cursor: pointer;
-
-    &:hover:not(:disabled) {
-      border-color: $azul;
-      color: $azul;
-    }
-
-    &:disabled {
-      opacity: 0.6;
-      cursor: wait;
-    }
-  }
-
   // Linhas: título, cartões (ou abas), erro, e lista + detalhe lado a lado.
   .coluna-lista > .mensagem-erro {
     grid-row: 3;
@@ -255,8 +229,4 @@ $suave: #5b6475;
     }
   }
 
-  .aviso {
-    left: d.$largura-menu;
-    bottom: 24px;
-  }
 }

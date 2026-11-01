@@ -3,15 +3,7 @@
     <h1>+party</h1>
   </div>
   <div class="acoes-header">
-    <button
-      class="btn-refresh"
-      type="button"
-      (click)="atualizarLista()"
-      [disabled]="carregando()"
-      aria-label="Atualizar pedidos"
-    >
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 2v6h-6"></path><path d="M3 12a9 9 0 1 0 2.1-5.7L2 9"></path></svg>
-    </button>
+    <app-botao-atualizar [desabilitado]="carregando()" (atualizar)="atualizarLista()" />
     <button class="btn-sair" type="button" (click)="sair()">Sair</button>
   </div>
 </header>
@@ -32,10 +24,7 @@
     </button>
   </div>
 
-  <button class="btn-atualizar" type="button" (click)="atualizarLista()" [disabled]="carregando()">
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 2v6h-6"></path><path d="M3 12a9 9 0 1 0 2.1-5.7L2 9"></path></svg>
-    Atualizar
-  </button>
+  <app-botao-atualizar class="btn-atualizar" [desabilitado]="carregando()" (atualizar)="atualizarLista()" />
 </div>
 
 @if (erro(); as mensagem) {

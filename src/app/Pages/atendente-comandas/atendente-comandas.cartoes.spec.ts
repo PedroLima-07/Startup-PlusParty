@@ -168,6 +168,20 @@ describe('AtendenteComandas — cartões no desktop', () => {
     expect(tela().querySelector('.sem-selecao')).not.toBeNull();
   });
 
+  it('cada pagamento confirmado ganha o próprio aviso, com mesa, cliente e valor', async () => {
+    cartao('Receber').click();
+    listar.mockResolvedValue(NOITE.filter((c) => c.id !== 'r2'));
+    Array.from(tela().querySelectorAll('button'))
+      .find((b) => b.textContent?.includes('Confirmar pagamento'))!
+      .click();
+    await assentar();
+
+    const avisos = tela().querySelectorAll('.aviso');
+    expect(avisos).toHaveLength(1);
+    expect(avisos[0].textContent).toContain('Pagamento confirmado');
+    expect(avisos[0].textContent).toContain('R$');
+  });
+
   it('a seta volta para os três cartões', () => {
     cartao('Liberar').click();
     tela().querySelector<HTMLButtonElement>('.btn-cartoes')!.click();

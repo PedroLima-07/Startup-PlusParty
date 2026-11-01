@@ -118,7 +118,7 @@ describe('AtendenteComandas', () => {
   }
 
   async function atualizar(): Promise<void> {
-    tela().querySelector<HTMLButtonElement>('.btn-refresh')!.click();
+    tela().querySelector<HTMLButtonElement>('app-botao-atualizar button')!.click();
     await assentar();
   }
 
