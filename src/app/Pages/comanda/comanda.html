@@ -123,23 +123,17 @@
         <h1>Sua comanda</h1>
       </header>
 
-      <div class="conteudo-fechamento">
-        <div class="icone-sucesso">⏳</div>
-        <p class="rotulo">Comanda em<br /><strong>{{ c.estabelecimento.nome }}</strong></p>
-        <p class="instrucao">
-          Aguardando liberação. Chame um atendente para confirmar sua presença.
+      <div class="conteudo-fechamento espera-liberacao">
+        <div class="chamada" aria-hidden="true">
+          <span class="halo"></span>
+          <span class="sino">
+            <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9a6 6 0 0 1 12 0c0 6 2.500 7.500 2.500 7.500h-17S6 15 6 9"></path><path d="M10 20a2.200 2.200 0 0 0 4 0"></path></svg>
+          </span>
+        </div>
+        <h2>Chame um atendente</h2>
+        <p class="instrucao" role="status">
+          Ele confirma sua presença no <strong>{{ c.estabelecimento.nome }}</strong> e sua comanda abre aqui sozinha.
         </p>
-        <button
-          class="botao-primario"
-          type="button"
-          [disabled]="atualizando()"
-          (click)="verificarLiberacao()"
-        >
-          {{ atualizando() ? 'Atualizando...' : 'Já fui liberado, atualizar' }}
-        </button>
-        @if (avisoAtualizacao(); as aviso) {
-          <p class="erro-cancelamento" role="alert">{{ aviso }}</p>
-        }
         <button
           class="botao-cancelar"
           type="button"
@@ -156,6 +150,8 @@
     </div>
   } @else {
     <div class="tela">
+      <app-aviso-cobranca [comandaId]="c.id" />
+
       <header class="cabecalho">
         <button class="voltar" type="button" routerLink="/cliente/home" aria-label="Voltar">←</button>
         <h1>Sua comanda</h1>

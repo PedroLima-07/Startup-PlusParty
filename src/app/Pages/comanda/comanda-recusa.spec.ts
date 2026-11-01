@@ -95,7 +95,8 @@ describe('ComandaPage — recusa', () => {
 
   it('quem estava esperando vê a recusa assim que o atendente recusa', async () => {
     await abrirCom('aguardando_liberacao');
-    expect(tela().textContent).toContain('Aguardando liberação');
+    expect(tela().textContent).toContain('Chame um atendente');
+    expect(tela().textContent).not.toContain('Já fui liberado');
 
     buscarComanda.mockResolvedValue(comanda('recusada'));
     avisarMudanca();
@@ -103,6 +104,16 @@ describe('ComandaPage — recusa', () => {
 
     expect(tela().textContent).toContain('Solicitação recusada');
     expect(tela().textContent).not.toContain('Cancelar solicitação');
+  });
+
+  it('quem volta ao app confere a liberação, mesmo sem aviso em tempo real', async () => {
+    await abrirCom('aguardando_liberacao');
+    buscarComanda.mockResolvedValue(comanda('aberta'));
+
+    document.dispatchEvent(new Event('visibilitychange'));
+    await assentar();
+
+    expect(tela().textContent).toContain('Fazer pedido');
   });
 
   it('comanda liberada continua mostrando a tela de pedidos', async () => {

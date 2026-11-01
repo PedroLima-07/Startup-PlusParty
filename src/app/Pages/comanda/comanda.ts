@@ -17,7 +17,11 @@ import { NavCliente } from '../../components/nav-cliente/nav-cliente';
 import { Carregando } from '../../components/carregando/carregando';
 import { ErroCarregar } from '../../components/erro-carregar/erro-carregar';
 import { AtivarAvisos } from '../../components/ativar-avisos/ativar-avisos';
+import { AvisoCobranca } from '../../components/aviso-cobranca/aviso-cobranca';
 import { minutosDesde, relogio, duracaoEspera } from '../../tempo';
+
+/** Sem botão de atualizar, garante a liberação mesmo se o aviso em tempo real falhar. */
+const INTERVALO_CONFERIR_LIBERACAO_MS = 15_000;
 
 const ROTULOS_STATUS_ITEM: Record<StatusPedidoItem, string> = {
   novo: 'Enviado',
@@ -27,10 +31,14 @@ const ROTULOS_STATUS_ITEM: Record<StatusPedidoItem, string> = {
 
 @Component({
   selector: 'app-comanda',
-  imports: [AtivarAvisos, Carregando, CurrencyPipe, DatePipe, ErroCarregar, NavCliente, RouterLink],
+  imports: [AtivarAvisos, AvisoCobranca, Carregando, CurrencyPipe, DatePipe, ErroCarregar, NavCliente, RouterLink],
   templateUrl: './comanda.html',
-  styleUrls: ['./comanda.scss', './comanda.conta.scss', './comanda.fechar.scss'],
-  host: { '(document:keydown.escape)': 'cancelarFechamento()' },
+  styleUrls: ['./comanda.scss', './comanda.conta.scss', './comanda.fechar.scss', './comanda.espera.scss'],
+  host: {
+    '(document:keydown.escape)': 'cancelarFechamento()',
+    '(document:visibilitychange)': 'conferirAoVoltar()',
+    '(window:online)': 'conferirAoVoltar()',
+  },
 })
 export class ComandaPage implements OnInit {
   private comandaService = inject(ComandaService);
@@ -119,6 +127,11 @@ export class ComandaPage implements OnInit {
     );
     this.destroyRef.onDestroy(pararDeEscutar);
 
+    const conferirLiberacao = setInterval(() => {
+      if (this.aguardandoLiberacao()) this.conferirAoVoltar();
+    }, INTERVALO_CONFERIR_LIBERACAO_MS);
+    this.destroyRef.onDestroy(() => clearInterval(conferirLiberacao));
+
     await this.carregarDados();
   }
 
@@ -134,8 +147,10 @@ export class ComandaPage implements OnInit {
     await this.carregarDados(true);
   }
 
-  protected async verificarLiberacao(): Promise<void> {
-    await this.carregarDados(true);
+  /** O tempo real perde mudanças com o celular bloqueado ou sem internet. */
+  protected conferirAoVoltar(): void {
+    if (document.hidden || this.cancelando() || !this.comanda()) return;
+    void this.carregarDados(true);
   }
 
   protected async tentarDeNovo(): Promise<void> {
