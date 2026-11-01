@@ -1,0 +1,74 @@
+.tela-fechamento .conteudo-fechamento.espera-liberacao {
+  flex: 1;
+  justify-content: center;
+  gap: 16px;
+  margin: 0 auto;
+  background: none;
+  border: 0;
+  box-shadow: none;
+
+  h2 {
+    margin: 0;
+    font-size: 1.9rem;
+    line-height: 1.15;
+    font-weight: 800;
+  }
+
+  .instrucao {
+    max-width: 420px;
+    margin: 0;
+    font-size: 1.05rem;
+    line-height: 1.45;
+
+    strong {
+      color: var(--azul-marinho);
+    }
+  }
+}
+
+.chamada {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 160px;
+  height: 160px;
+  color: #fff;
+}
+
+.halo {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: var(--azul-acao);
+  animation: pulso-halo 1.8s ease-in-out infinite;
+}
+
+.sino {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 88px;
+  height: 88px;
+  border-radius: 50%;
+  background: var(--azul-acao);
+}
+
+@keyframes pulso-halo {
+  0%,
+  100% {
+    transform: scale(0.78);
+    opacity: 0.34;
+  }
+
+  50% {
+    transform: scale(1.08);
+    opacity: 0.14;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .halo {
+    animation: none;
+    opacity: 0.22;
+  }
+}

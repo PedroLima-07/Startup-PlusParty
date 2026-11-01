@@ -1,0 +1,10 @@
+@if (!dispensado()) {
+  <dialog #dialogo aria-labelledby="titulo-aviso-cobranca" (close)="entendi()">
+    <h2 id="titulo-aviso-cobranca">Você só paga o que receber</h2>
+    <p>Se fechar a conta sem ter recebido algum item, ele sai da conta e não é cobrado.</p>
+    <a href="https://www.planalto.gov.br/ccivil_03/leis/l8078compilado.htm" target="_blank" rel="noopener">
+      Ler o Código de Defesa do Consumidor
+    </a>
+    <button type="button" autofocus (click)="entendi()">Entendi</button>
+  </dialog>
+}
