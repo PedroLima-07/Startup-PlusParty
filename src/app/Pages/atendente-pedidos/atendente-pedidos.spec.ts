@@ -156,7 +156,7 @@ describe('AtendentePedidos', () => {
 
   it('mostra erro quando não consegue carregar os pedidos', async () => {
     service.listarPendentes.mockRejectedValueOnce(new Error('rede'));
-    (fixture.nativeElement as HTMLElement).querySelector<HTMLButtonElement>('.btn-refresh')!.click();
+    (fixture.nativeElement as HTMLElement).querySelector<HTMLButtonElement>('app-botao-atualizar button')!.click();
     await fixture.whenStable();
 
     expect(textoDaTela()).toContain('Não foi possível carregar os pedidos');

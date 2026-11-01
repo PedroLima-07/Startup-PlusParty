@@ -1,3 +1,4 @@
+import { BotaoAtualizar } from '../../components/botao-atualizar/botao-atualizar';
 import { CurrencyPipe, DatePipe } from '@angular/common';
 import {
   Component,
@@ -75,16 +76,25 @@ const TITULOS_DETALHE: Record<ComandaAtendente['status'], string> = {
 
 /** Quanto tempo "Comanda liberada" e afins ficam na tela. */
 const DURACAO_AVISO_MS = 3000;
+/** Quantos avisos cabem empilhados: o mais antigo sai para dar lugar ao novo. */
+const MAXIMO_DE_AVISOS = 3;
+
+interface AvisoNaTela {
+  id: number;
+  titulo: string;
+  detalhe: string;
+}
 
 @Component({
   selector: 'app-atendente-comandas',
-  imports: [Carregando, CurrencyPipe, DatePipe, NavAtendente],
+  imports: [BotaoAtualizar, Carregando, CurrencyPipe, DatePipe, NavAtendente],
   templateUrl: './atendente-comandas.html',
   styleUrls: [
     './atendente-comandas.scss',
     './atendente-comandas.desktop.scss',
     './atendente-comandas.conta.scss',
     './atendente-comandas.cartoes.scss',
+    './atendente-comandas.avisos.scss',
   ],
 })
 export class AtendenteComandas implements OnInit {
@@ -104,7 +114,9 @@ export class AtendenteComandas implements OnInit {
   /** Falha de uma ação (liberar, recusar, confirmar); fica até a próxima ação. */
   protected readonly erro = signal<string | null>(null);
   /** Mensagem temporária depois de uma ação que deu certo. */
-  protected readonly aviso = signal<string | null>(null);
+  protected readonly avisos = signal<AvisoNaTela[]>([]);
+  /** A comanda que acabou de ser resolvida: só ela desliza para fora da lista. */
+  protected readonly saindoId = signal<string | null>(null);
   /** Ação em andamento, para travar os botões e trocar o texto de um deles. */
   protected readonly processando = signal<Acao | null>(null);
 
@@ -237,7 +249,8 @@ export class AtendenteComandas implements OnInit {
   /** Se o cliente da comanda a liberar já saiu sem pagar alguma vez. */
   protected readonly historicoNaoPaga = signal<HistoricoNaoPaga | null>(null);
 
-  private esperaDoAviso: ReturnType<typeof setTimeout> | undefined;
+  private proximoAviso = 0;
+  private readonly esperasDosAvisos = new Set<ReturnType<typeof setTimeout>>();
   private esperaDaPiscada: ReturnType<typeof setTimeout> | undefined;
   private quantidadesAnteriores: ReadonlyMap<TipoLista, number> | null = null;
 
@@ -261,7 +274,7 @@ export class AtendenteComandas implements OnInit {
     );
     this.destroyRef.onDestroy(() => {
       pararDeEscutar();
-      clearTimeout(this.esperaDoAviso);
+      this.esperasDosAvisos.forEach(clearTimeout);
       clearTimeout(this.esperaDaPiscada);
     });
 
@@ -446,6 +459,8 @@ export class AtendenteComandas implements OnInit {
       return;
     }
 
+    if (acao !== 'liberar') this.saindoId.set(comanda.id);
+
     // A tela já reflete o resultado antes de a nova consulta voltar.
     this.comandas.update((lista) =>
       acao === 'liberar'
@@ -457,15 +472,27 @@ export class AtendenteComandas implements OnInit {
     this.selecionadaId.set(null);
     this.semSelecaoAutomatica.set(acao === 'pagar');
     this.processando.set(null);
-    this.avisar(mensagem);
+    this.avisar(mensagem, this.detalheDoAviso(acao, comanda));
 
     await this.atualizarLista(true);
   }
 
-  private avisar(mensagem: string): void {
-    clearTimeout(this.esperaDoAviso);
-    this.aviso.set(mensagem);
-    this.esperaDoAviso = setTimeout(() => this.aviso.set(null), DURACAO_AVISO_MS);
+  private detalheDoAviso(acao: Acao, comanda: ComandaAtendente): string {
+    if (acao === 'liberar') return comanda.cliente;
+    const local = `${this.rotuloLocal(comanda)} · ${comanda.cliente}`;
+    if (acao !== 'pagar') return local;
+    const valor = comanda.total.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+    return `${local} · ${valor}`;
+  }
+
+  private avisar(titulo: string, detalhe: string): void {
+    const id = ++this.proximoAviso;
+    this.avisos.update((lista) => [...lista, { id, titulo, detalhe }].slice(-MAXIMO_DE_AVISOS));
+    const espera = setTimeout(() => {
+      this.esperasDosAvisos.delete(espera);
+      this.avisos.update((lista) => lista.filter((aviso) => aviso.id !== id));
+    }, DURACAO_AVISO_MS);
+    this.esperasDosAvisos.add(espera);
   }
 }
 

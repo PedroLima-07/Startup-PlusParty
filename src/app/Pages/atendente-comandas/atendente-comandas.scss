@@ -190,23 +190,6 @@ $cores-status: (
   font-size: 1.1rem;
 }
 
-.aviso {
-  position: fixed;
-  left: 16px;
-  right: 16px;
-  bottom: calc(84px + env(safe-area-inset-bottom));
-  z-index: 40;
-  margin: 0 auto;
-  max-width: 420px;
-  padding: 14px 18px;
-  border-radius: 12px;
-  background: #166534;
-  color: white;
-  font-weight: 600;
-  text-align: center;
-  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.2);
-}
-
 // Tela de detalhe: liberar, conferir o pagamento ou só acompanhar.
 .detalhe {
   flex: 1;

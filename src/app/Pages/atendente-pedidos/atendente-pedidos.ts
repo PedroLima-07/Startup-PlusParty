@@ -1,3 +1,4 @@
+import { BotaoAtualizar } from '../../components/botao-atualizar/botao-atualizar';
 import { duracaoEspera } from '../../tempo';
 import { DatePipe, NgClass } from '@angular/common';
 import { Component, DestroyRef, OnInit, computed, inject, signal } from '@angular/core';
@@ -27,7 +28,7 @@ interface Coluna {
 
 @Component({
   selector: 'app-atendente-pedidos',
-  imports: [Carregando, DatePipe, NavAtendente, NgClass],
+  imports: [BotaoAtualizar, Carregando, DatePipe, NavAtendente, NgClass],
   templateUrl: './atendente-pedidos.html',
   styleUrls: ['./atendente-pedidos.scss', './atendente-pedidos.desktop.scss'],
 })
