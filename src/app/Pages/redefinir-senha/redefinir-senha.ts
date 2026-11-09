@@ -2,6 +2,7 @@ import { REGRA_SENHA, VALIDADORES_SENHA_NOVA } from '../../senha';
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
+import { Logo } from '../../components/logo/logo';
 import { TipoPerfil } from '../../models';
 import { AuthService } from '../../services/auth.service';
 
@@ -13,7 +14,7 @@ type Estado = 'verificando' | 'pronto' | 'link_invalido';
  */
 @Component({
   selector: 'app-redefinir-senha',
-  imports: [ReactiveFormsModule, RouterLink],
+  imports: [Logo, ReactiveFormsModule, RouterLink],
   templateUrl: './redefinir-senha.html',
   styleUrl: '../login/login.scss',
 })

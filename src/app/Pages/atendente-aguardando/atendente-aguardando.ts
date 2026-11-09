@@ -1,6 +1,7 @@
 import { Component, DestroyRef, OnInit, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { Carregando } from '../../components/carregando/carregando';
+import { Logo } from '../../components/logo/logo';
 import { MinhaSolicitacaoEquipe } from '../../models';
 import { AuthService } from '../../services/auth.service';
 import { EquipeService } from '../../services/equipe.service';
@@ -12,7 +13,7 @@ import { SupabaseService } from '../../services/supabase.service';
  */
 @Component({
   selector: 'app-atendente-aguardando',
-  imports: [Carregando],
+  imports: [Carregando, Logo],
   templateUrl: './atendente-aguardando.html',
   styleUrls: ['../login/login.scss', './atendente-aguardando.scss'],
 })

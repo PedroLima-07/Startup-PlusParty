@@ -1,5 +1,6 @@
 import { Component, DestroyRef, OnInit, computed, inject, input, signal } from '@angular/core';
 import { Router, RouterLink, RouterLinkActive } from '@angular/router';
+import { Logo } from '../logo/logo';
 import { AuthService } from '../../services/auth.service';
 import { ComandasAtendenteService } from '../../services/comandas-atendente.service';
 import { SupabaseService } from '../../services/supabase.service';
@@ -12,7 +13,7 @@ import { SupabaseService } from '../../services/supabase.service';
  */
 @Component({
   selector: 'app-nav-atendente',
-  imports: [RouterLink, RouterLinkActive],
+  imports: [Logo, RouterLink, RouterLinkActive],
   templateUrl: './nav-atendente.html',
   styleUrls: ['./nav-atendente.scss', './nav-atendente.desktop.scss'],
 })

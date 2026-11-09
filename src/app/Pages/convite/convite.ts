@@ -4,6 +4,7 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { Carregando } from '../../components/carregando/carregando';
 import { ConfirmarCodigo } from '../../components/confirmar-codigo/confirmar-codigo';
+import { Logo } from '../../components/logo/logo';
 import { mensagemDoBanco } from '../../erros-banco';
 import { traduzirErroAuth } from '../../erros-auth';
 import { prepararFotoDePerfil } from '../../foto';
@@ -23,7 +24,7 @@ import {
  */
 @Component({
   selector: 'app-convite',
-  imports: [Carregando, ConfirmarCodigo, ReactiveFormsModule, RouterLink],
+  imports: [Carregando, ConfirmarCodigo, Logo, ReactiveFormsModule, RouterLink],
   templateUrl: './convite.html',
   styleUrls: ['../login/login.scss', './convite.scss'],
 })

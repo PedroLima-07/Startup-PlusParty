@@ -3,6 +3,7 @@ import { Component, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { ConfirmarCodigo } from '../../components/confirmar-codigo/confirmar-codigo';
+import { Logo } from '../../components/logo/logo';
 import { emailNaoConfirmado, traduzirErroAuth } from '../../erros-auth';
 import { AuthService } from '../../services/auth.service';
 import { EquipeService, ROTA_CONVITE } from '../../services/equipe.service';
@@ -11,7 +12,7 @@ type Modo = 'login' | 'cadastro' | 'recuperar';
 
 @Component({
   selector: 'app-login',
-  imports: [ConfirmarCodigo, ReactiveFormsModule, RouterLink],
+  imports: [ConfirmarCodigo, Logo, ReactiveFormsModule, RouterLink],
   templateUrl: './login.html',
   styleUrl: './login.scss',
 })
