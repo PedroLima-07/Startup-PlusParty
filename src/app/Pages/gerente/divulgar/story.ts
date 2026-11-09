@@ -7,6 +7,8 @@ export const ALTURA_STORY = 1920;
 const MARINHO = '#0f1f4b';
 const AZUL = '#2f6bff';
 const FONTE = "Inter, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif";
+/** A mesma imagem do componente app-logo. */
+const LOGO = '/img/logo/logo-plusparty.png';
 
 export interface DadosStory {
   nome: string;
@@ -27,14 +29,15 @@ export async function gerarStory(dados: DadosStory): Promise<Blob> {
   const ctx = canvas.getContext('2d');
   if (!ctx) throw new Error('Este navegador não consegue gerar a imagem.');
 
-  const [foto] = await Promise.all([
+  const [foto, logo] = await Promise.all([
     dados.fotoUrl ? carregarImagem(dados.fotoUrl).catch(() => null) : Promise.resolve(null),
+    carregarImagem(LOGO).catch(() => null),
     // Sem esperar a fonte, o primeiro desenho sai com a fonte padrão.
     document.fonts?.load(`800 88px ${FONTE}`).catch(() => undefined),
   ]);
 
   desenharFundo(ctx);
-  desenharLogo(ctx, 190);
+  desenharLogo(ctx, logo, 170);
   desenharFoto(ctx, foto, dados.nome, { x: 80, y: 320, tamanho: 920 });
   desenharTextos(ctx, dados);
 
@@ -79,8 +82,15 @@ function desenharFundo(ctx: CanvasRenderingContext2D): void {
   ctx.fillRect(0, 0, LARGURA_STORY, ALTURA_STORY);
 }
 
-/** O "+" num quadrado azul e "party" ao lado, centralizados. */
-function desenharLogo(ctx: CanvasRenderingContext2D, centroY: number): void {
+/** A logo do +party centralizada no topo; sem a imagem, o "+party" em texto. */
+function desenharLogo(ctx: CanvasRenderingContext2D, logo: HTMLImageElement | null, centroY: number): void {
+  if (logo) {
+    const largura = 440;
+    const altura = (largura * logo.naturalHeight) / logo.naturalWidth;
+    ctx.drawImage(logo, (LARGURA_STORY - largura) / 2, centroY - altura / 2, largura, altura);
+    return;
+  }
+
   const icone = 96;
   ctx.font = `800 72px ${FONTE}`;
   const larguraTexto = ctx.measureText('party').width;

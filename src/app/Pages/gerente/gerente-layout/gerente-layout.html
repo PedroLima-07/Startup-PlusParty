@@ -9,7 +9,7 @@
         <h1>{{ pagina.titulo }}</h1>
       } @else {
         <a class="logo" routerLink="/gerente/movimento" aria-label="+party, ir para o Movimento">
-          <span aria-hidden="true">+</span>party
+          <app-logo [largura]="72" />
         </a>
         <a class="botao-topo" routerLink="/gerente/configuracoes" aria-label="Configurações">
           <app-icone nome="configuracoes" />
@@ -26,7 +26,7 @@
     <div class="menu-conteudo">
       <!-- Só no desktop: logo e bar no topo da coluna. -->
       <a class="menu-marca" routerLink="/gerente/movimento" aria-label="+party, ir para o Movimento">
-        <span class="menu-logo"><span class="menu-logo-icone" aria-hidden="true">+</span>party</span>
+        <app-logo [largura]="130" />
         @if (nomeDoBar()) {
           <span class="menu-bar">{{ nomeDoBar() }} · Gerente</span>
         }

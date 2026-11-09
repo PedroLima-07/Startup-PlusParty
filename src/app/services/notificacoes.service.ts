@@ -212,7 +212,7 @@ export class NotificacoesService {
 
     const opcoes: NotificationOptions = {
       body: texto,
-      icon: '/favicon.ico',
+      icon: '/icons/icone-192.png',
       tag: notificacao?.id,
       data: { link: (notificacao && linkDaNotificacao(notificacao)) ?? '/cliente/notificacoes' },
     };

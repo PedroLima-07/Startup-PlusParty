@@ -1,5 +1,6 @@
 import { Component, ElementRef, afterNextRender, inject, signal } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
+import { Logo } from '../logo/logo';
 import { AuthService } from '../../services/auth.service';
 import { NotificacoesService } from '../../services/notificacoes.service';
 
@@ -12,7 +13,7 @@ let ultimaPosicao: number | null = null;
 
 @Component({
   selector: 'app-nav-cliente',
-  imports: [RouterLink],
+  imports: [Logo, RouterLink],
   templateUrl: './nav-cliente.html',
   styleUrl: './nav-cliente.scss',
 })

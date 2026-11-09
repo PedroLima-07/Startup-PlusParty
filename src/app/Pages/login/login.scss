@@ -37,24 +37,8 @@
 
 .logo {
   display: flex;
-  align-items: center;
-  gap: 4px;
-  font-size: 1.5rem;
-  font-weight: 700;
-  color: var(--azul-marinho);
+  justify-content: center;
   margin: 0 0 4px;
-
-  .logo-icone {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 32px;
-    height: 32px;
-    border-radius: 9px;
-    background: var(--azul-marinho);
-    color: #fff;
-    font-size: 1.2rem;
-  }
 }
 
 .tagline {

@@ -5,6 +5,7 @@ import { filter, map } from 'rxjs/operators';
 import { AuthService } from '../../../services/auth.service';
 import { EquipeService } from '../../../services/equipe.service';
 import { SupabaseService } from '../../../services/supabase.service';
+import { Logo } from '../../../components/logo/logo';
 import { Icone } from '../componentes/icone';
 
 /**
@@ -30,7 +31,7 @@ const SUBPAGINAS: { rota: string; titulo: string; voltar: string; desktop?: bool
 
 @Component({
   selector: 'app-gerente-layout',
-  imports: [Icone, RouterLink, RouterLinkActive, RouterOutlet],
+  imports: [Icone, Logo, RouterLink, RouterLinkActive, RouterOutlet],
   templateUrl: './gerente-layout.html',
   styleUrls: ['./gerente-layout.scss', './gerente-layout.desktop.scss'],
 })
