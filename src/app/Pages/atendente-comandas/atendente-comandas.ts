@@ -25,6 +25,7 @@ import {
   ComandasAtendenteService,
 } from '../../services/comandas-atendente.service';
 import { Carregando } from '../../components/carregando/carregando';
+import { Logo } from '../../components/logo/logo';
 import { NavAtendente } from '../../components/nav-atendente/nav-atendente';
 import { normalizarMesa } from '../../mesa';
 import { telaDesktop } from '../../tela';
@@ -88,7 +89,7 @@ interface AvisoNaTela {
 
 @Component({
   selector: 'app-atendente-comandas',
-  imports: [AvisoItemNaoRecebido, BotaoAtualizar, Carregando, CurrencyPipe, DatePipe, NavAtendente],
+  imports: [AvisoItemNaoRecebido, BotaoAtualizar, Carregando, CurrencyPipe, DatePipe, Logo, NavAtendente],
   templateUrl: './atendente-comandas.html',
   styleUrls: [
     './atendente-comandas.scss',

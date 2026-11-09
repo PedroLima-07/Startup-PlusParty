@@ -9,6 +9,7 @@ import { AuthService } from '../../services/auth.service';
 import { SupabaseService } from '../../services/supabase.service';
 import { PedidosAtendenteService } from '../../services/pedidos-atendente.service';
 import { Carregando } from '../../components/carregando/carregando';
+import { Logo } from '../../components/logo/logo';
 import { NavAtendente } from '../../components/nav-atendente/nav-atendente';
 import { telaDesktop } from '../../tela';
 
@@ -29,7 +30,7 @@ interface Coluna {
 
 @Component({
   selector: 'app-atendente-pedidos',
-  imports: [AvisoItemNaoRecebido, BotaoAtualizar, Carregando, DatePipe, NavAtendente, NgClass],
+  imports: [AvisoItemNaoRecebido, BotaoAtualizar, Carregando, DatePipe, Logo, NavAtendente, NgClass],
   templateUrl: './atendente-pedidos.html',
   styleUrls: ['./atendente-pedidos.scss', './atendente-pedidos.desktop.scss'],
 })
