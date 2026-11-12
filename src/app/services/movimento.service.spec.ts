@@ -359,4 +359,19 @@ describe('calcularMovimento', () => {
     expect(resultado.minutosPreparoBar).toBe(5);
     expect(resultado.minutosPreparoCozinha).toBe(15);
   });
+
+  it('tempo de preparo: item marcado como pronto horas depois fica fora da média', () => {
+    const noite = [
+      comanda({
+        id: 'c1',
+        pedidos: [
+          { id: 'p1', criado_em: em(19), pedido_itens: [{ ...item('Chope', 'bar', 1, 10), pronto_em: em(19, 6) }] },
+          // Esquecido: marcado como pronto mais de 3 horas depois.
+          { id: 'p2', criado_em: em(19, 10), pedido_itens: [{ ...item('Gin', 'bar', 1, 10), pronto_em: em(23) }] },
+        ],
+      }),
+    ];
+
+    expect(calcularMovimento(noite, AGORA).minutosPreparoBar).toBe(6);
+  });
 });

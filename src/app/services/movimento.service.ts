@@ -560,6 +560,13 @@ function calcularAlertas(
 }
 
 /**
+ * Acima disso o item não demorou para ficar pronto: o atendente esqueceu de
+ * marcar e marcou depois. Fica fora da média para não distorcer o painel.
+ * O mesmo limite está em supabase/resultados_periodo.sql.
+ */
+export const LIMITE_PREPARO_MINUTOS = 180;
+
+/**
  * Tempo médio de preparo de um setor, em minutos: do pedido enviado até o
  * último item daquele setor ficar pronto. Cada pedido conta uma vez por
  * setor (o atendente marca os itens do card juntos). Null sem nada pronto.
@@ -577,7 +584,7 @@ function minutosDePreparo(
     if (prontos.length === 0) continue;
 
     const minutos = (Math.max(...prontos) - tempo(pedido.criado_em)) / 60_000;
-    if (minutos >= 0) duracoes.push(minutos);
+    if (minutos >= 0 && minutos <= LIMITE_PREPARO_MINUTOS) duracoes.push(minutos);
   }
 
   return duracoes.length > 0 ? Math.round(soma(duracoes) / duracoes.length) : null;

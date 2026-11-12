@@ -33,6 +33,9 @@
 --   minutos_para_pagar       do fechamento da conta até o pagamento
 --   minutos_preparo_bar / minutos_preparo_cozinha    do pedido até ficar pronto
 --   (médias; null quando não há dado no período)
+--   O preparo ignora pedidos marcados como prontos mais de 3 horas depois:
+--   não é preparo, é o atendente que esqueceu de marcar (mesmo limite do
+--   LIMITE_PREPARO_MINUTOS em movimento.service.ts).
 --
 -- Não existe aqui (o banco não guarda): custo dos itens, lucro, meta.
 --
@@ -85,6 +88,7 @@ as $$
     from vendas
     where pronto_em is not null
     group by pedido_id, setor
+    having max(pronto_em) - min(pedido_em) <= interval '3 hours'
   ),
   visitas as (
     select usuario_id, count(distinct public.dia_do_bar(criada_em)) as dias
@@ -174,6 +178,7 @@ begin
                extract(epoch from (max(pronto_em) - min(pedido_em))) / 60 as minutos
         from vendas where pronto_em is not null
         group by comanda_em, setor, pedido_id
+        having max(pronto_em) - min(pedido_em) <= interval '3 hours'
       ) x
       group by 1, 2
     )
