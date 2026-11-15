@@ -2,7 +2,6 @@ import { Component, DestroyRef, computed, inject, signal } from '@angular/core';
 import { CartaoPostagem } from '../../components/cartao-postagem/cartao-postagem';
 import { Carregando } from '../../components/carregando/carregando';
 import { ErroCarregar } from '../../components/erro-carregar/erro-carregar';
-import { NavCliente } from '../../components/nav-cliente/nav-cliente';
 import { PostagemFeed, TipoPostagem } from '../../models';
 import { PostagemService } from '../../services/postagem.service';
 
@@ -24,7 +23,7 @@ const FILTROS: { valor: Filtro; rotulo: string }[] = [
  */
 @Component({
   selector: 'app-feed',
-  imports: [CartaoPostagem, Carregando, ErroCarregar, NavCliente],
+  imports: [CartaoPostagem, Carregando, ErroCarregar],
   templateUrl: './feed.html',
   styleUrl: './feed.scss',
 })

@@ -17,14 +17,13 @@ import { minutosDesde, relogio, duracaoEspera } from '../../../tempo';
 
 /** De quanto em quanto tempo a posição na fila é conferida. */
 const ATUALIZAR_FILA_MS = 20_000;
-import { NavCliente } from '../../../components/nav-cliente/nav-cliente';
 import { Carregando } from '../../../components/carregando/carregando';
 import { ErroCarregar } from '../../../components/erro-carregar/erro-carregar';
 
 @Component({
   selector: 'app-abrir-comanda-local',
   standalone: true,
-  imports: [Carregando, CurrencyPipe, DatePipe, ErroCarregar, FormsModule, NavCliente],
+  imports: [Carregando, CurrencyPipe, DatePipe, ErroCarregar, FormsModule],
   templateUrl: './local.html',
   styleUrls: ['./local.scss', './local.comanda-ativa.scss'],
 })

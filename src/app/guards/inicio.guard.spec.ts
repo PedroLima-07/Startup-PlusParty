@@ -21,10 +21,10 @@ describe('inicioGuard', () => {
     return TestBed.inject(Router).serializeUrl(resultado as UrlTree);
   }
 
-  it('manda o visitante para o Início público', async () => {
+  it('manda o visitante para o login', async () => {
     telaInicial.mockResolvedValue(null);
 
-    expect(await rodarGuard()).toBe('/cliente/home');
+    expect(await rodarGuard()).toBe('/login');
   });
 
   it('manda quem já está logado para a tela inicial dele', async () => {
@@ -33,9 +33,9 @@ describe('inicioGuard', () => {
     expect(await rodarGuard()).toBe('/gerente/movimento');
   });
 
-  it('sem conseguir descobrir a tela inicial, abre o Início público', async () => {
+  it('sem conseguir descobrir a tela inicial, abre o login', async () => {
     telaInicial.mockRejectedValue(new Error('sem rede'));
 
-    expect(await rodarGuard()).toBe('/cliente/home');
+    expect(await rodarGuard()).toBe('/login');
   });
 });

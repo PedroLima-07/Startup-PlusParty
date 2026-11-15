@@ -5,7 +5,6 @@ import { Item, ItemCarrinho } from '../../models';
 import { CardapioService } from '../../services/cardapio.service';
 import { EstabelecimentosService } from '../../services/estabelecimentos.service';
 import { PedidoService } from '../../services/pedido.service';
-import { NavCliente } from '../../components/nav-cliente/nav-cliente';
 import { Carregando } from '../../components/carregando/carregando';
 import { ErroCarregar } from '../../components/erro-carregar/erro-carregar';
 
@@ -13,7 +12,7 @@ type ModoCardapio = 'pedir' | 'visualizar';
 
 @Component({
   selector: 'app-cardapio',
-  imports: [Carregando, CurrencyPipe, ErroCarregar, NavCliente],
+  imports: [Carregando, CurrencyPipe, ErroCarregar],
   templateUrl: './cardapio.html',
   styleUrls: ['./cardapio.scss', './cardapio.folha.scss'],
   host: { '(document:keydown.escape)': 'revisando.set(false)' },

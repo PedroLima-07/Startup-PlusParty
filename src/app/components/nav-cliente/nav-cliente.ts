@@ -1,15 +1,12 @@
-import { Component, ElementRef, afterNextRender, inject, signal } from '@angular/core';
-import { Router, RouterLink } from '@angular/router';
+import { Component, inject, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { NavigationEnd, Router, RouterLink } from '@angular/router';
 import { Logo } from '../logo/logo';
 import { AuthService } from '../../services/auth.service';
 import { NotificacoesService } from '../../services/notificacoes.service';
 
 /** Rotas que têm item no menu, na ordem em que aparecem. */
-const ROTAS_DO_MENU = ['/cliente/home', '/cliente/discovery', '/cliente/novidades', '/cliente/notificacoes'];
-
-// Cada tela cria o seu próprio menu. Guardar onde o destaque estava na tela
-// anterior permite que ele deslize até o item novo em vez de só aparecer lá.
-let ultimaPosicao: number | null = null;
+export const ROTAS_DO_MENU = ['/cliente/home', '/cliente/discovery', '/cliente/novidades', '/cliente/notificacoes'];
 
 @Component({
   selector: 'app-nav-cliente',
@@ -19,7 +16,6 @@ let ultimaPosicao: number | null = null;
 })
 export class NavCliente {
   private readonly router = inject(Router);
-  private readonly elemento = inject<ElementRef<HTMLElement>>(ElementRef);
   private readonly auth = inject(AuthService);
 
   /** Índice do item em destaque; `null` nas telas que não têm item no menu. */
@@ -30,27 +26,32 @@ export class NavCliente {
   protected readonly saindo = signal(false);
 
   constructor() {
-    void this.carregarConta();
-
-    const atual = this.posicaoDaRota();
-    if (atual === null) return;
-
-    this.posicao.set(ultimaPosicao ?? atual);
-    ultimaPosicao = atual;
-
-    afterNextRender(() => {
-      // Ler o tamanho obriga o navegador a desenhar a posição antiga antes
-      // da nova; sem isso a animação não teria de onde partir.
-      void this.elemento.nativeElement.offsetWidth;
-      this.posicao.set(atual);
+    this.acompanharRota();
+    // O menu existe uma vez só (na raiz do app) e segue a rota: o destaque
+    // desliza até o item novo, e o cartão da conta acompanha login e saída.
+    this.router.events.pipe(takeUntilDestroyed()).subscribe((evento) => {
+      if (evento instanceof NavigationEnd) this.acompanharRota();
     });
+  }
+
+  /** O destaque sai no toque, sem esperar a tela nova carregar. */
+  protected destacar(indice: number): void {
+    this.posicao.set(indice);
+  }
+
+  private acompanharRota(): void {
+    this.posicao.set(this.posicaoDaRota());
+    void this.carregarConta();
   }
 
   /** O perfil fica guardado desde o login: trocar de tela não vai ao banco. */
   private async carregarConta(): Promise<void> {
     try {
       const perfil = await this.auth.perfilAtual();
-      if (!perfil) return;
+      if (!perfil) {
+        this.conta.set(null);
+        return;
+      }
       const nome = perfil.nome.trim().split(/\s+/)[0] || 'Você';
       this.conta.set({ nome, inicial: nome.charAt(0).toUpperCase() });
     } catch {

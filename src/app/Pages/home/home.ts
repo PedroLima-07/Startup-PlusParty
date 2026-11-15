@@ -1,6 +1,5 @@
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
-import { NavCliente } from '../../components/nav-cliente/nav-cliente';
 import { NotaBar } from '../../components/nota-bar/nota-bar';
 import { Comanda, Estabelecimento } from '../../models';
 import { statusHorario } from '../../horario-funcionamento';
@@ -18,7 +17,7 @@ interface EstabelecimentoComLotacao extends Estabelecimento {
 
 @Component({
   selector: 'app-home',
-  imports: [Carregando, ErroCarregar, RouterLink, NavCliente, NotaBar],
+  imports: [Carregando, ErroCarregar, RouterLink, NotaBar],
   templateUrl: './home.html',
   styleUrls: ['./home.scss', './home.conta.scss'],
   host: { '(document:keydown.escape)': 'menuConta.set(false)' },
