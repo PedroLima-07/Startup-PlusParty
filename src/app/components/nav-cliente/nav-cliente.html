@@ -12,7 +12,7 @@
   <span class="fundo" aria-hidden="true"><span class="recorte"></span></span>
   <span class="bolha" aria-hidden="true"></span>
 
-  <a class="item-nav" routerLink="/cliente/home" [class.ativo]="posicao() === 0">
+  <a class="item-nav" routerLink="/cliente/home" [class.ativo]="posicao() === 0" (click)="destacar(0)">
     <span class="icone">
       <svg viewBox="0 0 24 24" aria-hidden="true">
         <path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8" />
@@ -21,7 +21,7 @@
     </span>
     <span class="rotulo">Início</span>
   </a>
-  <a class="item-nav" routerLink="/cliente/discovery" [class.ativo]="posicao() === 1">
+  <a class="item-nav" routerLink="/cliente/discovery" [class.ativo]="posicao() === 1" (click)="destacar(1)">
     <span class="icone">
       <svg viewBox="0 0 24 24" aria-hidden="true">
         <path d="M14.536 21.686a.5.5 0 0 0 .937-.024l6.5-19a.496.496 0 0 0-.635-.635l-19 6.5a.5.5 0 0 0-.024.937l7.93 3.18a2 2 0 0 1 1.112 1.11z" />
@@ -30,7 +30,7 @@
     </span>
     <span class="rotulo">Descobrir</span>
   </a>
-  <a class="item-nav" routerLink="/cliente/novidades" [class.ativo]="posicao() === 2">
+  <a class="item-nav" routerLink="/cliente/novidades" [class.ativo]="posicao() === 2" (click)="destacar(2)">
     <span class="icone">
       <svg viewBox="0 0 24 24" aria-hidden="true">
         <path d="M15 18h-5" />
@@ -45,6 +45,7 @@
     class="item-nav"
     routerLink="/cliente/notificacoes"
     [class.ativo]="posicao() === 3"
+    (click)="destacar(3)"
     [attr.aria-label]="naoLidas() > 0 ? 'Notificações, ' + naoLidas() + ' não lidas' : null"
   >
     <span class="icone">

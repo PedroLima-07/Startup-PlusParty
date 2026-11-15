@@ -164,7 +164,7 @@ export const routes: Routes = [
     pathMatch: 'full',
   },
   // A raiz e endereços desconhecidos: quem já está logado vai para a própria
-  // tela inicial; visitante, para o Início público (inicioGuard).
+  // tela inicial; visitante, para o login (inicioGuard).
   {
     path: '',
     pathMatch: 'full',

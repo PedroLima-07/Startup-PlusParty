@@ -12,7 +12,6 @@ import { EstabelecimentosService } from '../../services/estabelecimentos.service
 import { linkComoChegar } from '../../services/google-maps.service';
 import { PostagemService } from '../../services/postagem.service';
 import { haQuantoTempo } from '../../tempo';
-import { NavCliente } from '../../components/nav-cliente/nav-cliente';
 import { Carregando } from '../../components/carregando/carregando';
 import { ErroCarregar } from '../../components/erro-carregar/erro-carregar';
 
@@ -41,7 +40,7 @@ type Carga<T> = T[] | null | 'erro';
 @Component({
   selector: 'app-estabelecimento',
   standalone: true,
-  imports: [CartaoPostagem, Carregando, CurrencyPipe, DatePipe, ErroCarregar, NavCliente, NotaBar],
+  imports: [CartaoPostagem, Carregando, CurrencyPipe, DatePipe, ErroCarregar, NotaBar],
   templateUrl: './estabelecimento.html',
   styleUrls: ['./estabelecimento.scss', './estabelecimento.abas.scss'],
 })

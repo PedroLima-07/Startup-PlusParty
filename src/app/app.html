@@ -1,3 +1,8 @@
 <router-outlet />
+<!-- Um menu só para toda a área do cliente: por não ser recriado a cada tela,
+     o destaque desliza de um item para o outro sem engasgar. -->
+@if (menuCliente(); as menu) {
+  <app-nav-cliente [class.apenas-desktop]="menu === 'desktop'" />
+}
 <app-aviso-notificacao />
 <ng-container #avaliacao />

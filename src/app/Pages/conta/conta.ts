@@ -1,7 +1,6 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
-import { NavCliente } from '../../components/nav-cliente/nav-cliente';
 import { AuthService } from '../../services/auth.service';
 
 /** O que a pessoa digita para confirmar que quer mesmo excluir. */
@@ -13,7 +12,7 @@ export const PALAVRA_DE_CONFIRMACAO = 'EXCLUIR';
  */
 @Component({
   selector: 'app-conta',
-  imports: [FormsModule, NavCliente, RouterLink],
+  imports: [FormsModule, RouterLink],
   templateUrl: './conta.html',
   styleUrl: './conta.scss',
 })

@@ -6,7 +6,8 @@ $itens: 4;
 $altura-barra: 64px;
 $bolha: 48px;
 $subida: 14px; // quanto a bolha (e o ícone ativo) passam do topo da barra
-$deslize: 420ms cubic-bezier(0.34, 1.3, 0.5, 1);
+$deslize: 340ms cubic-bezier(0.3, 1.15, 0.5, 1);
+$borda: 24px; // folga nas pontas, para o recorte não comer o canto da barra
 
 // Formato do recorte: uma "bacia" com folga em volta da bolha e cantos
 // arredondados onde ela encontra o topo da barra.
@@ -24,8 +25,8 @@ $recorte: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' view
   height: $altura-barra;
   max-width: 520px;
   margin: 0 auto;
+  padding: 0 $borda;
   font-family: system-ui, sans-serif;
-  filter: drop-shadow(0 8px 18px rgba(15, 31, 75, 0.28));
 }
 
 .fundo {
@@ -33,6 +34,8 @@ $recorte: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' view
   inset: 0;
   overflow: hidden;
   border-radius: 22px;
+  // Sombra simples: a sombra por filtro era recalculada a cada quadro da animação.
+  box-shadow: 0 8px 18px rgba(15, 31, 75, 0.28);
 }
 
 // Uma faixa da largura de um item, que desliza até o item ativo. A barra é
@@ -41,19 +44,22 @@ $recorte: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' view
   position: absolute;
   top: 0;
   bottom: 0;
-  left: 0;
-  width: calc(100% / $itens);
+  left: $borda;
+  width: calc((100% - #{2 * $borda}) / $itens);
   transform: translateX(calc(var(--posicao) * 100%));
   transition: transform $deslize;
+  will-change: transform;
 
   &::before {
     content: '';
     position: absolute;
     top: 0;
     bottom: 0;
+    // Nove vezes a faixa (pouco mais de duas barras): cobre a barra inteira em
+    // qualquer posição sem pintar uma área de várias telas de largura.
     left: 50%;
-    width: 400vw;
-    margin-left: -200vw;
+    width: 900%;
+    margin-left: -450%;
     background: #0f1f4b;
     mask:
       $recorte center top / 104px 40px no-repeat,
@@ -65,10 +71,11 @@ $recorte: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' view
 .bolha {
   position: absolute;
   top: -$subida;
-  left: 0;
-  width: calc(100% / $itens);
+  left: $borda;
+  width: calc((100% - #{2 * $borda}) / $itens);
   transform: translateX(calc(var(--posicao) * 100%));
   transition: transform $deslize;
+  will-change: transform;
   pointer-events: none;
 
   &::before {

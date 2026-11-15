@@ -3,7 +3,6 @@ import { AtivarAvisos } from '../../components/ativar-avisos/ativar-avisos';
 import { ICONE_NOTIFICACAO } from '../../components/aviso-notificacao/icone-notificacao';
 import { Carregando } from '../../components/carregando/carregando';
 import { ErroCarregar } from '../../components/erro-carregar/erro-carregar';
-import { NavCliente } from '../../components/nav-cliente/nav-cliente';
 import { Notificacao } from '../../models';
 import { NotificacoesService } from '../../services/notificacoes.service';
 import { haQuantoTempo } from '../../tempo';
@@ -20,7 +19,7 @@ interface Grupo {
  */
 @Component({
   selector: 'app-notificacoes',
-  imports: [AtivarAvisos, Carregando, ErroCarregar, NavCliente],
+  imports: [AtivarAvisos, Carregando, ErroCarregar],
   templateUrl: './notificacoes.html',
   styleUrl: './notificacoes.scss',
 })
