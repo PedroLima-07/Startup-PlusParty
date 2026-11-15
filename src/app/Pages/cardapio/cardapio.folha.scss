@@ -1,0 +1,158 @@
+@use '../../../styles/desktop' as d;
+
+// Celular: folha "Seu pedido", que sobe da base antes de confirmar.
+.botao-confirmar-desktop {
+  display: none;
+}
+
+.botao-stepper {
+  // Área de toque de 44px sem aumentar o círculo.
+  position: relative;
+
+  &::after {
+    content: '';
+    position: absolute;
+    inset: -7px;
+  }
+}
+
+.fundo-folha {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  background: rgba(15, 31, 75, 0.5);
+  animation: surgir 0.2s ease both;
+}
+
+.folha-pedido {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 21;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-height: 85dvh;
+  padding: 24px 20px calc(20px + env(safe-area-inset-bottom));
+  border-radius: 24px 24px 0 0;
+  background: #fff;
+  animation: subir 0.3s cubic-bezier(0.2, 0.9, 0.3, 1) both;
+
+  h2 {
+    margin: 0;
+    font-size: 1.3rem;
+  }
+}
+
+.itens-folha {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  overflow-y: auto;
+
+  li {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    min-height: 56px;
+    border-bottom: 1px solid var(--cinza-borda);
+  }
+
+  .detalhe {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+  }
+
+  .nome {
+    font-weight: 600;
+  }
+
+  .preco {
+    color: var(--cinza-texto);
+    font-size: 0.9rem;
+  }
+}
+
+.total-folha {
+  display: flex;
+  justify-content: space-between;
+  font-size: 1.1rem;
+}
+
+.erro-folha {
+  margin: 0;
+  padding: 10px 14px;
+  border-radius: 10px;
+  background: #fef2f2;
+  color: #b91c1c;
+  font-size: 0.9rem;
+  text-align: center;
+}
+
+.botao-continuar {
+  min-height: 44px;
+  border: 0;
+  background: none;
+  color: var(--azul-acao);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+// Cardápio de consulta: convite para abrir a comanda.
+.aviso-consulta {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+
+  p {
+    margin: 0;
+    color: var(--cinza-texto);
+    font-size: 0.95rem;
+    text-align: center;
+  }
+}
+
+@keyframes subir {
+  from {
+    transform: translateY(100%);
+  }
+}
+
+@keyframes surgir {
+  from {
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fundo-folha,
+  .folha-pedido {
+    animation: none;
+  }
+}
+
+// Desktop: o resumo já fica no painel lateral, então a folha não existe.
+@include d.desktop {
+  .botao-ver-pedido,
+  .fundo-folha,
+  .folha-pedido {
+    display: none;
+  }
+
+  .botao-confirmar-desktop {
+    display: block;
+  }
+
+  .aviso-consulta {
+    grid-column: 2;
+    grid-row: 2;
+  }
+}

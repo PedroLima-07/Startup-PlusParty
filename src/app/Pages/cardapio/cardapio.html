@@ -64,7 +64,7 @@
       }
 
       <footer class="rodape">
-        <!-- Resumo do carrinho: aparece só no painel lateral do desktop -->
+        <!-- Resumo do carrinho no painel lateral do desktop. No celular ele abre na folha "Seu pedido". -->
         <div class="resumo">
           <h2>Seu pedido</h2>
           @for (linha of itensDoCarrinho(); track linha.item.id) {
@@ -83,8 +83,23 @@
           }
         </div>
 
+        <!-- Só no celular: antes de confirmar, o cliente confere o que escolheu. -->
         <button
-          class="botao-primario"
+          class="botao-primario botao-ver-pedido"
+          type="button"
+          [disabled]="totalItensCarrinho() === 0"
+          (click)="revisando.set(true)"
+        >
+          @if (totalItensCarrinho() > 0) {
+            Ver pedido · {{ totalItensCarrinho() }} {{ totalItensCarrinho() === 1 ? 'item' : 'itens' }} ·
+            {{ totalCarrinho() | currency: 'BRL' }}
+          } @else {
+            Escolha os itens do pedido
+          }
+        </button>
+
+        <button
+          class="botao-primario botao-confirmar-desktop"
           type="button"
           [disabled]="totalItensCarrinho() === 0 || enviando()"
           (click)="confirmarPedido()"
@@ -97,6 +112,61 @@
             }}
           }
         </button>
+      </footer>
+
+      @if (revisando() && totalItensCarrinho() > 0) {
+        <div class="fundo-folha" (click)="revisando.set(false)"></div>
+        <section class="folha-pedido" role="dialog" aria-modal="true" aria-labelledby="titulo-folha-pedido">
+          <h2 id="titulo-folha-pedido">Seu pedido</h2>
+          <ul class="itens-folha">
+            @for (linha of itensDoCarrinho(); track linha.item.id) {
+              <li>
+                <div class="detalhe">
+                  <span class="nome">{{ linha.item.nome }}</span>
+                  <span class="preco">{{ linha.item.preco * linha.quantidade | currency: 'BRL' }}</span>
+                </div>
+                <div class="stepper">
+                  <button
+                    type="button"
+                    class="botao-stepper"
+                    (click)="remover(linha.item.id)"
+                    [attr.aria-label]="'Remover uma unidade de ' + linha.item.nome"
+                  >
+                    −
+                  </button>
+                  <span class="quantidade">{{ linha.quantidade }}</span>
+                  <button
+                    type="button"
+                    class="botao-stepper"
+                    (click)="adicionar(linha.item.id)"
+                    [attr.aria-label]="'Adicionar uma unidade de ' + linha.item.nome"
+                  >
+                    +
+                  </button>
+                </div>
+              </li>
+            }
+          </ul>
+          <div class="total-folha">
+            <span>Total</span>
+            <strong>{{ totalCarrinho() | currency: 'BRL' }}</strong>
+          </div>
+          @if (erro(); as mensagem) {
+            <p class="erro-folha" role="alert">{{ mensagem }}</p>
+          }
+          <button class="botao-primario" type="button" [disabled]="enviando()" (click)="confirmarPedido()">
+            {{ enviando() ? 'Enviando...' : 'Confirmar pedido' }}
+          </button>
+          <button class="botao-continuar" type="button" [disabled]="enviando()" (click)="revisando.set(false)">
+            Continuar escolhendo
+          </button>
+        </section>
+      }
+    } @else if (categorias().length > 0) {
+      <!-- Cardápio de consulta: para pedir é preciso abrir a comanda neste bar. -->
+      <footer class="rodape aviso-consulta">
+        <p>Para pedir, abra a sua comanda neste bar.</p>
+        <button class="botao-primario" type="button" (click)="abrirComanda()">Abrir comanda</button>
       </footer>
     }
   </div>

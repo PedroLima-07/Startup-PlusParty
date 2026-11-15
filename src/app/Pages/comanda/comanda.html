@@ -174,8 +174,16 @@
       <div class="cabecalho-itens">
         <span>Itens pedidos</span>
         @if (itens().length > 0) {
-          <button class="link" type="button" [disabled]="atualizando()" (click)="atualizarStatus()">
-            {{ atualizando() ? 'Atualizando...' : 'Atualizar status' }}
+          <!-- A lista se atualiza sozinha; o toque só força uma conferência. -->
+          <button
+            class="ao-vivo"
+            type="button"
+            [disabled]="atualizando()"
+            (click)="atualizarStatus()"
+            aria-label="Ao vivo: a lista se atualiza sozinha. Tocar para conferir agora."
+          >
+            <span class="ponto" aria-hidden="true"></span>
+            {{ atualizando() ? 'Atualizando...' : 'Ao vivo' }}
           </button>
         }
       </div>

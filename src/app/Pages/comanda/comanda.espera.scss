@@ -53,6 +53,36 @@
   background: var(--azul-acao);
 }
 
+// Indicador de que os itens se atualizam sozinhos.
+.ao-vivo {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  margin: -12px 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: #166534;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+
+  .ponto {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #16a34a;
+    animation: pulso-ponto 1.6s ease-in-out infinite;
+  }
+}
+
+@keyframes pulso-ponto {
+  50% {
+    opacity: 0.35;
+  }
+}
+
 @keyframes pulso-halo {
   0%,
   100% {
@@ -67,6 +97,10 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .ao-vivo .ponto {
+    animation: none;
+  }
+
   .halo {
     animation: none;
     opacity: 0.22;

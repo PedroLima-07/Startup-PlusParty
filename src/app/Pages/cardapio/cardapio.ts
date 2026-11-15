@@ -15,7 +15,8 @@ type ModoCardapio = 'pedir' | 'visualizar';
   selector: 'app-cardapio',
   imports: [Carregando, CurrencyPipe, ErroCarregar, NavCliente],
   templateUrl: './cardapio.html',
-  styleUrl: './cardapio.scss',
+  styleUrls: ['./cardapio.scss', './cardapio.folha.scss'],
+  host: { '(document:keydown.escape)': 'revisando.set(false)' },
 })
 export class CardapioPage implements OnInit {
   private route = inject(ActivatedRoute);
@@ -39,6 +40,8 @@ export class CardapioPage implements OnInit {
   protected readonly nomeEstabelecimento = signal('');
   protected readonly categorias = signal<[string, Item[]][]>([]);
   protected readonly carrinho = signal<Map<string, number>>(new Map());
+  /** Celular: a folha "Seu pedido", aberta antes de confirmar. */
+  protected readonly revisando = signal(false);
 
   private itensPorId = new Map<string, Item>();
   private comandaId: string | null = null;
@@ -136,6 +139,10 @@ export class CardapioPage implements OnInit {
       this.erro.set('Não foi possível confirmar o pedido agora. Tente novamente.');
       this.enviando.set(false);
     }
+  }
+
+  protected abrirComanda(): void {
+    void this.router.navigate(['/cliente/abrir-comanda', this.id()]);
   }
 
   protected voltar(): void {
