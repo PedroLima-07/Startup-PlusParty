@@ -283,28 +283,28 @@ describe('LoginPage — abrir direto no cadastro (?modo=cadastro)', () => {
     await abrirCom({});
 
     expect(tela().querySelector('input[formControlName=nome]')).toBeNull();
-    expect(tela().textContent).toContain('LOGIN');
+    expect(tela().querySelector('button[type=submit]')?.textContent).toContain('Entrar');
   });
 
   it('com modo=cadastro, abre no cadastro, com o campo de nome', async () => {
     await abrirCom({ modo: 'cadastro' });
 
     expect(tela().querySelector('input[formControlName=nome]')).not.toBeNull();
-    expect(tela().textContent).toContain('CADASTRAR');
+    expect(tela().querySelector('button[type=submit]')?.textContent).toContain('Criar conta');
   });
 
   it('valor desconhecido é ignorado: abre no login', async () => {
     await abrirCom({ modo: 'gerente' });
 
     expect(tela().querySelector('input[formControlName=nome]')).toBeNull();
-    expect(tela().textContent).toContain('LOGIN');
+    expect(tela().querySelector('button[type=submit]')?.textContent).toContain('Entrar');
   });
 
   it('não abre direto em "recuperar senha" pelo endereço', async () => {
     await abrirCom({ modo: 'recuperar' });
 
     expect(tela().querySelector('input[type=password]')).not.toBeNull();
-    expect(tela().textContent).toContain('LOGIN');
+    expect(tela().querySelector('button[type=submit]')?.textContent).toContain('Entrar');
   });
 
   it('aberto pelo endereço, o cadastro exige o nome como no clique em "Cadastre-se"', async () => {
@@ -324,7 +324,7 @@ describe('LoginPage — abrir direto no cadastro (?modo=cadastro)', () => {
     botao('Entrar').click();
 
     expect(tela().querySelector('input[formControlName=nome]')).toBeNull();
-    expect(tela().textContent).toContain('LOGIN');
+    expect(tela().querySelector('button[type=submit]')?.textContent).toContain('Entrar');
   });
 
   it('o aviso de conta excluída continua aparecendo no login', async () => {
