@@ -64,7 +64,14 @@
         <button type="button" class="bar-card" [class.com-foto]="foto" (click)="abrirPerfil(bar)">
           @if (foto) {
             <span class="capa">
-              <img class="bar-foto" [src]="foto" alt="" loading="lazy" />
+              <img
+                class="bar-foto"
+                [src]="foto | fotoBar: 480"
+                [attr.srcset]="foto | srcsetBar"
+                sizes="(min-width: 1024px) 30vw, 100vw"
+                alt=""
+                loading="lazy"
+              />
               @if (bar.eventoHoje) {
                 <span class="selo selo-evento">Evento hoje</span>
               } @else if (bar.quente) {

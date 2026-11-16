@@ -2,6 +2,7 @@ import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { BarNoMapa, Mapa } from '../../components/mapa/mapa';
+import { FotoBarPipe, SrcsetBarPipe } from '../../foto-bar.pipe';
 import { GoogleMapsService } from '../../services/google-maps.service';
 import { NotaBar } from '../../components/nota-bar/nota-bar';
 import { formatarHora, statusHorario } from '../../horario-funcionamento';
@@ -35,7 +36,7 @@ interface BarDescoberto extends Estabelecimento {
 @Component({
   selector: 'app-discovery',
   standalone: true,
-  imports: [Carregando, ErroCarregar, FormsModule, Mapa, NotaBar],
+  imports: [Carregando, ErroCarregar, FormsModule, FotoBarPipe, Mapa, NotaBar, SrcsetBarPipe],
   templateUrl: './discovery.html',
   styleUrls: ['./discovery.scss', './discovery.filtros.scss'],
 })

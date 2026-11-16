@@ -4,7 +4,7 @@
     <header class="topo">
       <a class="bar" [routerLink]="['/cliente/estabelecimento', b.id]">
         @if (b.foto_url) {
-          <img class="bar-foto" [src]="b.foto_url" alt="" />
+          <img class="bar-foto" [src]="b.foto_url | fotoBar: 160" alt="" />
         } @else {
           <span class="bar-foto bar-inicial" aria-hidden="true">{{ b.nome.charAt(0) }}</span>
         }

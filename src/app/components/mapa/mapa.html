@@ -24,7 +24,7 @@
   @if (selecionado(); as bar) {
     <div class="resumo">
       @if (bar.foto_url) {
-        <img [src]="bar.foto_url" alt="" />
+        <img [src]="bar.foto_url | fotoBar: 160" alt="" />
       }
       <span class="resumo-texto">
         <strong>{{ bar.nome }}</strong>

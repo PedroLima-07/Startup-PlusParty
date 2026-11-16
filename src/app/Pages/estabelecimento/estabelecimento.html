@@ -17,7 +17,13 @@
 
   <main class="page-content" [class.com-botao]="status()?.aberto">
     @if (e.foto_url) {
-      <img class="foto-capa" [src]="e.foto_url" alt="" />
+      <img
+        class="foto-capa"
+        [src]="e.foto_url | fotoBar: 960"
+        [attr.srcset]="e.foto_url | srcsetBar"
+        sizes="(min-width: 1024px) 900px, 100vw"
+        alt=""
+      />
     }
 
     <div class="topo">
