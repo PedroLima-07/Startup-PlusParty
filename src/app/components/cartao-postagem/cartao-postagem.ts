@@ -1,6 +1,7 @@
 import { CurrencyPipe, formatDate } from '@angular/common';
 import { Component, LOCALE_ID, computed, inject, input } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import { FotoBarPipe } from '../../foto-bar.pipe';
 import { Estabelecimento, Postagem, TipoPostagem } from '../../models';
 import {
   EMOJI_DO_TIPO,
@@ -28,7 +29,7 @@ const NOME_DO_TIPO: Record<TipoPostagem, string> = {
  */
 @Component({
   selector: 'app-cartao-postagem',
-  imports: [CurrencyPipe, RouterLink],
+  imports: [CurrencyPipe, FotoBarPipe, RouterLink],
   templateUrl: './cartao-postagem.html',
   styleUrl: './cartao-postagem.scss',
 })

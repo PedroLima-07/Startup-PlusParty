@@ -11,7 +11,8 @@ import {
   untracked,
   viewChild,
 } from '@angular/core';
-import { RouterLink } from '@angular/router';
+import { RouterLink } from '@angular/router';
+import { FotoBarPipe } from '../../foto-bar.pipe';
 import {
   ApiGoogleMaps,
   CENTRO_PADRAO,
@@ -41,7 +42,7 @@ export interface BarNoMapa {
  */
 @Component({
   selector: 'app-mapa',
-  imports: [RouterLink],
+  imports: [FotoBarPipe, RouterLink],
   templateUrl: './mapa.html',
   styleUrl: './mapa.scss',
 })

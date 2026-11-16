@@ -13,7 +13,8 @@ import { linkComoChegar } from '../../services/google-maps.service';
 import { PostagemService } from '../../services/postagem.service';
 import { haQuantoTempo } from '../../tempo';
 import { Carregando } from '../../components/carregando/carregando';
-import { ErroCarregar } from '../../components/erro-carregar/erro-carregar';
+import { ErroCarregar } from '../../components/erro-carregar/erro-carregar';
+import { FotoBarPipe, SrcsetBarPipe } from '../../foto-bar.pipe';
 
 const NOTA_BEM_AVALIADO = 4.5;
 
@@ -40,7 +41,7 @@ type Carga<T> = T[] | null | 'erro';
 @Component({
   selector: 'app-estabelecimento',
   standalone: true,
-  imports: [CartaoPostagem, Carregando, CurrencyPipe, DatePipe, ErroCarregar, NotaBar],
+  imports: [CartaoPostagem, Carregando, CurrencyPipe, DatePipe, ErroCarregar, FotoBarPipe, NotaBar, SrcsetBarPipe],
   templateUrl: './estabelecimento.html',
   styleUrls: ['./estabelecimento.scss', './estabelecimento.abas.scss'],
 })
