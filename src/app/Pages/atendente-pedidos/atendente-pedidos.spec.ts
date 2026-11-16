@@ -43,20 +43,21 @@ describe('AtendentePedidos', () => {
     fixture.detectChanges();
   }
 
-  function tituloDoModal(): string | null {
-    fixture.detectChanges();
-    return (fixture.nativeElement as HTMLElement).querySelector('.modal-content h3')?.textContent ?? null;
-  }
-
   function seloDoCard(texto: string): string | null {
     fixture.detectChanges();
     const cards = Array.from((fixture.nativeElement as HTMLElement).querySelectorAll<HTMLElement>('.card-pedido'));
     return cards.find((card) => card.textContent?.includes(texto))?.querySelector('.badge')?.textContent?.trim() ?? null;
   }
 
-  async function confirmarModal(): Promise<void> {
-    (fixture.nativeElement as HTMLElement).querySelector<HTMLButtonElement>('.btn-confirmar')!.click();
+  /** Termina o tempo de desfazer: a mudança vai para o banco. */
+  async function passarTempoDeDesfazer(): Promise<void> {
+    await fixture.componentInstance['gravarPendente']();
     await fixture.whenStable();
+  }
+
+  function avisoDesfazer(): HTMLElement | null {
+    fixture.detectChanges();
+    return (fixture.nativeElement as HTMLElement).querySelector('.aviso-desfazer');
   }
 
   let supabase: { escutarMudancas: ReturnType<typeof vi.fn> };
@@ -64,6 +65,7 @@ describe('AtendentePedidos', () => {
   let comandasService: { pendencias: WritableSignal<number>; atualizarPendencias: ReturnType<typeof vi.fn> };
 
   beforeEach(async () => {
+    localStorage.clear();
     supabase = {
       // A navegação também escuta (a tabela de comandas, para o contador);
       // aqui interessa o aviso que a própria tela de pedidos pediu.
@@ -122,36 +124,85 @@ describe('AtendentePedidos', () => {
     expect(texto).not.toContain('Carlos');
   });
 
-  it('pedido novo vira "em andamento" ao confirmar', async () => {
+  it('o toque avança na hora, sem janela de confirmação, e só grava depois do tempo de desfazer', async () => {
     clicarNoCard('Mesa 12');
-    expect(tituloDoModal()).toContain('Começar a preparar');
 
-    await confirmarModal();
+    expect(seloDoCard('Mesa 12')).toBe('Em andamento');
+    expect(avisoDesfazer()?.textContent).toContain('Mesa 12: em preparo');
+    expect(service.atualizarStatus).not.toHaveBeenCalled();
+
+    await passarTempoDeDesfazer();
 
     expect(service.atualizarStatus).toHaveBeenCalledWith(['p1-item'], 'em_andamento');
-    expect(seloDoCard('Mesa 12')).toBe('Em andamento');
-    expect(tituloDoModal()).toBeNull();
+    expect(avisoDesfazer()).toBeNull();
   });
 
   it('pedido em andamento sai da lista ao marcar como pronto', async () => {
     clicarNoCard('Mariana');
-    expect(tituloDoModal()).toContain('Marcar como pronto');
+    expect(textoDaTela()).not.toContain('Mariana');
 
-    await confirmarModal();
+    await passarTempoDeDesfazer();
 
     expect(service.atualizarStatus).toHaveBeenCalledWith(['p2-item'], 'pronto');
-    expect(textoDaTela()).not.toContain('Mariana');
+  });
+
+  it('"Desfazer" devolve o pedido e não muda nada no banco', async () => {
+    clicarNoCard('Mariana');
+    avisoDesfazer()!.querySelector('button')!.click();
+
+    expect(textoDaTela()).toContain('Mariana');
+    expect(seloDoCard('Mariana')).toBe('Em andamento');
+
+    await passarTempoDeDesfazer();
+    expect(service.atualizarStatus).not.toHaveBeenCalled();
+  });
+
+  it('um segundo toque grava o primeiro na hora', async () => {
+    clicarNoCard('Mesa 12');
+    clicarNoCard('Mariana');
+    await fixture.whenStable();
+
+    expect(service.atualizarStatus).toHaveBeenCalledWith(['p1-item'], 'em_andamento');
+    expect(service.atualizarStatus).not.toHaveBeenCalledWith(['p2-item'], 'pronto');
   });
 
   it('mantém o pedido e mostra erro quando a atualização falha', async () => {
     service.atualizarStatus.mockRejectedValueOnce(new Error('RLS'));
     clicarNoCard('Mariana');
 
-    await confirmarModal();
+    await passarTempoDeDesfazer();
 
     const texto = textoDaTela();
     expect(texto).toContain('Mariana');
     expect(texto).toContain('Não foi possível atualizar o pedido');
+  });
+
+  it('a lista que chega do banco no tempo de desfazer não desfaz o toque', async () => {
+    clicarNoCard('Mariana');
+
+    avisarMudanca();
+    await fixture.whenStable();
+
+    expect(textoDaTela()).not.toContain('Mariana');
+  });
+
+  it('pedido novo que chega toca o aviso; a primeira carga e o som desligado, não', async () => {
+    const avisar = vi.spyOn(fixture.componentInstance as unknown as { avisarPedidoNovo(): void }, 'avisarPedidoNovo');
+    expect(avisar).not.toHaveBeenCalled();
+
+    service.listarPendentes.mockResolvedValueOnce([
+      pedido({ id: 'p1' }),
+      pedido({ id: 'p9', cliente: 'Josias' }),
+    ]);
+    avisarMudanca();
+    await fixture.whenStable();
+    expect(avisar).toHaveBeenCalledTimes(1);
+
+    fixture.componentInstance['alternarSom']();
+    service.listarPendentes.mockResolvedValueOnce([pedido({ id: 'p10', cliente: 'Ana' })]);
+    avisarMudanca();
+    await fixture.whenStable();
+    expect(avisar).toHaveBeenCalledTimes(1);
   });
 
   it('mostra erro quando não consegue carregar os pedidos', async () => {
@@ -219,12 +270,10 @@ describe('AtendentePedidos', () => {
       ]);
     });
 
-    it('o botão do cartão já age, sem a janela de confirmação', async () => {
+    it('o botão do cartão avança e oferece desfazer, como no celular', () => {
       clicarNoCard('Mesa 12');
-      await fixture.whenStable();
 
-      expect(tituloDoModal()).toBeNull();
-      expect(service.atualizarStatus).toHaveBeenCalledWith(['p1-item'], 'em_andamento');
+      expect(avisoDesfazer()?.textContent).toContain('Desfazer');
     });
 
     it('marca em laranja o pedido esperando há 15 minutos ou mais', () => {

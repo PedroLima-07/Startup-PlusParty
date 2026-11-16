@@ -11,15 +11,21 @@ import { PedidosAtendenteService } from '../../services/pedidos-atendente.servic
 import { Carregando } from '../../components/carregando/carregando';
 import { Logo } from '../../components/logo/logo';
 import { NavAtendente } from '../../components/nav-atendente/nav-atendente';
-import { telaDesktop } from '../../tela';
-
-type AcaoModal = 'comecar' | 'pronto';
+import { guardarSomLigado, lerSomLigado, liberarSom, tocarAvisoPedido } from './aviso-sonoro';
 
 /** A partir de quantos minutos o pedido parado ganha o selo laranja (o mesmo alerta do gerente). */
 export const MINUTOS_ATRASADO = 15;
 
 /** De quanto em quanto tempo o "há X min" dos cartões é recalculado. */
 const ATUALIZAR_ESPERA_MS = 30_000;
+
+/** Tempo para desfazer um toque antes de a mudança ir para o banco. */
+export const TEMPO_DESFAZER_MS = 5_000;
+
+interface MudancaPendente {
+  pedido: PedidoSetor;
+  novoStatus: 'em_andamento' | 'pronto';
+}
 
 interface Coluna {
   status: Exclude<StatusPedidoItem, 'pronto'>;
@@ -32,7 +38,8 @@ interface Coluna {
   selector: 'app-atendente-pedidos',
   imports: [AvisoItemNaoRecebido, BotaoAtualizar, Carregando, DatePipe, Logo, NavAtendente, NgClass],
   templateUrl: './atendente-pedidos.html',
-  styleUrls: ['./atendente-pedidos.scss', './atendente-pedidos.desktop.scss'],
+  styleUrls: ['./atendente-pedidos.scss', './atendente-pedidos.desktop.scss', './atendente-pedidos.status.scss'],
+  host: { '(document:pointerdown)': 'liberarSom()' },
 })
 export class AtendentePedidos implements OnInit {
   private pedidosService = inject(PedidosAtendenteService);
@@ -41,24 +48,18 @@ export class AtendentePedidos implements OnInit {
   private authService = inject(AuthService);
   private router = inject(Router);
 
-  /** No desktop o botão do cartão já age; no celular abre a confirmação. */
-  private readonly desktop = telaDesktop();
-
   protected readonly abaAtiva = signal<SetorItem>('bar');
   protected readonly pedidos = signal<PedidoSetor[]>([]);
   protected readonly carregando = signal(true);
-  protected readonly salvando = signal(false);
-  /** Pedido com uma mudança em andamento, para o botão dele mostrar "Salvando...". */
-  protected readonly salvandoId = signal<string | null>(null);
   protected readonly erro = signal<string | null>(null);
   private readonly agora = signal(Date.now());
 
-  protected readonly pedidoSelecionado = signal<PedidoSetor | null>(null);
-  protected readonly acaoModal = computed<AcaoModal | null>(() => {
-    const pedido = this.pedidoSelecionado();
-    if (!pedido) return null;
-    return pedido.status === 'novo' ? 'comecar' : 'pronto';
-  });
+  /** Último toque, ainda dentro do tempo de desfazer. */
+  protected readonly pendente = signal<MudancaPendente | null>(null);
+  private timerPendente: ReturnType<typeof setTimeout> | undefined;
+  protected readonly som = signal(lerSomLigado());
+  /** Pedidos já mostrados; null antes da primeira carga. */
+  private vistos: Set<string> | null = null;
 
   protected readonly pedidosFiltrados = computed(() =>
     this.pedidos().filter((pedido) => pedido.setor === this.abaAtiva()),
@@ -105,6 +106,8 @@ export class AtendentePedidos implements OnInit {
     this.destroyRef.onDestroy(() => {
       pararDeEscutar();
       clearInterval(relogio);
+      // Saiu da tela dentro do tempo de desfazer: a mudança vale.
+      void this.gravarPendente();
     });
 
     await this.atualizarLista();
@@ -121,7 +124,9 @@ export class AtendentePedidos implements OnInit {
     this.erro.set(null);
 
     try {
-      this.pedidos.set(await this.pedidosService.listarPendentes());
+      const lista = await this.pedidosService.listarPendentes();
+      this.conferirPedidosNovos(lista);
+      this.pedidos.set(this.comPendente(lista));
       this.agora.set(Date.now());
     } catch {
       this.erro.set('Não foi possível carregar os pedidos. Toque em atualizar para tentar de novo.');
@@ -155,54 +160,83 @@ export class AtendentePedidos implements OnInit {
     return this.minutosEsperando(pedido) >= MINUTOS_ATRASADO;
   }
 
-  /** Toque no cartão: no desktop muda direto; no celular pergunta antes. */
+  /**
+   * Toque no cartão: avança na hora, na tela, e só grava depois de alguns
+   * segundos. Assim "Desfazer" não chega a mudar o banco, e o cliente não
+   * recebe o aviso de "pronto" por um toque errado.
+   */
   protected agir(pedido: PedidoSetor): void {
-    if (this.desktop()) {
-      void this.mudarStatus(pedido);
-    } else {
-      this.abrirAcao(pedido);
-    }
+    // Um toque novo confirma o anterior antes de abrir outra janela de desfazer.
+    if (this.pendente()) void this.gravarPendente();
+
+    const novoStatus = pedido.status === 'novo' ? 'em_andamento' : 'pronto';
+    this.pendente.set({ pedido, novoStatus });
+    this.pedidos.update((lista) => this.comPendente(lista));
+    this.erro.set(null);
+    this.timerPendente = setTimeout(() => void this.gravarPendente(), TEMPO_DESFAZER_MS);
   }
 
-  protected abrirAcao(pedido: PedidoSetor): void {
-    this.pedidoSelecionado.set(pedido);
+  protected desfazer(): void {
+    const mudanca = this.pendente();
+    if (!mudanca) return;
+
+    clearTimeout(this.timerPendente);
+    this.pendente.set(null);
+    this.devolver(mudanca.pedido);
   }
 
-  protected fecharModal(): void {
-    if (this.salvando()) return;
-    this.pedidoSelecionado.set(null);
+  protected alternarSom(): void {
+    const ligado = !this.som();
+    this.som.set(ligado);
+    guardarSomLigado(ligado);
   }
 
-  protected async confirmarAcao(): Promise<void> {
-    const pedido = this.pedidoSelecionado();
-    if (!pedido) return;
-
-    await this.mudarStatus(pedido);
-    this.pedidoSelecionado.set(null);
+  protected liberarSom(): void {
+    liberarSom();
   }
 
   /** Novo → em preparo → pronto. Pronto sai da lista. */
-  private async mudarStatus(pedido: PedidoSetor): Promise<void> {
-    if (this.salvando()) return;
+  private async gravarPendente(): Promise<void> {
+    const mudanca = this.pendente();
+    if (!mudanca) return;
 
-    const novoStatus = pedido.status === 'novo' ? 'em_andamento' : 'pronto';
-    this.salvando.set(true);
-    this.salvandoId.set(pedido.id);
-    this.erro.set(null);
+    clearTimeout(this.timerPendente);
+    this.pendente.set(null);
 
     try {
-      await this.pedidosService.atualizarStatus(pedido.itens_ids, novoStatus);
-
-      this.pedidos.update((lista) =>
-        novoStatus === 'pronto'
-          ? lista.filter((p) => p.id !== pedido.id)
-          : lista.map((p) => (p.id === pedido.id ? { ...p, status: novoStatus } : p)),
-      );
+      await this.pedidosService.atualizarStatus(mudanca.pedido.itens_ids, mudanca.novoStatus);
     } catch {
+      this.devolver(mudanca.pedido);
       this.erro.set('Não foi possível atualizar o pedido. Tente novamente.');
-    } finally {
-      this.salvando.set(false);
-      this.salvandoId.set(null);
     }
+  }
+
+  /** Põe o pedido de volta como estava, na ordem de chegada. */
+  private devolver(pedido: PedidoSetor): void {
+    this.pedidos.update((lista) =>
+      [...lista.filter((p) => p.id !== pedido.id), pedido].sort((a, b) => a.criado_em.localeCompare(b.criado_em)),
+    );
+  }
+
+  /** A lista do banco ainda não tem a mudança que espera o "Desfazer": aplica por cima. */
+  private comPendente(lista: PedidoSetor[]): PedidoSetor[] {
+    const mudanca = this.pendente();
+    if (!mudanca) return lista;
+    const { pedido, novoStatus } = mudanca;
+    return novoStatus === 'pronto'
+      ? lista.filter((p) => p.id !== pedido.id)
+      : lista.map((p) => (p.id === pedido.id ? { ...p, status: novoStatus } : p));
+  }
+
+  /** Chegou pedido que a tela ainda não tinha mostrado: som e vibração. */
+  private conferirPedidosNovos(lista: PedidoSetor[]): void {
+    const novos = lista.filter((p) => p.status === 'novo' && !this.vistos?.has(p.id));
+    // Na primeira carga nada é "novo": a tela acabou de abrir.
+    if (this.vistos && novos.length > 0 && this.som()) this.avisarPedidoNovo();
+    this.vistos = new Set(lista.map((p) => p.id));
+  }
+
+  protected avisarPedidoNovo(): void {
+    tocarAvisoPedido();
   }
 }

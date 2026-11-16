@@ -3,6 +3,20 @@
     <h1><app-logo [largura]="72" /></h1>
   </div>
   <div class="acoes-header">
+    <button
+      class="btn-som"
+      type="button"
+      [attr.aria-pressed]="som()"
+      (click)="alternarSom()"
+    >
+      @if (som()) {
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 5 6 9H2v6h4l5 4z"></path><path d="M15.5 8.5a5 5 0 0 1 0 7"></path><path d="M19 5a10 10 0 0 1 0 14"></path></svg>
+        Som ligado
+      } @else {
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 5 6 9H2v6h4l5 4z"></path><path d="m22 9-6 6"></path><path d="m16 9 6 6"></path></svg>
+        Som desligado
+      }
+    </button>
     <app-botao-atualizar [desabilitado]="carregando()" (atualizar)="atualizarLista()" />
     <button class="btn-sair" type="button" (click)="sair()">Sair</button>
   </div>
@@ -26,6 +40,20 @@
     </button>
   </div>
 
+  <button
+    class="btn-som btn-som-desktop"
+    type="button"
+    [attr.aria-pressed]="som()"
+    (click)="alternarSom()"
+  >
+    @if (som()) {
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 5 6 9H2v6h4l5 4z"></path><path d="M15.5 8.5a5 5 0 0 1 0 7"></path><path d="M19 5a10 10 0 0 1 0 14"></path></svg>
+      Som ligado
+    } @else {
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 5 6 9H2v6h4l5 4z"></path><path d="m22 9-6 6"></path><path d="m16 9 6 6"></path></svg>
+      Som desligado
+    }
+  </button>
   <app-botao-atualizar class="btn-atualizar" [desabilitado]="carregando()" (atualizar)="atualizarLista()" />
 </div>
 
@@ -49,7 +77,7 @@
           </h3>
 
           @for (pedido of coluna.pedidos; track pedido.id) {
-            <article class="card-pedido" [style.order]="ordemDeChegada(pedido)">
+            <article class="card-pedido" [attr.data-status]="pedido.status" [style.order]="ordemDeChegada(pedido)">
               <div class="card-header">
                 <span class="mesa">{{ rotuloLocal(pedido) }}</span>
                 <span class="tempo">{{ pedido.criado_em | date: 'HH:mm' }}</span>
@@ -72,17 +100,15 @@
                 </span>
               </div>
 
-              <!-- No celular cobre o cartão inteiro e abre a confirmação;
-                   no desktop é o botão do pé do cartão e já age. -->
+              <!-- Avança na hora; "Desfazer" fica disponível por alguns segundos. -->
               <button
                 type="button"
                 class="card-acao"
                 [class.pronto]="pedido.status !== 'novo'"
-                [disabled]="salvando()"
                 [attr.aria-label]="rotuloAcao(pedido) + ': ' + rotuloLocal(pedido) + ', ' + pedido.cliente"
                 (click)="agir(pedido)"
               >
-                {{ salvandoId() === pedido.id ? 'Salvando...' : rotuloAcao(pedido) }}
+                {{ rotuloAcao(pedido) }}
               </button>
             </article>
           } @empty {
@@ -102,24 +128,11 @@
 
 <app-nav-atendente />
 
-@if (pedidoSelecionado(); as pedido) {
-  <div class="modal-overlay" (click)="fecharModal()">
-    <div class="modal-content" (click)="$event.stopPropagation()">
-      <h3>{{ acaoModal() === 'comecar' ? 'Começar a preparar este pedido?' : 'Marcar como pronto?' }}</h3>
-      <p class="modal-mesa">{{ rotuloLocal(pedido) }} - {{ pedido.cliente }}</p>
-
-      <div class="modal-actions">
-        <button class="btn-cancelar" type="button" (click)="fecharModal()" [disabled]="salvando()">
-          Cancelar
-        </button>
-        <button class="btn-confirmar" type="button" (click)="confirmarAcao()" [disabled]="salvando()">
-          @if (salvando()) {
-            Salvando...
-          } @else {
-            {{ acaoModal() === 'comecar' ? 'Começar' : 'Pronto' }}
-          }
-        </button>
-      </div>
-    </div>
+@if (pendente(); as mudanca) {
+  <div class="aviso-desfazer" role="status">
+    <span>
+      {{ rotuloLocal(mudanca.pedido) }}: {{ mudanca.novoStatus === 'pronto' ? 'pronto' : 'em preparo' }}
+    </span>
+    <button type="button" (click)="desfazer()">Desfazer</button>
   </div>
 }
