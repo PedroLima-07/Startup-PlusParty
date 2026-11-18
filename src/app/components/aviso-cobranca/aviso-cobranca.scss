@@ -1,3 +1,9 @@
+// O aviso abre por cima de tudo (showModal): o elemento do componente não
+// pode ocupar uma célula da grade da tela que o contém.
+:host {
+  display: contents;
+}
+
 dialog {
   width: min(480px, calc(100vw - 32px));
   box-sizing: border-box;
