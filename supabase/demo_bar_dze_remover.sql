@@ -4,8 +4,8 @@
 -- Remove tudo o que supabase/demo_bar_dze.sql criou: os clientes e
 -- atendentes de demonstração (e-mails @demo.plusparty.invalid), as
 -- comandas, os pedidos, os chamados de garçom, as avaliações, a fila e os
--- eventos de demonstração. Os dados de verdade (contas reais, cardápio,
--- postagens, eventos do gerente) não são tocados.
+-- eventos e as 4 postagens de demonstração. Os dados de verdade (contas
+-- reais, cardápio, outras postagens, eventos do gerente) não são tocados.
 --
 -- Como aplicar: SQL Editor → colar este arquivo inteiro → Run.
 -- A última consulta deve mostrar: sobrou = 0
@@ -47,6 +47,12 @@ end $$;
 
 delete from solicitacoes_equipe
 where usuario_id in (select id from auth.users where email like '%@demo.plusparty.invalid');
+
+-- Postagens de demonstração do Bar D'Zé: identificadas pelo título.
+delete from postagens
+where estabelecimento_id = '11111111-1111-1111-1111-111111111111'
+  and titulo in ('Happy hour: chope a R$ 9', 'Combo batata com cheddar + 2 chopes',
+     'Show acústico hoje à noite', 'Cozinha aberta até 1h');
 
 delete from perfis
 where id in (select id from auth.users where email like '%@demo.plusparty.invalid');

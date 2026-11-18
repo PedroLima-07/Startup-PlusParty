@@ -56,7 +56,7 @@ Os scripts desta pasta são aplicados pelo **SQL Editor** do Supabase. Cada um e
 | `agenda_eventos.sql` | Agenda de eventos do bar (com repetição semanal), "Tenho interesse", lembrete 2 h antes (pg_cron) e aviso de evento cancelado |
 | `resultados_periodo.sql` | Números da tela Resultados para 3, 7, 15 ou 30 dias, já somados no banco e comparados com o período anterior |
 | `bar_redes_localizacao.sql` | Instagram, TikTok, WhatsApp e ponto no mapa do bar (o banco limpa o que o gerente digita); edição de postagens sem mudar a data de publicação |
-| `demo_bar_dze.sql` | Demonstração no Bar D'Zé: a noite de hoje e os 30 dias anteriores (sexta e sábado cheios), avaliações, agenda com interessados, uma fila de mesa e uma conta não paga, com os horários de agora. `demo_bar_dze_remover.sql` apaga tudo |
+| `demo_bar_dze.sql` | Demonstração no Bar D'Zé: a noite de hoje e os 30 dias anteriores (sexta e sábado cheios), avaliações, agenda com interessados, 4 postagens, 2 itens não recebidos, uma fila de mesa e uma conta não paga, com os horários de agora. `demo_bar_dze_remover.sql` apaga tudo |
 | `seguranca_advisor.sql` | Correções do Security Advisor do Supabase: `search_path` fixo em todas as funções, funções de trigger fechadas para chamadas diretas e funções `SECURITY DEFINER` fechadas para visitantes, exceto as que o app usa sem login |
 | `indices.sql` | Índices das consultas mais usadas (Movimento, Resultados, comandas do cliente, equipe), sugeridos pelo Index Advisor do Supabase |
 | `item_nao_recebido.sql` | Fecha a conta sem cobrar o que o cliente não recebeu: tira o item da conta, registra o motivo e avisa a equipe e o gerente |
