@@ -18,6 +18,9 @@
 --   - Agenda: roda de samba toda sexta, um show hoje e um quiz na terça,
 --     com clientes interessados;
 --   - Equipe: 2 atendentes de demonstração (Ana Lima e Rafael Menezes);
+--   - Postagens e Novidades: 4 postagens do bar, válidas por 30 dias;
+--   - Itens não recebidos: um alerta novo (Lucas Barbosa, batata que não
+--     chegou) e um já visto pela equipe (Thiago Ribeiro, iscas de frango);
 --   - Atendente:
 --       * Gustavo Reis, esperando liberação, já saiu sem pagar uma vez;
 --       * Paulo Henrique está na fila da mesa 4: ao confirmar o pagamento
@@ -73,6 +76,12 @@ where usuario_id in (select id from auth.users where email like '%@demo.pluspart
 
 delete from solicitacoes_equipe
 where usuario_id in (select id from auth.users where email like '%@demo.plusparty.invalid');
+
+-- Postagens de demonstração do Bar D'Zé: identificadas pelo título.
+delete from postagens
+where estabelecimento_id = '11111111-1111-1111-1111-111111111111'
+  and titulo in ('Happy hour: chope a R$ 9', 'Combo batata com cheddar + 2 chopes',
+     'Show acústico hoje à noite', 'Cozinha aberta até 1h');
 
 -- Eventos de demonstração: marcados com a data de criação 01/01/2000.
 do $$
@@ -341,6 +350,49 @@ begin
     perform pg_temp.demo_comanda(v_comanda, v_vez, v_agora, v_atendentes);
   end loop;
 
+  -- ------------------------------------------- itens não recebidos
+  -- O cliente fechou a conta sem receber um item, que saiu da conta.
+  -- O do Lucas é de agora (alerta no Movimento e aviso para a equipe); o
+  -- do Thiago já foi visto pela equipe. Saem junto com a comanda.
+  if to_regclass('public.itens_nao_recebidos') is not null then
+    execute $q$
+      insert into itens_nao_recebidos (
+        comanda_id, estabelecimento_id, item_id, nome, setor, quantidade, preco_unitario,
+        status_no_fechamento, motivo, criado_em, ciente_em, ciente_por
+      )
+      select c.id, $1, i.id, i.nome, i.setor, x.quantidade, i.preco,
+             x.status, x.motivo, c.fechada_em,
+             case when x.visto then c.fechada_em + interval '3 minutes' end,
+             case when x.visto then c.liberada_por end
+      from (values
+        ('Lucas Barbosa', 'Batata Frita c/ Cheddar', 1, 'em_andamento', 'Preciso ir embora', false),
+        ('Thiago Ribeiro', 'Iscas de Frango', 1, 'pronto', 'Demorou muito: a porção não chegou na mesa', true)
+      ) as x(cliente, item, quantidade, status, motivo, visto)
+      join comandas c on c.usuario_id = pg_temp.demo_usuario(x.cliente)
+                     and c.fechada_em > $2 - interval '5 hours'
+      join itens i on i.estabelecimento_id = $1 and i.nome = x.item
+    $q$ using v_bar, v_agora;
+  end if;
+
+  -- ------------------------------------------------------ postagens
+  -- O aviso de postagem nova iria para clientes reais: fica desligado.
+  alter table postagens disable trigger notificar_postagem;
+  insert into postagens (estabelecimento_id, tipo, titulo, texto, preco, preco_antigo, imagem_url, valida_ate, criada_em)
+  values
+    (v_bar, 'bebida', 'Happy hour: chope a R$ 9',
+     'Chope Pilsen 350ml bem gelado de R$ 12 por R$ 9, todo dia até as 20h. Chegou cedo, bebeu mais barato.',
+     9.00, 12.00, null, v_agora + interval '30 days', v_agora - interval '2 days'),
+    (v_bar, 'comida', 'Combo batata com cheddar + 2 chopes',
+     'Porção de batata frita com cheddar e dois chopes Pilsen 350ml. Perfeito para dividir com a galera.',
+     49.00, 58.00, null, v_agora + interval '30 days', v_agora - interval '1 day'),
+    (v_bar, 'evento', 'Show acústico hoje à noite',
+     'MPB e pop rock com a Lia Duarte, a partir das 21h. Couvert de R$ 15.',
+     null, null, 'img/estabelecimentos/bar-dze.jpg', v_agora + interval '1 day', v_agora - interval '3 hours'),
+    (v_bar, 'novidade', 'Cozinha aberta até 1h',
+     'A partir desta semana, a cozinha fica aberta até 1h de sexta e sábado.',
+     null, null, null, v_agora + interval '30 days', v_agora - interval '40 minutes');
+  alter table postagens enable trigger notificar_postagem;
+
   -- --------------------------------------------- os 29 dias anteriores
   -- Sexta e sábado cheios, domingo e quinta médios, o resto fraco. As
   -- comandas se espalham das 19h à 1h para o mapa de calor.
@@ -502,7 +554,10 @@ end $$;
 -- Conferência: deve mostrar
 --   comandas_hoje = 22 | comandas_30_dias > 200 | atendentes_demo = 2 |
 --   nao_pagas = 1 | avaliacoes > 0 | eventos = 3 | na_fila = 1 |
---   triggers_ligados = 2
+--   itens_nao_recebidos = 2 | postagens = 4 | gerentes_do_bar >= 1 |
+--   triggers_ligados = 3
+-- gerentes_do_bar = 0 quer dizer que nenhuma conta de gerente está ligada
+-- ao Bar D'Zé: quem entrar como gerente não vai ver esta demonstração.
 -- (avaliacoes, eventos e na_fila ficam 0 se o script daquela parte ainda
 -- não foi aplicado)
 -- ---------------------------------------------------------------------
@@ -538,5 +593,15 @@ select
   pg_temp.demo_contar('fila_mesa', $q$
     select count(*) from fila_mesa f join auth.users u on u.id = f.usuario_id
     where u.email like '%@demo.plusparty.invalid' and f.situacao = 'esperando'$q$) as na_fila,
+  pg_temp.demo_contar('itens_nao_recebidos', $q$
+    select count(*) from itens_nao_recebidos n join comandas c on c.id = n.comanda_id
+    join auth.users u on u.id = c.usuario_id
+    where u.email like '%@demo.plusparty.invalid'$q$) as itens_nao_recebidos,
+  (select count(*) from postagens
+    where estabelecimento_id = '11111111-1111-1111-1111-111111111111'
+      and titulo in ('Happy hour: chope a R$ 9', 'Combo batata com cheddar + 2 chopes',  'Show acústico hoje à noite', 'Cozinha aberta até 1h')) as postagens,
+  (select count(*) from perfis
+    where tipo = 'gerente' and estabelecimento_id = '11111111-1111-1111-1111-111111111111') as gerentes_do_bar,
   (select count(*) from pg_trigger
-    where tgname in ('registrar_responsaveis_comanda', 'registrar_item_pronto') and tgenabled = 'O') as triggers_ligados;
+    where tgname in ('registrar_responsaveis_comanda', 'registrar_item_pronto', 'notificar_postagem')
+      and tgenabled = 'O') as triggers_ligados;
